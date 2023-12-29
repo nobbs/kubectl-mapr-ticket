@@ -1,0 +1,59 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "bootstrap-sha": "083462b7aa133062f90ad6601824d6e08254e03b",
+  "separate-pull-requests": true,
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "packages": {
+    ".": {
+      "pull-request-title-pattern": "chore(release): ${version}",
+      "release-type": "go",
+      "draft": false,
+      "prerelease": false,
+      "extra-files": ["internal/version/version.go"],
+      "initial-version": "0.1.0"
+    }
+  },
+  "changelog-sections": [
+    {
+      "type": "build",
+      "section": "Build System"
+    },
+    {
+      "type": "chore",
+      "section": "Miscellaneous Chores"
+    },
+    {
+      "type": "ci",
+      "section": "Continuous Integration"
+    },
+    {
+      "type": "docs",
+      "section": "Documentation"
+    },
+    {
+      "type": "feat",
+      "section": "Features"
+    },
+    {
+      "type": "fix",
+      "section": "Bug Fixes"
+    },
+    {
+      "type": "perf",
+      "section": "Performance Improvements"
+    },
+    {
+      "type": "refactor",
+      "section": "Code Refactoring"
+    },
+    {
+      "type": "revert",
+      "section": "Reverts"
+    },
+    {
+      "type": "test",
+      "section": "Tests"
+    }
+  ]
+}

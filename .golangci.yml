@@ -1,0 +1,26 @@
+# docs: <https://golangci-lint.run/usage/configuration/>
+linters:
+  enable:
+    - gofmt
+    - gci
+    - errorlint
+    - dogsled
+    - nilnil
+    - gocyclo
+    - gocognit
+    - funlen
+    - dupl
+    - gocritic
+
+linters-settings:
+  gocyclo:
+    min-complexity: 10
+  gocognit:
+    min-complexity: 20
+  funlen:
+    lines: 120
+    statements: 120
+  gofmt:
+    rewrite-rules:
+      - pattern: "interface{}"
+        replacement: "any"
