@@ -5,22 +5,25 @@ import (
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 )
 
-type cmdOptions struct {
-	configFlags *genericclioptions.ConfigFlags
-	IOStreams   genericclioptions.IOStreams
+type rootCmdOptions struct {
+	kubernetesConfigFlags *genericclioptions.ConfigFlags
+	IOStreams             genericclioptions.IOStreams
 }
 
-func NewCmdOptions(streams genericclioptions.IOStreams) *cmdOptions {
-	return &cmdOptions{
-		configFlags: genericclioptions.NewConfigFlags(true),
-		IOStreams:   streams,
+func NewCmdOptions(kubernetesConfigFlags *genericclioptions.ConfigFlags, streams genericclioptions.IOStreams) *rootCmdOptions {
+	return &rootCmdOptions{
+		kubernetesConfigFlags: kubernetesConfigFlags,
+		IOStreams:             streams,
 	}
 }
 
-func NewRootCmd(streams genericclioptions.IOStreams) *cobra.Command {
-	o := NewCmdOptions(streams)
+func NewRootCmd(flags *genericclioptions.ConfigFlags, streams genericclioptions.IOStreams) *cobra.Command {
+	rootOpts := NewCmdOptions(
+		flags,
+		streams,
+	)
 
-	cmd := &cobra.Command{
+	rootCmd := &cobra.Command{
 		Use:   "kubectl-mapr-ticket",
 		Short: "A kubectl plugin to list and inspect MapR tickets",
 		Long: `A kubectl plugin that allows you to list and inspect MapR tickets from a
@@ -29,18 +32,18 @@ requiring access to the MapR cluster.`,
 	}
 
 	// set IOStreams for the command
-	cmd.SetIn(o.IOStreams.In)
-	cmd.SetOut(o.IOStreams.Out)
-	cmd.SetErr(o.IOStreams.ErrOut)
+	rootCmd.SetIn(rootOpts.IOStreams.In)
+	rootCmd.SetOut(rootOpts.IOStreams.Out)
+	rootCmd.SetErr(rootOpts.IOStreams.ErrOut)
 
-	// add flags
-	o.configFlags.AddFlags(cmd.PersistentFlags())
+	// add default kubernetes flags as global flags
+	rootOpts.kubernetesConfigFlags.AddFlags(rootCmd.PersistentFlags())
 
 	// add subcommands
-	cmd.AddCommand(
-		newListCmd(streams),
-		newVersionCmd(streams),
+	rootCmd.AddCommand(
+		newListCmd(rootOpts),
+		newVersionCmd(rootOpts),
 	)
 
-	return cmd
+	return rootCmd
 }

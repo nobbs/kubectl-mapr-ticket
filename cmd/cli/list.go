@@ -2,32 +2,28 @@ package cli
 
 import (
 	"github.com/nobbs/kubectl-mapr-ticket/internal/ticket"
+	"github.com/nobbs/kubectl-mapr-ticket/internal/utils"
 	"github.com/spf13/cobra"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
-	"k8s.io/cli-runtime/pkg/genericiooptions"
 	"k8s.io/cli-runtime/pkg/printers"
-	"k8s.io/client-go/kubernetes"
 )
 
 type listOptions struct {
-	configFlags *genericclioptions.ConfigFlags
-	IOStreams   genericiooptions.IOStreams
+	*rootCmdOptions
 
+	// AllNamespaces indicates whether to list secrets in all namespaces
 	AllNamespaces bool
-
-	client kubernetes.Interface
 }
 
-func NewListOptions(streams genericiooptions.IOStreams) *listOptions {
+func NewListOptions(rootOpts *rootCmdOptions) *listOptions {
 	return &listOptions{
-		configFlags: genericclioptions.NewConfigFlags(true),
-		IOStreams:   streams,
+		rootCmdOptions: rootOpts,
 	}
 }
 
-func newListCmd(streams genericiooptions.IOStreams) *cobra.Command {
-	o := NewListOptions(streams)
+func newListCmd(rootOpts *rootCmdOptions) *cobra.Command {
+	o := NewListOptions(rootOpts)
 
 	cmd := &cobra.Command{
 		Use:     "list",
@@ -58,35 +54,24 @@ some information about them.`,
 	cmd.SetErr(o.IOStreams.ErrOut)
 
 	// add flags
-	o.configFlags.AddFlags(cmd.Flags())
 	cmd.Flags().BoolVarP(&o.AllNamespaces, "all-namespaces", "A", false, "If present, list the requested object(s) across all namespaces. Namespace in current context is ignored even if specified with --namespace.")
 
 	return cmd
 }
 
 func (o *listOptions) Complete(cmd *cobra.Command, args []string) error {
-	config, err := o.configFlags.ToRESTConfig()
-	if err != nil {
-		return err
-	}
-
-	o.client, err = kubernetes.NewForConfig(config)
-	if err != nil {
-		return err
-	}
-
-	if o.configFlags.Namespace == nil || *o.configFlags.Namespace == "" {
-		namespace, err := getNamespace(o.configFlags)
+	if o.kubernetesConfigFlags.Namespace == nil || *o.kubernetesConfigFlags.Namespace == "" {
+		namespace, err := getNamespace(o.kubernetesConfigFlags)
 		if err != nil {
 			return err
 		}
 
-		o.configFlags.Namespace = &namespace
+		o.kubernetesConfigFlags.Namespace = &namespace
 	}
 
 	if o.AllNamespaces {
 		namespaceAll := metaV1.NamespaceAll
-		o.configFlags.Namespace = &namespaceAll
+		o.kubernetesConfigFlags.Namespace = &namespaceAll
 	}
 
 	return nil
@@ -97,9 +82,14 @@ func (o *listOptions) Validate() error {
 }
 
 func (o *listOptions) Run(cmd *cobra.Command, args []string) error {
-	secretGetter := o.client.CoreV1().Secrets(*o.configFlags.Namespace)
+	client, err := utils.ClientFromFlags(o.kubernetesConfigFlags)
+	if err != nil {
+		return err
+	}
 
-	ticketSecrets, err := ticket.NewList(secretGetter).Run()
+	ticketSecrets, err := ticket.NewList(
+		client.CoreV1().Secrets(*o.kubernetesConfigFlags.Namespace),
+	).Run()
 	if err != nil {
 		return err
 	}
