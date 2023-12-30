@@ -44,6 +44,8 @@ jobs:
 
       - name: Run tests
         run: go test -v ./...
+        env:
+          CGO_ENABLED: 0
 
   build:
     runs-on: ubuntu-latest
@@ -65,6 +67,8 @@ jobs:
 
       - name: Build
         run: go build -buildvcs=true -o ./bin/kubectl-mapr-ticket ./cmd/
+        env:
+          CGO_ENABLED: 0
 
       - name: Run and print version
         run: ./bin/kubectl-mapr-ticket version
