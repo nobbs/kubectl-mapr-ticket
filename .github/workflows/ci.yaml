@@ -84,10 +84,15 @@ jobs:
 
       - name: Compress
         run: |
+          # Copy LICENSE and README.md to artifact directory
+          mkdir -p ./bin/${{ matrix.goarch }}/${{ matrix.goos }}
+          cp ./LICENSE ./bin/${{ matrix.goarch }}/${{ matrix.goos }}/
+          cp ./README.md ./bin/${{ matrix.goarch }}/${{ matrix.goos }}/
+
+          # Compress artifact directory contents
           tar -czvf \
             ./kubectl-mapr-ticket-${{ matrix.goarch }}-${{ matrix.goos }}.tar.gz \
-            -C ./bin/${{ matrix.goarch }}/${{ matrix.goos }}/ \
-            kubectl-mapr-ticket
+            -C ./bin/${{ matrix.goarch }}/${{ matrix.goos }}/ .
 
       - name: Upload artifact
         if: contains(github.ref, 'tags')
@@ -97,3 +102,10 @@ jobs:
           file: ./kubectl-mapr-ticket-${{ matrix.goarch }}-${{ matrix.goos }}.tar.gz
           tag: ${{ github.ref }}
           overwrite: true
+
+      - name: Upload artifact for PRs
+        if: ${{ !contains(github.ref, 'tags') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: kubectl-mapr-ticket-${{ matrix.goarch }}-${{ matrix.goos }}.tar.gz
+          path: ./kubectl-mapr-ticket-${{ matrix.goarch }}-${{ matrix.goos }}.tar.gz
