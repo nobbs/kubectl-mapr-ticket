@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - v*
   pull_request:
     branches:
       - main
@@ -42,3 +44,35 @@ jobs:
 
       - name: Run tests
         run: go test -v ./...
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create GitHub App Token
+        uses: actions/create-github-app-token@v1
+        id: token
+        with:
+          app-id: ${{ secrets.RELEASE_PLEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_PLEASE_PRIVATE_KEY }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ./go.mod
+
+      - name: Build
+        run: go build -buildvcs=true -o ./bin/kubectl-mapr-ticket ./cmd/
+
+      - name: Run and print version
+        run: ./bin/kubectl-mapr-ticket version
+
+      - name: Upload artifact
+        if: contains(github.ref, 'tags')
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ steps.token.outputs.token }}
+          file: ./bin/kubectl-mapr-ticket
+          tag: ${{ github.ref }}
