@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.1.1](https://github.com/nobbs/kubectl-mapr-ticket/compare/v0.1.0...v0.1.1) (2023-12-30)
+
+
+### Continuous Integration
+
+* add codecov reporting ([#8](https://github.com/nobbs/kubectl-mapr-ticket/issues/8)) ([05f0d65](https://github.com/nobbs/kubectl-mapr-ticket/commit/05f0d65a897637f85b496eb7ce7f8975b1295f7d))
+* **build:** also package LICENSE and README into release assets ([#6](https://github.com/nobbs/kubectl-mapr-ticket/issues/6)) ([030e4c1](https://github.com/nobbs/kubectl-mapr-ticket/commit/030e4c1e9904b7d1bfbdddef188d0af96273e464))
+* **tests:** use CGO as race won't work otherwise ([05f0d65](https://github.com/nobbs/kubectl-mapr-ticket/commit/05f0d65a897637f85b496eb7ce7f8975b1295f7d))
+
+
+### Documentation
+
+* add readme ([#9](https://github.com/nobbs/kubectl-mapr-ticket/issues/9)) ([dca7660](https://github.com/nobbs/kubectl-mapr-ticket/commit/dca766070bf207e97e4a4e51506723a0405b1cc7))
+
+
+### Code Refactoring
+
+* add proper usage string to cli ([dca7660](https://github.com/nobbs/kubectl-mapr-ticket/commit/dca766070bf207e97e4a4e51506723a0405b1cc7))
+
 ## 0.1.0 (2023-12-30)
 
 
