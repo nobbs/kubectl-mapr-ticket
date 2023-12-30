@@ -49,6 +49,16 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        goos:
+          - linux
+          - darwin
+        goarch:
+          - amd64
+          - arm64
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -66,18 +76,24 @@ jobs:
           go-version-file: ./go.mod
 
       - name: Build
-        run: go build -buildvcs=true -o ./bin/kubectl-mapr-ticket ./cmd/
+        run: go build -buildvcs=true -o ./bin/${{ matrix.goarch }}/${{ matrix.goos }}/kubectl-mapr-ticket ./cmd
         env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: 0
 
-      - name: Run and print version
-        run: ./bin/kubectl-mapr-ticket version
+      - name: Compress
+        run: |
+          tar -czvf \
+            ./kubectl-mapr-ticket-${{ matrix.goarch }}-${{ matrix.goos }}.tar.gz \
+            -C ./bin/${{ matrix.goarch }}/${{ matrix.goos }}/ \
+            kubectl-mapr-ticket
 
       - name: Upload artifact
         if: contains(github.ref, 'tags')
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ steps.token.outputs.token }}
-          file: ./bin/kubectl-mapr-ticket
+          file: ./kubectl-mapr-ticket-${{ matrix.goarch }}-${{ matrix.goos }}.tar.gz
           tag: ${{ github.ref }}
           overwrite: true
