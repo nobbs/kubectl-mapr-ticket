@@ -80,3 +80,4 @@ jobs:
           repo_token: ${{ steps.token.outputs.token }}
           file: ./bin/kubectl-mapr-ticket
           tag: ${{ github.ref }}
+          overwrite: true
