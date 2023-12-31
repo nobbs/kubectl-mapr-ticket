@@ -51,10 +51,6 @@ some information about them.`,
 				return err
 			}
 
-			if err := o.Validate(); err != nil {
-				return err
-			}
-
 			if err := o.Run(cmd, args); err != nil {
 				return err
 			}
@@ -95,10 +91,6 @@ func (o *listOptions) Complete(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *listOptions) Validate() error {
-	return nil
-}
-
 func (o *listOptions) Run(cmd *cobra.Command, args []string) error {
 	client, err := util.ClientFromFlags(o.kubernetesConfigFlags)
 	if err != nil {
@@ -106,7 +98,7 @@ func (o *listOptions) Run(cmd *cobra.Command, args []string) error {
 	}
 
 	// create list options
-	opts := []list.ListOption{}
+	opts := []list.ListerOption{}
 
 	if o.FilterOnlyExpired {
 		opts = append(opts, list.WithFilterOnlyExpired())
@@ -125,7 +117,7 @@ func (o *listOptions) Run(cmd *cobra.Command, args []string) error {
 	}
 
 	// create lister
-	lister := list.NewList(client, *o.kubernetesConfigFlags.Namespace, opts...)
+	lister := list.NewLister(client, *o.kubernetesConfigFlags.Namespace, opts...)
 
 	// run lister
 	items, err := lister.Run()
@@ -143,5 +135,11 @@ func (o *listOptions) Run(cmd *cobra.Command, args []string) error {
 	printer := printers.NewTablePrinter(printers.PrintOptions{
 		WithNamespace: o.AllNamespaces,
 	})
-	return printer.PrintObj(table, o.IOStreams.Out)
+
+	err = printer.PrintObj(table, o.IOStreams.Out)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

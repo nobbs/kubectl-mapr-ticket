@@ -10,12 +10,12 @@ import (
 	typedV1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
-type Item struct {
+type ListItem struct {
 	secret *coreV1.Secret
 	ticket *ticket.MaprTicket
 }
 
-type List struct {
+type Lister struct {
 	client    typedV1.SecretInterface
 	namespace string
 
@@ -25,41 +25,44 @@ type List struct {
 	filterByMaprUser    *string
 }
 
-type ListOption func(*List)
+type ListerOption func(*Lister)
 
-func WithFilterByMaprCluster(cluster string) ListOption {
-	return func(l *List) {
+func WithFilterByMaprCluster(cluster string) ListerOption {
+	return func(l *Lister) {
 		l.filterByMaprCluster = &cluster
 	}
 }
 
-func WithFilterByMaprUser(user string) ListOption {
-	return func(l *List) {
+func WithFilterByMaprUser(user string) ListerOption {
+	return func(l *Lister) {
 		l.filterByMaprUser = &user
 	}
 }
 
-func WithFilterOnlyExpired() ListOption {
-	return func(l *List) {
+func WithFilterOnlyExpired() ListerOption {
+	return func(l *Lister) {
 		l.filterOnlyExpired = true
 	}
 }
 
-func WithFilterOnlyUnexpired() ListOption {
-	return func(l *List) {
+func WithFilterOnlyUnexpired() ListerOption {
+	return func(l *Lister) {
 		l.filterOnlyUnexpired = true
 	}
 }
 
-func NewList(client kubernetes.Interface, namespace string, opts ...ListOption) *List {
+// NewLister creates a new Lister
+func NewLister(client kubernetes.Interface, namespace string, opts ...ListerOption) *Lister {
 	const (
-		defaultFilterOnlyExpired = false
+		defaultFilterOnlyExpired   = false
+		defaultFilterOnlyUnexpired = false
 	)
 
-	l := &List{
-		client:            client.CoreV1().Secrets(namespace),
-		namespace:         namespace,
-		filterOnlyExpired: defaultFilterOnlyExpired,
+	l := &Lister{
+		client:              client.CoreV1().Secrets(namespace),
+		namespace:           namespace,
+		filterOnlyExpired:   defaultFilterOnlyExpired,
+		filterOnlyUnexpired: defaultFilterOnlyUnexpired,
 	}
 
 	for _, opt := range opts {
@@ -69,28 +72,14 @@ func NewList(client kubernetes.Interface, namespace string, opts ...ListOption) 
 	return l
 }
 
-func (l *List) Run() ([]Item, error) {
+func (l *Lister) Run() ([]ListItem, error) {
 	secrets, err := l.client.List(context.TODO(), metaV1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	// filter secrets that don't contain a ticket
-	filtered := l.filterSecretsWithMaprTicketKey(secrets.Items)
-
 	// convert secrets to items, parse all tickets
-	var items []Item
-	for i := range filtered {
-		ticket, err := ticket.NewTicketFromSecret(&filtered[i])
-		if err != nil {
-			continue
-		}
-
-		items = append(items, Item{
-			secret: &filtered[i],
-			ticket: ticket,
-		})
-	}
+	items := l.parseSecretsToItems(secrets.Items)
 
 	// filter items to only expired tickets, if requested
 	if l.filterOnlyExpired {
@@ -115,7 +104,8 @@ func (l *List) Run() ([]Item, error) {
 	return items, nil
 }
 
-func (l *List) filterSecretsWithMaprTicketKey(secrets []coreV1.Secret) []coreV1.Secret {
+// filterSecretsWithMaprTicketKey filters secrets to only those that contain a MapR ticket key
+func (l *Lister) filterSecretsWithMaprTicketKey(secrets []coreV1.Secret) []coreV1.Secret {
 	var filtered []coreV1.Secret
 
 	for _, secret := range secrets {
@@ -127,8 +117,28 @@ func (l *List) filterSecretsWithMaprTicketKey(secrets []coreV1.Secret) []coreV1.
 	return filtered
 }
 
-func (l *List) filterItemsOnlyExpired(items []Item) []Item {
-	var filtered []Item
+// parseSecretsToItems parses secrets to items, ignoring secrets that don't contain a MapR ticket
+func (l *Lister) parseSecretsToItems(secrets []coreV1.Secret) []ListItem {
+	var items []ListItem
+
+	for i := range l.filterSecretsWithMaprTicketKey(secrets) {
+		ticket, err := ticket.NewTicketFromSecret(&secrets[i])
+		if err != nil {
+			continue
+		}
+
+		items = append(items, ListItem{
+			secret: &secrets[i],
+			ticket: ticket,
+		})
+	}
+
+	return items
+}
+
+// filterItemsOnlyExpired filters items to only tickets that are expired already
+func (l *Lister) filterItemsOnlyExpired(items []ListItem) []ListItem {
+	var filtered []ListItem
 
 	for _, item := range items {
 		if item.ticket.IsExpired() {
@@ -139,8 +149,9 @@ func (l *List) filterItemsOnlyExpired(items []Item) []Item {
 	return filtered
 }
 
-func (l *List) filterItemsOnlyUnexpired(items []Item) []Item {
-	var filtered []Item
+// filterItemsOnlyUnexpired filters items to only tickets that are not expired yet
+func (l *Lister) filterItemsOnlyUnexpired(items []ListItem) []ListItem {
+	var filtered []ListItem
 
 	for _, item := range items {
 		if !item.ticket.IsExpired() {
@@ -151,8 +162,9 @@ func (l *List) filterItemsOnlyUnexpired(items []Item) []Item {
 	return filtered
 }
 
-func (l *List) filterItemsByMaprCluster(items []Item) []Item {
-	var filtered []Item
+// filterItemsByMaprCluster filters items to only tickets for the specified MapR cluster
+func (l *Lister) filterItemsByMaprCluster(items []ListItem) []ListItem {
+	var filtered []ListItem
 
 	for _, item := range items {
 		if item.ticket.Cluster == *l.filterByMaprCluster {
@@ -163,8 +175,9 @@ func (l *List) filterItemsByMaprCluster(items []Item) []Item {
 	return filtered
 }
 
-func (l *List) filterItemsByMaprUser(items []Item) []Item {
-	var filtered []Item
+// filterItemsByMaprUser filters items to only tickets for the specified MapR user
+func (l *Lister) filterItemsByMaprUser(items []ListItem) []ListItem {
+	var filtered []ListItem
 
 	for _, item := range items {
 		if item.ticket.UserCreds.GetUserName() == *l.filterByMaprUser {

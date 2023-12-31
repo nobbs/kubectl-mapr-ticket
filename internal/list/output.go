@@ -11,7 +11,7 @@ import (
 )
 
 // GenerateTable generates a table from the secrets containing MapR tickets
-func GenerateTable(cmd *cobra.Command, items []Item) (*metaV1.Table, error) {
+func GenerateTable(cmd *cobra.Command, items []ListItem) (*metaV1.Table, error) {
 	return &metaV1.Table{
 		ColumnDefinitions: []metaV1.TableColumnDefinition{
 			{
@@ -33,7 +33,7 @@ func GenerateTable(cmd *cobra.Command, items []Item) (*metaV1.Table, error) {
 
 // generateRows generates the rows for the table from the secrets containing
 // MapR tickets
-func generateRows(items []Item) []metaV1.TableRow {
+func generateRows(items []ListItem) []metaV1.TableRow {
 	rows := make([]metaV1.TableRow, 0, len(items))
 
 	for _, item := range items {
