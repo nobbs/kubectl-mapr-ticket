@@ -1,15 +1,19 @@
 package cli
 
 import (
+	"fmt"
+
 	"github.com/nobbs/kubectl-mapr-ticket/internal/list"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	"github.com/spf13/cobra"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/cli-runtime/pkg/printers"
 )
 
-type listOptions struct {
+type ListOptions struct {
 	*rootCmdOptions
+
+	// OutputFormat is the format to use for output
+	OutputFormat string
 
 	// AllNamespaces indicates whether to list secrets in all namespaces
 	AllNamespaces bool
@@ -29,10 +33,18 @@ type listOptions struct {
 	// FilterByMaprUser indicates whether to filter secrets to only those that
 	// have a ticket for the specified MapR user
 	FilterByMaprUser string
+
+	// FilterByMaprUID indicates whether to filter secrets to only those that have
+	// a ticket for the specified UID
+	FilterByMaprUID uint32
+
+	// FilterByMaprGID indicates whether to filter secrets to only those that have
+	// a ticket for the specified GID
+	FilterByMaprGID uint32
 }
 
-func NewListOptions(rootOpts *rootCmdOptions) *listOptions {
-	return &listOptions{
+func NewListOptions(rootOpts *rootCmdOptions) *ListOptions {
+	return &ListOptions{
 		rootCmdOptions: rootOpts,
 	}
 }
@@ -51,6 +63,10 @@ some information about them.`,
 				return err
 			}
 
+			if err := o.Validate(); err != nil {
+				return err
+			}
+
 			if err := o.Run(cmd, args); err != nil {
 				return err
 			}
@@ -65,17 +81,20 @@ some information about them.`,
 	cmd.SetErr(o.IOStreams.ErrOut)
 
 	// add flags
+	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", "Output format. One of: table|wide|json|yaml")
 	cmd.Flags().BoolVarP(&o.AllNamespaces, "all-namespaces", "A", false, "If true, list the requested object(s) across all namespaces. Namespace in current context is ignored even if specified with --namespace.")
 	cmd.Flags().BoolVarP(&o.FilterOnlyExpired, "only-expired", "E", false, "If true, only show secrets with tickets that have expired")
 	cmd.Flags().BoolVarP(&o.FilterOnlyUnexpired, "only-unexpired", "U", false, "If true, only show secrets with tickets that have not expired")
 	cmd.Flags().StringVarP(&o.FilterByMaprCluster, "mapr-cluster", "c", "", "Only show secrets with tickets for the specified MapR cluster")
 	cmd.Flags().StringVarP(&o.FilterByMaprUser, "mapr-user", "u", "", "Only show secrets with tickets for the specified MapR user")
+	cmd.Flags().Uint32Var(&o.FilterByMaprUID, "mapr-uid", 0, "Only show secrets with tickets for the specified UID")
+	cmd.Flags().Uint32Var(&o.FilterByMaprGID, "mapr-gid", 0, "Only show secrets with tickets for the specified GID")
 	cmd.MarkFlagsMutuallyExclusive("only-expired", "only-unexpired")
 
 	return cmd
 }
 
-func (o *listOptions) Complete(cmd *cobra.Command, args []string) error {
+func (o *ListOptions) Complete(cmd *cobra.Command, args []string) error {
 	// set namespace
 	if o.kubernetesConfigFlags.Namespace == nil || *o.kubernetesConfigFlags.Namespace == "" {
 		namespace := util.GetNamespace(o.kubernetesConfigFlags)
@@ -91,29 +110,47 @@ func (o *listOptions) Complete(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *listOptions) Run(cmd *cobra.Command, args []string) error {
+func (o *ListOptions) Validate() error {
+	// validate output format
+	if o.OutputFormat != "table" && o.OutputFormat != "wide" && o.OutputFormat != "json" && o.OutputFormat != "yaml" {
+		return fmt.Errorf("invalid output format: %s. Must be one of: table|wide|json|yaml", o.OutputFormat)
+	}
+
+	return nil
+}
+
+//gocyclo:ignore
+func (o *ListOptions) Run(cmd *cobra.Command, args []string) error {
 	client, err := util.ClientFromFlags(o.kubernetesConfigFlags)
 	if err != nil {
 		return err
 	}
 
-	// create list options
+	// create list options and pass them to the lister
 	opts := []list.ListerOption{}
 
-	if o.FilterOnlyExpired {
+	if cmd.Flags().Changed("only-expired") && o.FilterOnlyExpired {
 		opts = append(opts, list.WithFilterOnlyExpired())
 	}
 
-	if o.FilterOnlyUnexpired {
+	if cmd.Flags().Changed("only-unexpired") && o.FilterOnlyUnexpired {
 		opts = append(opts, list.WithFilterOnlyUnexpired())
 	}
 
-	if o.FilterByMaprCluster != "" {
+	if cmd.Flags().Changed("mapr-cluster") {
 		opts = append(opts, list.WithFilterByMaprCluster(o.FilterByMaprCluster))
 	}
 
-	if o.FilterByMaprUser != "" {
+	if cmd.Flags().Changed("mapr-user") {
 		opts = append(opts, list.WithFilterByMaprUser(o.FilterByMaprUser))
+	}
+
+	if cmd.Flags().Changed("mapr-uid") {
+		opts = append(opts, list.WithFilterByUID(o.FilterByMaprUID))
+	}
+
+	if cmd.Flags().Changed("mapr-gid") {
+		opts = append(opts, list.WithFilterByGID(o.FilterByMaprGID))
 	}
 
 	// create lister
@@ -125,19 +162,8 @@ func (o *listOptions) Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// generate table for output
-	table, err := list.GenerateTable(cmd, items)
-	if err != nil {
-		return err
-	}
-
-	// print table
-	printer := printers.NewTablePrinter(printers.PrintOptions{
-		WithNamespace: o.AllNamespaces,
-	})
-
-	err = printer.PrintObj(table, o.IOStreams.Out)
-	if err != nil {
+	// print output
+	if err := list.Print(cmd, items); err != nil {
 		return err
 	}
 

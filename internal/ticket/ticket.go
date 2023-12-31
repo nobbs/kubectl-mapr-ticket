@@ -50,3 +50,9 @@ func (ticket *MaprTicket) ExpiryTimeToHuman(format string) string {
 	t := time.Unix(int64(ticket.GetExpiryTime()), 0)
 	return t.Format(format)
 }
+
+// createTimeToHuman returns the creation time in a human readable format
+func (ticket *MaprTicket) CreateTimeToHuman(format string) string {
+	t := time.Unix(int64(ticket.GetCreationTimeSec()), 0)
+	return t.Format(format)
+}
