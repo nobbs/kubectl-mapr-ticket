@@ -43,6 +43,7 @@ requiring access to the MapR cluster.`,
 	rootCmd.AddCommand(
 		newListCmd(rootOpts),
 		newVersionCmd(rootOpts),
+		newUsedByCmd(rootOpts),
 	)
 
 	return rootCmd
