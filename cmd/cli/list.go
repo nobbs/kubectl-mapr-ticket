@@ -1,15 +1,19 @@
 package cli
 
 import (
+	"fmt"
+
 	"github.com/nobbs/kubectl-mapr-ticket/internal/list"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	"github.com/spf13/cobra"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/cli-runtime/pkg/printers"
 )
 
-type listOptions struct {
+type ListOptions struct {
 	*rootCmdOptions
+
+	// OutputFormat is the format to use for output
+	OutputFormat string
 
 	// AllNamespaces indicates whether to list secrets in all namespaces
 	AllNamespaces bool
@@ -39,8 +43,8 @@ type listOptions struct {
 	FilterByMaprGID uint32
 }
 
-func NewListOptions(rootOpts *rootCmdOptions) *listOptions {
-	return &listOptions{
+func NewListOptions(rootOpts *rootCmdOptions) *ListOptions {
+	return &ListOptions{
 		rootCmdOptions: rootOpts,
 	}
 }
@@ -59,6 +63,10 @@ some information about them.`,
 				return err
 			}
 
+			if err := o.Validate(); err != nil {
+				return err
+			}
+
 			if err := o.Run(cmd, args); err != nil {
 				return err
 			}
@@ -73,6 +81,7 @@ some information about them.`,
 	cmd.SetErr(o.IOStreams.ErrOut)
 
 	// add flags
+	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", "Output format. One of: table|wide")
 	cmd.Flags().BoolVarP(&o.AllNamespaces, "all-namespaces", "A", false, "If true, list the requested object(s) across all namespaces. Namespace in current context is ignored even if specified with --namespace.")
 	cmd.Flags().BoolVarP(&o.FilterOnlyExpired, "only-expired", "E", false, "If true, only show secrets with tickets that have expired")
 	cmd.Flags().BoolVarP(&o.FilterOnlyUnexpired, "only-unexpired", "U", false, "If true, only show secrets with tickets that have not expired")
@@ -85,7 +94,7 @@ some information about them.`,
 	return cmd
 }
 
-func (o *listOptions) Complete(cmd *cobra.Command, args []string) error {
+func (o *ListOptions) Complete(cmd *cobra.Command, args []string) error {
 	// set namespace
 	if o.kubernetesConfigFlags.Namespace == nil || *o.kubernetesConfigFlags.Namespace == "" {
 		namespace := util.GetNamespace(o.kubernetesConfigFlags)
@@ -101,7 +110,16 @@ func (o *listOptions) Complete(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *listOptions) Run(cmd *cobra.Command, args []string) error {
+func (o *ListOptions) Validate() error {
+	// validate output format
+	if o.OutputFormat != "table" && o.OutputFormat != "wide" {
+		return fmt.Errorf("invalid output format: %s", o.OutputFormat)
+	}
+
+	return nil
+}
+
+func (o *ListOptions) Run(cmd *cobra.Command, args []string) error {
 	client, err := util.ClientFromFlags(o.kubernetesConfigFlags)
 	if err != nil {
 		return err
@@ -143,19 +161,8 @@ func (o *listOptions) Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// generate table for output
-	table, err := list.GenerateTable(cmd, items)
-	if err != nil {
-		return err
-	}
-
-	// print table
-	printer := printers.NewTablePrinter(printers.PrintOptions{
-		WithNamespace: o.AllNamespaces,
-	})
-
-	err = printer.PrintObj(table, o.IOStreams.Out)
-	if err != nil {
+	// print output
+	if err := list.Print(cmd, items); err != nil {
 		return err
 	}
 
