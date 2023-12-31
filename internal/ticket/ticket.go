@@ -42,7 +42,7 @@ func NewTicketFromSecret(secret *coreV1.Secret) (*MaprTicket, error) {
 // isExpired returns true if the ticket is expired
 func (ticket *MaprTicket) IsExpired() bool {
 	t := time.Unix(int64(ticket.GetExpiryTime()), 0)
-	return time.Now().Before(t)
+	return time.Now().After(t)
 }
 
 // expiryTimeToHuman returns the expiry time in a human readable format
