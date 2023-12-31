@@ -3,24 +3,22 @@ package cli
 import (
 	"github.com/nobbs/kubectl-mapr-ticket/internal/version"
 	"github.com/spf13/cobra"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
-	"k8s.io/cli-runtime/pkg/genericiooptions"
 )
 
+// versionOptions holds the options for 'version' sub command
 type versionOptions struct {
-	configFlags *genericclioptions.ConfigFlags
-	IOStreams   genericiooptions.IOStreams
+	// embed common options from rootCmdOptions
+	*rootCmdOptions
 }
 
-func newVersionOptions(streams genericiooptions.IOStreams) *versionOptions {
+func newVersionOptions(rootOpts *rootCmdOptions) *versionOptions {
 	return &versionOptions{
-		configFlags: genericclioptions.NewConfigFlags(true),
-		IOStreams:   streams,
+		rootCmdOptions: rootOpts,
 	}
 }
 
-func newVersionCmd(streams genericiooptions.IOStreams) *cobra.Command {
-	o := newVersionOptions(streams)
+func newVersionCmd(rootOpts *rootCmdOptions) *cobra.Command {
+	o := newVersionOptions(rootOpts)
 
 	cmd := &cobra.Command{
 		Use:     "version",
