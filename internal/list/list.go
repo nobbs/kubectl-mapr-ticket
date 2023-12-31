@@ -11,8 +11,8 @@ import (
 )
 
 type ListItem struct {
-	secret *coreV1.Secret
-	ticket *ticket.MaprTicket
+	Secret *coreV1.Secret     `json:"originalSecret"`
+	Ticket *ticket.MaprTicket `json:"parsedTicket"`
 }
 
 type Lister struct {
@@ -152,8 +152,8 @@ func (l *Lister) parseSecretsToItems(secrets []coreV1.Secret) []ListItem {
 		}
 
 		items = append(items, ListItem{
-			secret: &secrets[i],
-			ticket: ticket,
+			Secret: &secrets[i],
+			Ticket: ticket,
 		})
 	}
 
@@ -165,7 +165,7 @@ func (l *Lister) filterItemsOnlyExpired(items []ListItem) []ListItem {
 	var filtered []ListItem
 
 	for _, item := range items {
-		if item.ticket.IsExpired() {
+		if item.Ticket.IsExpired() {
 			filtered = append(filtered, item)
 		}
 	}
@@ -178,7 +178,7 @@ func (l *Lister) filterItemsOnlyUnexpired(items []ListItem) []ListItem {
 	var filtered []ListItem
 
 	for _, item := range items {
-		if !item.ticket.IsExpired() {
+		if !item.Ticket.IsExpired() {
 			filtered = append(filtered, item)
 		}
 	}
@@ -191,7 +191,7 @@ func (l *Lister) filterItemsByMaprCluster(items []ListItem) []ListItem {
 	var filtered []ListItem
 
 	for _, item := range items {
-		if item.ticket.Cluster == *l.filterByMaprCluster {
+		if item.Ticket.Cluster == *l.filterByMaprCluster {
 			filtered = append(filtered, item)
 		}
 	}
@@ -204,7 +204,7 @@ func (l *Lister) filterItemsByMaprUser(items []ListItem) []ListItem {
 	var filtered []ListItem
 
 	for _, item := range items {
-		if item.ticket.UserCreds.GetUserName() == *l.filterByMaprUser {
+		if item.Ticket.UserCreds.GetUserName() == *l.filterByMaprUser {
 			filtered = append(filtered, item)
 		}
 	}
@@ -217,7 +217,7 @@ func (l *Lister) filterItemsByUID(items []ListItem) []ListItem {
 	var filtered []ListItem
 
 	for _, item := range items {
-		if *item.ticket.UserCreds.Uid == *l.filterByUID {
+		if *item.Ticket.UserCreds.Uid == *l.filterByUID {
 			filtered = append(filtered, item)
 		}
 	}
@@ -231,7 +231,7 @@ func (l *Lister) filterItemsByGID(items []ListItem) []ListItem {
 
 	for _, item := range items {
 		// check if GID is in the list of GIDs
-		for _, gid := range item.ticket.UserCreds.Gids {
+		for _, gid := range item.Ticket.UserCreds.Gids {
 			if gid == *l.filterByGID {
 				filtered = append(filtered, item)
 				break

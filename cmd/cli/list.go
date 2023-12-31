@@ -81,7 +81,7 @@ some information about them.`,
 	cmd.SetErr(o.IOStreams.ErrOut)
 
 	// add flags
-	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", "Output format. One of: table|wide")
+	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", "Output format. One of: table|wide|json|yaml")
 	cmd.Flags().BoolVarP(&o.AllNamespaces, "all-namespaces", "A", false, "If true, list the requested object(s) across all namespaces. Namespace in current context is ignored even if specified with --namespace.")
 	cmd.Flags().BoolVarP(&o.FilterOnlyExpired, "only-expired", "E", false, "If true, only show secrets with tickets that have expired")
 	cmd.Flags().BoolVarP(&o.FilterOnlyUnexpired, "only-unexpired", "U", false, "If true, only show secrets with tickets that have not expired")
@@ -112,8 +112,8 @@ func (o *ListOptions) Complete(cmd *cobra.Command, args []string) error {
 
 func (o *ListOptions) Validate() error {
 	// validate output format
-	if o.OutputFormat != "table" && o.OutputFormat != "wide" {
-		return fmt.Errorf("invalid output format: %s", o.OutputFormat)
+	if o.OutputFormat != "table" && o.OutputFormat != "wide" && o.OutputFormat != "json" && o.OutputFormat != "yaml" {
+		return fmt.Errorf("invalid output format: %s. Must be one of: table|wide|json|yaml", o.OutputFormat)
 	}
 
 	return nil
