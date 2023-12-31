@@ -23,6 +23,8 @@ type Lister struct {
 	filterOnlyUnexpired bool
 	filterByMaprCluster *string
 	filterByMaprUser    *string
+	filterByUID         *uint32
+	filterByGID         *uint32
 }
 
 type ListerOption func(*Lister)
@@ -36,6 +38,18 @@ func WithFilterByMaprCluster(cluster string) ListerOption {
 func WithFilterByMaprUser(user string) ListerOption {
 	return func(l *Lister) {
 		l.filterByMaprUser = &user
+	}
+}
+
+func WithFilterByUID(uid uint32) ListerOption {
+	return func(l *Lister) {
+		l.filterByUID = &uid
+	}
+}
+
+func WithFilterByGID(gid uint32) ListerOption {
+	return func(l *Lister) {
+		l.filterByGID = &gid
 	}
 }
 
@@ -99,6 +113,16 @@ func (l *Lister) Run() ([]ListItem, error) {
 	// filter items to only tickets for the specified MapR user, if requested
 	if l.filterByMaprUser != nil && *l.filterByMaprUser != "" {
 		items = l.filterItemsByMaprUser(items)
+	}
+
+	// filter items to only tickets for the specified UID, if requested
+	if l.filterByUID != nil {
+		items = l.filterItemsByUID(items)
+	}
+
+	// filter items to only tickets for the specified GID, if requested
+	if l.filterByGID != nil {
+		items = l.filterItemsByGID(items)
 	}
 
 	return items, nil
@@ -182,6 +206,36 @@ func (l *Lister) filterItemsByMaprUser(items []ListItem) []ListItem {
 	for _, item := range items {
 		if item.ticket.UserCreds.GetUserName() == *l.filterByMaprUser {
 			filtered = append(filtered, item)
+		}
+	}
+
+	return filtered
+}
+
+// filterItemsByUID filters items to only tickets for the specified UID
+func (l *Lister) filterItemsByUID(items []ListItem) []ListItem {
+	var filtered []ListItem
+
+	for _, item := range items {
+		if *item.ticket.UserCreds.Uid == *l.filterByUID {
+			filtered = append(filtered, item)
+		}
+	}
+
+	return filtered
+}
+
+// filterItemsByGID filters items to only tickets for the specified GID
+func (l *Lister) filterItemsByGID(items []ListItem) []ListItem {
+	var filtered []ListItem
+
+	for _, item := range items {
+		// check if GID is in the list of GIDs
+		for _, gid := range item.ticket.UserCreds.Gids {
+			if gid == *l.filterByGID {
+				filtered = append(filtered, item)
+				break
+			}
 		}
 	}
 

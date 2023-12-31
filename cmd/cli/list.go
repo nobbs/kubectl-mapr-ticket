@@ -29,6 +29,14 @@ type listOptions struct {
 	// FilterByMaprUser indicates whether to filter secrets to only those that
 	// have a ticket for the specified MapR user
 	FilterByMaprUser string
+
+	// FilterByMaprUID indicates whether to filter secrets to only those that have
+	// a ticket for the specified UID
+	FilterByMaprUID uint32
+
+	// FilterByMaprGID indicates whether to filter secrets to only those that have
+	// a ticket for the specified GID
+	FilterByMaprGID uint32
 }
 
 func NewListOptions(rootOpts *rootCmdOptions) *listOptions {
@@ -70,6 +78,8 @@ some information about them.`,
 	cmd.Flags().BoolVarP(&o.FilterOnlyUnexpired, "only-unexpired", "U", false, "If true, only show secrets with tickets that have not expired")
 	cmd.Flags().StringVarP(&o.FilterByMaprCluster, "mapr-cluster", "c", "", "Only show secrets with tickets for the specified MapR cluster")
 	cmd.Flags().StringVarP(&o.FilterByMaprUser, "mapr-user", "u", "", "Only show secrets with tickets for the specified MapR user")
+	cmd.Flags().Uint32Var(&o.FilterByMaprUID, "mapr-uid", 0, "Only show secrets with tickets for the specified UID")
+	cmd.Flags().Uint32Var(&o.FilterByMaprGID, "mapr-gid", 0, "Only show secrets with tickets for the specified GID")
 	cmd.MarkFlagsMutuallyExclusive("only-expired", "only-unexpired")
 
 	return cmd
@@ -97,23 +107,31 @@ func (o *listOptions) Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// create list options
+	// create list options and pass them to the lister
 	opts := []list.ListerOption{}
 
-	if o.FilterOnlyExpired {
+	if cmd.Flags().Changed("only-expired") && o.FilterOnlyExpired {
 		opts = append(opts, list.WithFilterOnlyExpired())
 	}
 
-	if o.FilterOnlyUnexpired {
+	if cmd.Flags().Changed("only-unexpired") && o.FilterOnlyUnexpired {
 		opts = append(opts, list.WithFilterOnlyUnexpired())
 	}
 
-	if o.FilterByMaprCluster != "" {
+	if cmd.Flags().Changed("mapr-cluster") {
 		opts = append(opts, list.WithFilterByMaprCluster(o.FilterByMaprCluster))
 	}
 
-	if o.FilterByMaprUser != "" {
+	if cmd.Flags().Changed("mapr-user") {
 		opts = append(opts, list.WithFilterByMaprUser(o.FilterByMaprUser))
+	}
+
+	if cmd.Flags().Changed("mapr-uid") {
+		opts = append(opts, list.WithFilterByUID(o.FilterByMaprUID))
+	}
+
+	if cmd.Flags().Changed("mapr-gid") {
+		opts = append(opts, list.WithFilterByGID(o.FilterByMaprGID))
 	}
 
 	// create lister
