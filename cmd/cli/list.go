@@ -119,6 +119,7 @@ func (o *ListOptions) Validate() error {
 	return nil
 }
 
+//gocyclo:ignore
 func (o *ListOptions) Run(cmd *cobra.Command, args []string) error {
 	client, err := util.ClientFromFlags(o.kubernetesConfigFlags)
 	if err != nil {

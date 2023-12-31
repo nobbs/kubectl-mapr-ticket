@@ -93,7 +93,10 @@ func Print(cmd *cobra.Command, items []ListItem) error {
 			return err
 		}
 	case "json", "yaml":
-		printEncoded(items, format, cmd.OutOrStdout())
+		err := printEncoded(items, format, cmd.OutOrStdout())
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
