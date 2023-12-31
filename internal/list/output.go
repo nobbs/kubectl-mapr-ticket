@@ -87,11 +87,17 @@ var (
 func Print(cmd *cobra.Command, items []ListItem) error {
 	format := cmd.Flag("output").Value.String()
 	allNamespaces := cmd.Flag("all-namespaces").Changed && cmd.Flag("all-namespaces").Value.String() == "true"
+	withInUse := cmd.Flag("show-in-use").Changed && cmd.Flag("show-in-use").Value.String() == "true"
 
 	switch format {
 	case "table", "wide":
 		// generate table for output
 		table := generateTable(items)
+
+		// enrich table with in use column
+		if withInUse {
+			enrichTableWithInUse(table, items)
+		}
 
 		// print table
 		printer := printers.NewTablePrinter(printers.PrintOptions{
@@ -158,6 +164,31 @@ func generateRow(item *ListItem) *metaV1.TableRow {
 	}
 
 	return row
+}
+
+// enrichTableWithInUse enriches the table with a column indicating whether the
+// ticket is in use by a persistent volume or not
+func enrichTableWithInUse(table *metaV1.Table, items []ListItem) {
+	numColumns := len(listTableColumns)
+
+	table.ColumnDefinitions = append(
+		table.ColumnDefinitions[:numColumns-1],
+		metaV1.TableColumnDefinition{
+			Name:        "In Use",
+			Type:        "boolean",
+			Description: "Whether the ticket is in use by a persistent volume or not",
+			Priority:    0,
+		},
+		table.ColumnDefinitions[numColumns-1],
+	)
+
+	for i := range table.Rows {
+		table.Rows[i].Cells = append(
+			table.Rows[i].Cells[:numColumns-1],
+			items[i].InUse,
+			table.Rows[i].Cells[numColumns-1],
+		)
+	}
 }
 
 func printEncoded(items []ListItem, format string, stream io.Writer) error {

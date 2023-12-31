@@ -41,6 +41,14 @@ type ListOptions struct {
 	// FilterByMaprGID indicates whether to filter secrets to only those that have
 	// a ticket for the specified GID
 	FilterByMaprGID uint32
+
+	// FilterByInUse indicates whether to filter secrets to only those that are
+	// in use by a persistent volume
+	FilterByInUse bool
+
+	// ShowInUse indicates whether to show only secrets that are in use by a
+	// persistent volume
+	ShowInUse bool
 }
 
 func NewListOptions(rootOpts *rootCmdOptions) *ListOptions {
@@ -89,6 +97,8 @@ some information about them.`,
 	cmd.Flags().StringVarP(&o.FilterByMaprUser, "mapr-user", "u", "", "Only show secrets with tickets for the specified MapR user")
 	cmd.Flags().Uint32Var(&o.FilterByMaprUID, "mapr-uid", 0, "Only show secrets with tickets for the specified UID")
 	cmd.Flags().Uint32Var(&o.FilterByMaprGID, "mapr-gid", 0, "Only show secrets with tickets for the specified GID")
+	cmd.Flags().BoolVarP(&o.FilterByInUse, "in-use", "I", false, "If true, only show secrets that are in use by a persistent volume")
+	cmd.Flags().BoolVarP(&o.ShowInUse, "show-in-use", "i", false, "If true, add a column to the output indicating whether the secret is in use by a persistent volume")
 	cmd.MarkFlagsMutuallyExclusive("only-expired", "only-unexpired")
 
 	return cmd
@@ -151,6 +161,14 @@ func (o *ListOptions) Run(cmd *cobra.Command, args []string) error {
 
 	if cmd.Flags().Changed("mapr-gid") {
 		opts = append(opts, list.WithFilterByGID(o.FilterByMaprGID))
+	}
+
+	if cmd.Flags().Changed("in-use") && o.FilterByInUse {
+		opts = append(opts, list.WithFilterByInUse())
+	}
+
+	if cmd.Flags().Changed("show-in-use") && o.ShowInUse {
+		opts = append(opts, list.WithShowInUse())
 	}
 
 	// create lister
