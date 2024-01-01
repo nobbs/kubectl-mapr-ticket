@@ -33,17 +33,34 @@ $ kubectl mapr-ticket --help
 
 ## Usage
 
-Currently, `kubectl-mapr-ticket` supports only the `list` command. This command will list all MapR tickets deployed in the current namespace. The output will include the name of the secret, the MapR cluster name, the username, and the expiry date of the ticket.
+The plugin can be invoked using the `kubectl mapr-ticket` command. The plugin supports the following subcommands:
+
+- `list` - List all MapR tickets deployed in the current namespace.
+- `used-by` - List all Persistent Volumes that are using a specific MapR ticket.
+
+### List
+
+The `list` subcommand will list all MapR tickets deployed in the current namespace. The output by default will be a table with the following columns. Additional flags can be used to customize the output, see `kubectl mapr-ticket list --help` for more details.
 
 ```console
 $ kubectl mapr-ticket list
-NAME                      MAPR CLUSTER         USER     EXPIRATION
-mapr-dev-ticket-user-a    demo.dev.mapr.com    user_a   2028-11-09T15:50:57+01:00 (Expired)
-mapr-dev-ticket-user-b    demo.dev.mapr.com    user_b   2028-11-09T15:50:55+01:00 (Expired)
-mapr-dev-ticket-user-c    demo.dev.mapr.com    user_c   2028-11-09T15:50:51+01:00 (Expired)
-mapr-prod-ticket-user-a   demo.prod.mapr.com   user_a   2023-11-19T08:47:05+01:00
-mapr-prod-ticket-user-b   demo.prod.mapr.com   user_b   2023-11-19T08:47:03+01:00
-mapr-prod-ticket-user-c   demo.prod.mapr.com   user_c   2023-11-19T08:47:02+01:00
+NAME                      MAPR CLUSTER         USER     STATUS              AGE
+mapr-dev-ticket-user-a    demo.dev.mapr.com    user_a   Valid (4y left)     75d
+mapr-dev-ticket-user-b    demo.dev.mapr.com    user_b   Valid (4y left)     75d
+mapr-dev-ticket-user-c    demo.dev.mapr.com    user_c   Valid (4y left)     75d
+mapr-prod-ticket-user-a   demo.prod.mapr.com   user_a   Expired (43d ago)   73d
+mapr-prod-ticket-user-b   demo.prod.mapr.com   user_b   Expired (43d ago)   73d
+mapr-prod-ticket-user-c   demo.prod.mapr.com   user_c   Expired (43d ago)   73d
+```
+
+### Used By
+
+The `used-by` subcommand will list all Persistent Volumes that are using a specific MapR ticket or any ticket in the current namespace if `--all` is specified. The output by default will be a table with the following columns. Additional flags can be used to customize the output, see `kubectl mapr-ticket used-by --help` for more details.
+
+```console
+$ kubectl mapr-ticket mapr-ticket-secret -n test-csi
+NAME             SECRET NAMESPACE   SECRET               CLAIM NAMESPACE   CLAIM   AGE
+test-static-pv   test-csi           mapr-ticket-secret                             13h
 ```
 
 ## Does this require a connection to a MapR cluster?
