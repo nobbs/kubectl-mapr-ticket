@@ -41,18 +41,25 @@ func NewTicketFromSecret(secret *coreV1.Secret) (*MaprTicket, error) {
 
 // isExpired returns true if the ticket is expired
 func (ticket *MaprTicket) IsExpired() bool {
-	t := time.Unix(int64(ticket.GetExpiryTime()), 0)
-	return time.Now().After(t)
+	return time.Now().After(ticket.ExpiryTime())
 }
 
 // expiryTimeToHuman returns the expiry time in a human readable format
 func (ticket *MaprTicket) ExpiryTimeToHuman(format string) string {
-	t := time.Unix(int64(ticket.GetExpiryTime()), 0)
-	return t.Format(format)
+	return ticket.ExpiryTime().Format(format)
 }
 
 // createTimeToHuman returns the creation time in a human readable format
 func (ticket *MaprTicket) CreateTimeToHuman(format string) string {
-	t := time.Unix(int64(ticket.GetCreationTimeSec()), 0)
-	return t.Format(format)
+	return ticket.CreationTime().Format(format)
+}
+
+// ExpiryTime returns the expiry time of the ticket as a time.Time object
+func (ticket *MaprTicket) ExpiryTime() time.Time {
+	return time.Unix(int64(ticket.GetExpiryTime()), 0)
+}
+
+// CreationTime returns the creation time of the ticket as a time.Time object
+func (ticket *MaprTicket) CreationTime() time.Time {
+	return time.Unix(int64(ticket.GetCreationTimeSec()), 0)
 }

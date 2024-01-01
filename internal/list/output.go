@@ -7,6 +7,8 @@ import (
 	"io"
 	"time"
 
+	"github.com/nobbs/kubectl-mapr-ticket/internal/ticket"
+	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	"github.com/spf13/cobra"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -48,23 +50,35 @@ var (
 			Priority:    1,
 		},
 		{
-			Name:        "Created",
+			Name:        "Expiry Time",
+			Type:        "string",
+			Format:      "date-time",
+			Description: "Timestamp of the ticket expiry",
+			Priority:    1,
+		},
+		{
+			Name:        "Status",
+			Type:        "string",
+			Description: "Status of the ticket",
+			Priority:    0,
+		},
+		{
+			Name:        "Span",
+			Type:        "string",
+			Description: "Duration of the ticket",
+			Priority:    1,
+		},
+		{
+			Name:        "Creation Time",
 			Type:        "string",
 			Format:      "date-time",
 			Description: "Creation time of the ticket",
 			Priority:    1,
 		},
 		{
-			Name:        "Expires",
+			Name:        "Age",
 			Type:        "string",
-			Format:      "date-time",
-			Description: "Expiration time of the ticket",
-			Priority:    0,
-		},
-		{
-			Name:        "Status",
-			Type:        "string",
-			Description: "Status of the ticket",
+			Description: "Time since the ticket was created",
 			Priority:    0,
 		},
 	}
@@ -73,13 +87,16 @@ var (
 func Print(cmd *cobra.Command, items []ListItem) error {
 	format := cmd.Flag("output").Value.String()
 	allNamespaces := cmd.Flag("all-namespaces").Changed && cmd.Flag("all-namespaces").Value.String() == "true"
+	withInUse := cmd.Flag("show-in-use").Changed && cmd.Flag("show-in-use").Value.String() == "true"
 
 	switch format {
 	case "table", "wide":
 		// generate table for output
-		table, err := generateTable(items)
-		if err != nil {
-			return err
+		table := generateTable(items)
+
+		// enrich table with in use column
+		if withInUse {
+			enrichTableWithInUse(table, items)
 		}
 
 		// print table
@@ -88,7 +105,7 @@ func Print(cmd *cobra.Command, items []ListItem) error {
 			Wide:          format == "wide",
 		})
 
-		err = printer.PrintObj(table, cmd.OutOrStdout())
+		err := printer.PrintObj(table, cmd.OutOrStdout())
 		if err != nil {
 			return err
 		}
@@ -103,13 +120,13 @@ func Print(cmd *cobra.Command, items []ListItem) error {
 }
 
 // generateTable generates a table from the secrets containing MapR tickets
-func generateTable(items []ListItem) (*metaV1.Table, error) {
+func generateTable(items []ListItem) *metaV1.Table {
 	rows := generateRows(items)
 
 	return &metaV1.Table{
 		ColumnDefinitions: listTableColumns,
 		Rows:              rows,
-	}, nil
+	}
 }
 
 // generateRows generates the rows for the table from the secrets containing
@@ -118,7 +135,7 @@ func generateRows(items []ListItem) []metaV1.TableRow {
 	rows := make([]metaV1.TableRow, 0, len(items))
 
 	for _, item := range items {
-		rows = append(rows, *generateRow(item))
+		rows = append(rows, *generateRow(&item))
 	}
 
 	return rows
@@ -126,18 +143,11 @@ func generateRows(items []ListItem) []metaV1.TableRow {
 
 // generateRow generates a row for the table from the secret containing a MapR
 // ticket
-func generateRow(item ListItem) *metaV1.TableRow {
+func generateRow(item *ListItem) *metaV1.TableRow {
 	row := &metaV1.TableRow{
 		Object: runtime.RawExtension{
 			Object: item.Secret,
 		},
-	}
-
-	var status string
-	if item.Ticket.IsExpired() {
-		status = "Expired"
-	} else {
-		status = "Valid"
 	}
 
 	row.Cells = []any{
@@ -146,12 +156,39 @@ func generateRow(item ListItem) *metaV1.TableRow {
 		item.Ticket.UserCreds.GetUserName(),
 		item.Ticket.UserCreds.GetUid(),
 		item.Ticket.UserCreds.GetGids(),
-		item.Ticket.CreateTimeToHuman(time.RFC3339),
 		item.Ticket.ExpiryTimeToHuman(time.RFC3339),
-		status,
+		getStatus(item.Ticket),
+		util.ShortHumanDuration(item.Ticket.ExpiryTime().Sub(item.Ticket.CreationTime())),
+		item.Ticket.CreateTimeToHuman(time.RFC3339),
+		util.ShortHumanDurationUntilNow(item.Ticket.CreationTime()),
 	}
 
 	return row
+}
+
+// enrichTableWithInUse enriches the table with a column indicating whether the
+// ticket is in use by a persistent volume or not
+func enrichTableWithInUse(table *metaV1.Table, items []ListItem) {
+	numColumns := len(listTableColumns)
+
+	table.ColumnDefinitions = append(
+		table.ColumnDefinitions[:numColumns-1],
+		metaV1.TableColumnDefinition{
+			Name:        "In Use",
+			Type:        "boolean",
+			Description: "Whether the ticket is in use by a persistent volume or not",
+			Priority:    0,
+		},
+		table.ColumnDefinitions[numColumns-1],
+	)
+
+	for i := range table.Rows {
+		table.Rows[i].Cells = append(
+			table.Rows[i].Cells[:numColumns-1],
+			items[i].InUse,
+			table.Rows[i].Cells[numColumns-1],
+		)
+	}
 }
 
 func printEncoded(items []ListItem, format string, stream io.Writer) error {
@@ -159,7 +196,7 @@ func printEncoded(items []ListItem, format string, stream io.Writer) error {
 
 	if len(items) == 1 {
 		// encode single item
-		_, err := bytesBuffer.Write(encodeItem(items[0], format))
+		_, err := bytesBuffer.Write(encodeItem(&items[0], format))
 		if err != nil {
 			return err
 		}
@@ -177,7 +214,7 @@ func printEncoded(items []ListItem, format string, stream io.Writer) error {
 		return err
 	}
 
-	return fmt.Errorf("not implemented")
+	return nil
 }
 
 func encodeItems(items []ListItem, format string) []byte {
@@ -201,7 +238,7 @@ func encodeItems(items []ListItem, format string) []byte {
 	return nil
 }
 
-func encodeItem(item ListItem, format string) []byte {
+func encodeItem(item *ListItem, format string) []byte {
 	switch format {
 	case "json":
 		encoded, err := json.MarshalIndent(item, "", "  ")
@@ -220,4 +257,12 @@ func encodeItem(item ListItem, format string) []byte {
 	}
 
 	return nil
+}
+
+func getStatus(ticket *ticket.MaprTicket) string {
+	if ticket.IsExpired() {
+		return fmt.Sprintf("Expired (%s ago)", util.ShortHumanDurationComparedToNow(ticket.ExpiryTime()))
+	}
+
+	return fmt.Sprintf("Valid (%s left)", util.ShortHumanDurationComparedToNow(ticket.ExpiryTime()))
 }

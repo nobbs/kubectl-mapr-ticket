@@ -10,7 +10,7 @@
       "release-type": "go",
       "draft": false,
       "prerelease": false,
-      "extra-files": ["internal/version/version.go"],
+      "extra-files": ["internal/version/version.go", "README.md"],
       "initial-version": "0.1.0"
     }
   },

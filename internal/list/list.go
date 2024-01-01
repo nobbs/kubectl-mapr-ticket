@@ -4,19 +4,20 @@ import (
 	"context"
 
 	"github.com/nobbs/kubectl-mapr-ticket/internal/ticket"
+	"github.com/nobbs/kubectl-mapr-ticket/internal/volumes"
 	coreV1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	typedV1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 type ListItem struct {
 	Secret *coreV1.Secret     `json:"originalSecret"`
 	Ticket *ticket.MaprTicket `json:"parsedTicket"`
+	InUse  bool               `json:"inUse"`
 }
 
 type Lister struct {
-	client    typedV1.SecretInterface
+	client    kubernetes.Interface
 	namespace string
 
 	filterOnlyExpired   bool
@@ -25,6 +26,8 @@ type Lister struct {
 	filterByMaprUser    *string
 	filterByUID         *uint32
 	filterByGID         *uint32
+	filterByInUse       bool
+	showInUse           bool
 }
 
 type ListerOption func(*Lister)
@@ -65,6 +68,18 @@ func WithFilterOnlyUnexpired() ListerOption {
 	}
 }
 
+func WithFilterByInUse() ListerOption {
+	return func(l *Lister) {
+		l.filterByInUse = true
+	}
+}
+
+func WithShowInUse() ListerOption {
+	return func(l *Lister) {
+		l.showInUse = true
+	}
+}
+
 // NewLister creates a new Lister
 func NewLister(client kubernetes.Interface, namespace string, opts ...ListerOption) *Lister {
 	const (
@@ -73,7 +88,7 @@ func NewLister(client kubernetes.Interface, namespace string, opts ...ListerOpti
 	)
 
 	l := &Lister{
-		client:              client.CoreV1().Secrets(namespace),
+		client:              client,
 		namespace:           namespace,
 		filterOnlyExpired:   defaultFilterOnlyExpired,
 		filterOnlyUnexpired: defaultFilterOnlyUnexpired,
@@ -87,49 +102,62 @@ func NewLister(client kubernetes.Interface, namespace string, opts ...ListerOpti
 }
 
 func (l *Lister) Run() ([]ListItem, error) {
-	secrets, err := l.client.List(context.TODO(), metaV1.ListOptions{})
+	secrets, err := l.client.CoreV1().Secrets(l.namespace).List(context.TODO(), metaV1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
 
 	// convert secrets to items, parse all tickets
-	items := l.parseSecretsToItems(secrets.Items)
+	items := parseSecretsToItems(secrets.Items)
 
 	// filter items to only expired tickets, if requested
 	if l.filterOnlyExpired {
-		items = l.filterItemsOnlyExpired(items)
+		items = filterItemsOnlyExpired(items)
 	}
 
 	// filter items to only unexpired tickets, if requested
 	if l.filterOnlyUnexpired {
-		items = l.filterItemsOnlyUnexpired(items)
+		items = filterItemsOnlyUnexpired(items)
 	}
 
 	// filter items to only tickets for the specified MapR cluster, if requested
 	if l.filterByMaprCluster != nil && *l.filterByMaprCluster != "" {
-		items = l.filterItemsByMaprCluster(items)
+		items = filterItemsByMaprCluster(items, *l.filterByMaprCluster)
 	}
 
 	// filter items to only tickets for the specified MapR user, if requested
 	if l.filterByMaprUser != nil && *l.filterByMaprUser != "" {
-		items = l.filterItemsByMaprUser(items)
+		items = filterItemsByMaprUser(items, *l.filterByMaprUser)
 	}
 
 	// filter items to only tickets for the specified UID, if requested
 	if l.filterByUID != nil {
-		items = l.filterItemsByUID(items)
+		items = filterItemsByUID(items, *l.filterByUID)
 	}
 
 	// filter items to only tickets for the specified GID, if requested
 	if l.filterByGID != nil {
-		items = l.filterItemsByGID(items)
+		items = filterItemsByGID(items, *l.filterByGID)
+	}
+
+	// enrich items with an InUse condition, if requested
+	if l.showInUse || l.filterByInUse {
+		items, err = l.enrichItemsWithInUseCondition(items)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// filter items to only tickets that are in use by a persistent volume, if requested
+	if l.filterByInUse {
+		items = filterItemsToOnlyInUse(items)
 	}
 
 	return items, nil
 }
 
 // filterSecretsWithMaprTicketKey filters secrets to only those that contain a MapR ticket key
-func (l *Lister) filterSecretsWithMaprTicketKey(secrets []coreV1.Secret) []coreV1.Secret {
+func filterSecretsWithMaprTicketKey(secrets []coreV1.Secret) []coreV1.Secret {
 	var filtered []coreV1.Secret
 
 	for _, secret := range secrets {
@@ -142,10 +170,10 @@ func (l *Lister) filterSecretsWithMaprTicketKey(secrets []coreV1.Secret) []coreV
 }
 
 // parseSecretsToItems parses secrets to items, ignoring secrets that don't contain a MapR ticket
-func (l *Lister) parseSecretsToItems(secrets []coreV1.Secret) []ListItem {
+func parseSecretsToItems(secrets []coreV1.Secret) []ListItem {
 	var items []ListItem
 
-	for i := range l.filterSecretsWithMaprTicketKey(secrets) {
+	for i := range filterSecretsWithMaprTicketKey(secrets) {
 		ticket, err := ticket.NewTicketFromSecret(&secrets[i])
 		if err != nil {
 			continue
@@ -161,7 +189,7 @@ func (l *Lister) parseSecretsToItems(secrets []coreV1.Secret) []ListItem {
 }
 
 // filterItemsOnlyExpired filters items to only tickets that are expired already
-func (l *Lister) filterItemsOnlyExpired(items []ListItem) []ListItem {
+func filterItemsOnlyExpired(items []ListItem) []ListItem {
 	var filtered []ListItem
 
 	for _, item := range items {
@@ -174,7 +202,7 @@ func (l *Lister) filterItemsOnlyExpired(items []ListItem) []ListItem {
 }
 
 // filterItemsOnlyUnexpired filters items to only tickets that are not expired yet
-func (l *Lister) filterItemsOnlyUnexpired(items []ListItem) []ListItem {
+func filterItemsOnlyUnexpired(items []ListItem) []ListItem {
 	var filtered []ListItem
 
 	for _, item := range items {
@@ -187,11 +215,11 @@ func (l *Lister) filterItemsOnlyUnexpired(items []ListItem) []ListItem {
 }
 
 // filterItemsByMaprCluster filters items to only tickets for the specified MapR cluster
-func (l *Lister) filterItemsByMaprCluster(items []ListItem) []ListItem {
+func filterItemsByMaprCluster(items []ListItem, cluster string) []ListItem {
 	var filtered []ListItem
 
 	for _, item := range items {
-		if item.Ticket.Cluster == *l.filterByMaprCluster {
+		if item.Ticket.Cluster == cluster {
 			filtered = append(filtered, item)
 		}
 	}
@@ -200,11 +228,11 @@ func (l *Lister) filterItemsByMaprCluster(items []ListItem) []ListItem {
 }
 
 // filterItemsByMaprUser filters items to only tickets for the specified MapR user
-func (l *Lister) filterItemsByMaprUser(items []ListItem) []ListItem {
+func filterItemsByMaprUser(items []ListItem, user string) []ListItem {
 	var filtered []ListItem
 
 	for _, item := range items {
-		if item.Ticket.UserCreds.GetUserName() == *l.filterByMaprUser {
+		if item.Ticket.UserCreds.GetUserName() == user {
 			filtered = append(filtered, item)
 		}
 	}
@@ -213,11 +241,11 @@ func (l *Lister) filterItemsByMaprUser(items []ListItem) []ListItem {
 }
 
 // filterItemsByUID filters items to only tickets for the specified UID
-func (l *Lister) filterItemsByUID(items []ListItem) []ListItem {
+func filterItemsByUID(items []ListItem, uid uint32) []ListItem {
 	var filtered []ListItem
 
 	for _, item := range items {
-		if *item.Ticket.UserCreds.Uid == *l.filterByUID {
+		if *item.Ticket.UserCreds.Uid == uid {
 			filtered = append(filtered, item)
 		}
 	}
@@ -226,16 +254,53 @@ func (l *Lister) filterItemsByUID(items []ListItem) []ListItem {
 }
 
 // filterItemsByGID filters items to only tickets for the specified GID
-func (l *Lister) filterItemsByGID(items []ListItem) []ListItem {
+func filterItemsByGID(items []ListItem, gid uint32) []ListItem {
 	var filtered []ListItem
 
 	for _, item := range items {
 		// check if GID is in the list of GIDs
-		for _, gid := range item.Ticket.UserCreds.Gids {
-			if gid == *l.filterByGID {
+		for _, gotGid := range item.Ticket.UserCreds.Gids {
+			if gotGid == gid {
 				filtered = append(filtered, item)
 				break
 			}
+		}
+	}
+
+	return filtered
+}
+
+// enrichItemsWithInUseCondition enriches items with an InUse condition based on whether a
+// persistent volume is using the ticket or not
+func (l *Lister) enrichItemsWithInUseCondition(items []ListItem) ([]ListItem, error) {
+	pvs, err := l.client.CoreV1().PersistentVolumes().List(context.TODO(), metaV1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	// Filter the volumes to only MapR CSI-based ones
+	maprVolumes := volumes.FilterVolumesToMaprCSI(pvs.Items)
+
+	// check for each ticket if it is in use by a persistent volume
+	for i := range items {
+		for _, volume := range maprVolumes {
+			if volumes.UsesTicket(&volume, items[i].Secret.Name, items[i].Secret.Namespace) {
+				items[i].InUse = true
+				break
+			}
+		}
+	}
+
+	return items, nil
+}
+
+// filterItemsToOnlyInUse filters items to only tickets that are in use by a persistent volume
+func filterItemsToOnlyInUse(items []ListItem) []ListItem {
+	var filtered []ListItem
+
+	for _, item := range items {
+		if item.InUse {
+			filtered = append(filtered, item)
 		}
 	}
 

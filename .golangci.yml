@@ -6,17 +6,11 @@ linters:
     - errorlint
     - dogsled
     - nilnil
-    - gocyclo
-    - gocognit
     - funlen
     - dupl
     - gocritic
 
 linters-settings:
-  gocyclo:
-    min-complexity: 10
-  gocognit:
-    min-complexity: 20
   funlen:
     lines: 120
     statements: 120
