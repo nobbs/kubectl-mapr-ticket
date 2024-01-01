@@ -1,4 +1,4 @@
-package volumes
+package volume
 
 import (
 	"github.com/nobbs/kubectl-mapr-ticket/internal/util"

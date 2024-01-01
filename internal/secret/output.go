@@ -1,4 +1,4 @@
-package list
+package secret
 
 import (
 	"bytes"

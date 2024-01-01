@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
-	"github.com/nobbs/kubectl-mapr-ticket/internal/volumes"
+	"github.com/nobbs/kubectl-mapr-ticket/internal/volume"
 	"github.com/spf13/cobra"
 )
 
@@ -100,15 +100,15 @@ func (o *UsedByOptions) Run(cmd *cobra.Command, args []string) error {
 	}
 
 	// create list options
-	opts := []volumes.ListerOption{}
+	opts := []volume.ListerOption{}
 
 	// if we are listing volumes for all secrets in the namespace, create an option to do so
 	if o.AllSecrets {
-		opts = append(opts, volumes.WithAllSecrets())
+		opts = append(opts, volume.WithAllSecrets())
 	}
 
 	// create lister
-	lister := volumes.NewLister(client, o.SecretName, *o.kubernetesConfigFlags.Namespace, opts...)
+	lister := volume.NewLister(client, o.SecretName, *o.kubernetesConfigFlags.Namespace, opts...)
 
 	// run the lister
 	pvs, err := lister.Run()
@@ -117,7 +117,7 @@ func (o *UsedByOptions) Run(cmd *cobra.Command, args []string) error {
 	}
 
 	// print the volumes
-	if err := volumes.Print(cmd, pvs); err != nil {
+	if err := volume.Print(cmd, pvs); err != nil {
 		return err
 	}
 

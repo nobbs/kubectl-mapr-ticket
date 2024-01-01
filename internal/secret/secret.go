@@ -1,10 +1,10 @@
-package list
+package secret
 
 import (
 	"context"
 
 	"github.com/nobbs/kubectl-mapr-ticket/internal/ticket"
-	"github.com/nobbs/kubectl-mapr-ticket/internal/volumes"
+	"github.com/nobbs/kubectl-mapr-ticket/internal/volume"
 	coreV1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -279,12 +279,12 @@ func (l *Lister) enrichItemsWithInUseCondition(items []ListItem) ([]ListItem, er
 	}
 
 	// Filter the volumes to only MapR CSI-based ones
-	maprVolumes := volumes.FilterVolumesToMaprCSI(pvs.Items)
+	maprVolumes := volume.FilterVolumesToMaprCSI(pvs.Items)
 
 	// check for each ticket if it is in use by a persistent volume
 	for i := range items {
-		for _, volume := range maprVolumes {
-			if volumes.UsesTicket(&volume, items[i].Secret.Name, items[i].Secret.Namespace) {
+		for _, pv := range maprVolumes {
+			if volume.UsesTicket(&pv, items[i].Secret.Name, items[i].Secret.Namespace) {
 				items[i].InUse = true
 				break
 			}

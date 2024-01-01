@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 
-	"github.com/nobbs/kubectl-mapr-ticket/internal/list"
+	"github.com/nobbs/kubectl-mapr-ticket/internal/secret"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	"github.com/spf13/cobra"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -137,42 +137,42 @@ func (o *ListOptions) Run(cmd *cobra.Command, args []string) error {
 	}
 
 	// create list options and pass them to the lister
-	opts := []list.ListerOption{}
+	opts := []secret.ListerOption{}
 
 	if cmd.Flags().Changed("only-expired") && o.FilterOnlyExpired {
-		opts = append(opts, list.WithFilterOnlyExpired())
+		opts = append(opts, secret.WithFilterOnlyExpired())
 	}
 
 	if cmd.Flags().Changed("only-unexpired") && o.FilterOnlyUnexpired {
-		opts = append(opts, list.WithFilterOnlyUnexpired())
+		opts = append(opts, secret.WithFilterOnlyUnexpired())
 	}
 
 	if cmd.Flags().Changed("mapr-cluster") {
-		opts = append(opts, list.WithFilterByMaprCluster(o.FilterByMaprCluster))
+		opts = append(opts, secret.WithFilterByMaprCluster(o.FilterByMaprCluster))
 	}
 
 	if cmd.Flags().Changed("mapr-user") {
-		opts = append(opts, list.WithFilterByMaprUser(o.FilterByMaprUser))
+		opts = append(opts, secret.WithFilterByMaprUser(o.FilterByMaprUser))
 	}
 
 	if cmd.Flags().Changed("mapr-uid") {
-		opts = append(opts, list.WithFilterByUID(o.FilterByMaprUID))
+		opts = append(opts, secret.WithFilterByUID(o.FilterByMaprUID))
 	}
 
 	if cmd.Flags().Changed("mapr-gid") {
-		opts = append(opts, list.WithFilterByGID(o.FilterByMaprGID))
+		opts = append(opts, secret.WithFilterByGID(o.FilterByMaprGID))
 	}
 
 	if cmd.Flags().Changed("in-use") && o.FilterByInUse {
-		opts = append(opts, list.WithFilterByInUse())
+		opts = append(opts, secret.WithFilterByInUse())
 	}
 
 	if cmd.Flags().Changed("show-in-use") && o.ShowInUse {
-		opts = append(opts, list.WithShowInUse())
+		opts = append(opts, secret.WithShowInUse())
 	}
 
 	// create lister
-	lister := list.NewLister(client, *o.kubernetesConfigFlags.Namespace, opts...)
+	lister := secret.NewLister(client, *o.kubernetesConfigFlags.Namespace, opts...)
 
 	// run lister
 	items, err := lister.Run()
@@ -181,7 +181,7 @@ func (o *ListOptions) Run(cmd *cobra.Command, args []string) error {
 	}
 
 	// print output
-	if err := list.Print(cmd, items); err != nil {
+	if err := secret.Print(cmd, items); err != nil {
 		return err
 	}
 
