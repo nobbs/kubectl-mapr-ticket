@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"time"
 
 	"github.com/nobbs/kubectl-mapr-ticket/internal/ticket"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
@@ -156,10 +155,10 @@ func generateRow(item *ListItem) *metaV1.TableRow {
 		item.Ticket.UserCreds.GetUserName(),
 		item.Ticket.UserCreds.GetUid(),
 		item.Ticket.UserCreds.GetGids(),
-		item.Ticket.ExpiryTimeToHuman(time.RFC3339),
+		item.Ticket.ExpirationTime().Format(ticket.DefaultTimeFormat),
 		getStatus(item.Ticket),
-		util.ShortHumanDuration(item.Ticket.ExpiryTime().Sub(item.Ticket.CreationTime())),
-		item.Ticket.CreateTimeToHuman(time.RFC3339),
+		util.ShortHumanDuration(item.Ticket.ExpirationTime().Sub(item.Ticket.CreationTime())),
+		item.Ticket.CreationTime().Format(ticket.DefaultTimeFormat),
 		util.ShortHumanDurationUntilNow(item.Ticket.CreationTime()),
 	}
 
@@ -261,8 +260,8 @@ func encodeItem(item *ListItem, format string) []byte {
 
 func getStatus(ticket *ticket.MaprTicket) string {
 	if ticket.IsExpired() {
-		return fmt.Sprintf("Expired (%s ago)", util.ShortHumanDurationComparedToNow(ticket.ExpiryTime()))
+		return fmt.Sprintf("Expired (%s ago)", util.ShortHumanDurationComparedToNow(ticket.ExpirationTime()))
 	}
 
-	return fmt.Sprintf("Valid (%s left)", util.ShortHumanDurationComparedToNow(ticket.ExpiryTime()))
+	return fmt.Sprintf("Valid (%s left)", util.ShortHumanDurationComparedToNow(ticket.ExpirationTime()))
 }

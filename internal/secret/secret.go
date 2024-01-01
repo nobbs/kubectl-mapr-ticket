@@ -174,7 +174,7 @@ func parseSecretsToItems(secrets []coreV1.Secret) []ListItem {
 	var items []ListItem
 
 	for i := range filterSecretsWithMaprTicketKey(secrets) {
-		ticket, err := ticket.NewTicketFromSecret(&secrets[i])
+		ticket, err := ticket.NewMaprTicketFromSecret(&secrets[i])
 		if err != nil {
 			continue
 		}

@@ -9,25 +9,55 @@ import (
 )
 
 const (
-	secretMaprTicketKey = "CONTAINER_TICKET"
+	// SecretMaprTicketKey is the key used for MapR tickets in secrets
+	SecretMaprTicketKey = "CONTAINER_TICKET"
+
+	// DefaultTimeFormat is the default time format used for human readable time
+	// strings
+	DefaultTimeFormat = time.RFC3339
 )
 
 // SecretContainsMaprTicket returns true if the secret contains the key typically
 // used for MapR tickets
+type ErrSecretDoesNotContainMaprTicket struct {
+	Name      string
+	Namespace string
+}
+
+// NewErrSecretDoesNotContainMaprTicket returns a new ErrSecretDoesNotContainMaprTicket
+func NewErrSecretDoesNotContainMaprTicket(namespace, name string) ErrSecretDoesNotContainMaprTicket {
+	return ErrSecretDoesNotContainMaprTicket{
+		Name:      name,
+		Namespace: namespace,
+	}
+}
+
+// Error returns the error message for ErrSecretDoesNotContainMaprTicket
+func (err ErrSecretDoesNotContainMaprTicket) Error() string {
+	return fmt.Sprintf("secret %s/%s does not contain a MapR ticket", err.Namespace, err.Name)
+}
+
+// SecretContainsMaprTicket returns true if the secret contains the key typically
+// used for MapR tickets
 func SecretContainsMaprTicket(secret *coreV1.Secret) bool {
-	_, ok := secret.Data[secretMaprTicketKey]
+	_, ok := secret.Data[SecretMaprTicketKey]
 	return ok
 }
 
 // Wrapper around parse.MaprTicket to add methods
 type MaprTicket parse.MaprTicket
 
-// NewTicketFromSecret parses the ticket from the secret and returns it
-func NewTicketFromSecret(secret *coreV1.Secret) (*MaprTicket, error) {
+// NewMaprTicket returns a new empty MaprTicket
+func NewMaprTicket() *MaprTicket {
+	return (*MaprTicket)(parse.NewMaprTicket())
+}
+
+// NewMaprTicketFromSecret parses the ticket from the secret and returns it
+func NewMaprTicketFromSecret(secret *coreV1.Secret) (*MaprTicket, error) {
 	// get ticket from secret
-	ticketBytes, ok := secret.Data[secretMaprTicketKey]
+	ticketBytes, ok := secret.Data[SecretMaprTicketKey]
 	if !ok {
-		return nil, fmt.Errorf("secret %s does not contain a MapR ticket", secret.Name)
+		return nil, NewErrSecretDoesNotContainMaprTicket(secret.Namespace, secret.Name)
 	}
 
 	// parse ticket
@@ -41,21 +71,11 @@ func NewTicketFromSecret(secret *coreV1.Secret) (*MaprTicket, error) {
 
 // isExpired returns true if the ticket is expired
 func (ticket *MaprTicket) IsExpired() bool {
-	return time.Now().After(ticket.ExpiryTime())
+	return time.Now().After(ticket.ExpirationTime())
 }
 
-// expiryTimeToHuman returns the expiry time in a human readable format
-func (ticket *MaprTicket) ExpiryTimeToHuman(format string) string {
-	return ticket.ExpiryTime().Format(format)
-}
-
-// createTimeToHuman returns the creation time in a human readable format
-func (ticket *MaprTicket) CreateTimeToHuman(format string) string {
-	return ticket.CreationTime().Format(format)
-}
-
-// ExpiryTime returns the expiry time of the ticket as a time.Time object
-func (ticket *MaprTicket) ExpiryTime() time.Time {
+// ExpirationTime returns the expiry time of the ticket as a time.Time object
+func (ticket *MaprTicket) ExpirationTime() time.Time {
 	return time.Unix(int64(ticket.GetExpiryTime()), 0)
 }
 
