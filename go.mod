@@ -3,7 +3,7 @@ module github.com/nobbs/kubectl-mapr-ticket
 go 1.21
 
 require (
-	github.com/nobbs/mapr-ticket-parser v0.1.1-0.20240101220421-eb5901c27a6b
+	github.com/nobbs/mapr-ticket-parser v0.1.1
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.4
