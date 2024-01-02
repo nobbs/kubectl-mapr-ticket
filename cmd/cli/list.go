@@ -46,6 +46,10 @@ type ListOptions struct {
 	// in use by a persistent volume
 	FilterByInUse bool
 
+	// FilterExpiresBefore indicates whether to filter secrets to only those that
+	// expire before the specified duration from now
+	FilterExpiresBefore util.DurationValue
+
 	// ShowInUse indicates whether to show only secrets that are in use by a
 	// persistent volume
 	ShowInUse bool
@@ -98,6 +102,7 @@ some information about them.`,
 	cmd.Flags().Uint32Var(&o.FilterByMaprUID, "mapr-uid", 0, "Only show secrets with tickets for the specified UID")
 	cmd.Flags().Uint32Var(&o.FilterByMaprGID, "mapr-gid", 0, "Only show secrets with tickets for the specified GID")
 	cmd.Flags().BoolVarP(&o.FilterByInUse, "in-use", "I", false, "If true, only show secrets that are in use by a persistent volume")
+	cmd.Flags().Var(&o.FilterExpiresBefore, "expires-before", "Only show secrets with tickets that expire before the specified duration from now")
 	cmd.Flags().BoolVarP(&o.ShowInUse, "show-in-use", "i", false, "If true, add a column to the output indicating whether the secret is in use by a persistent volume")
 	cmd.MarkFlagsMutuallyExclusive("only-expired", "only-unexpired")
 
@@ -165,6 +170,10 @@ func (o *ListOptions) Run(cmd *cobra.Command, args []string) error {
 
 	if cmd.Flags().Changed("in-use") && o.FilterByInUse {
 		opts = append(opts, secret.WithFilterByInUse())
+	}
+
+	if cmd.Flags().Changed("expires-before") {
+		opts = append(opts, secret.WithFilterExpiresBefore(o.FilterExpiresBefore.Cast()))
 	}
 
 	if cmd.Flags().Changed("show-in-use") && o.ShowInUse {

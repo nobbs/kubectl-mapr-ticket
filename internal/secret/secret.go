@@ -2,6 +2,7 @@ package secret
 
 import (
 	"context"
+	"time"
 
 	"github.com/nobbs/kubectl-mapr-ticket/internal/ticket"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/volume"
@@ -27,6 +28,7 @@ type Lister struct {
 	filterByUID         *uint32
 	filterByGID         *uint32
 	filterByInUse       bool
+	filterExpiresBefore time.Duration
 	showInUse           bool
 }
 
@@ -71,6 +73,12 @@ func WithFilterOnlyUnexpired() ListerOption {
 func WithFilterByInUse() ListerOption {
 	return func(l *Lister) {
 		l.filterByInUse = true
+	}
+}
+
+func WithFilterExpiresBefore(expiresBefore time.Duration) ListerOption {
+	return func(l *Lister) {
+		l.filterExpiresBefore = expiresBefore
 	}
 }
 
@@ -138,6 +146,11 @@ func (l *Lister) Run() ([]ListItem, error) {
 	// filter items to only tickets for the specified GID, if requested
 	if l.filterByGID != nil {
 		items = filterItemsByGID(items, *l.filterByGID)
+	}
+
+	// filter items to only tickets that expire before the specified duration from now, if requested
+	if l.filterExpiresBefore > 0 {
+		items = filterExpiresBefore(items, l.filterExpiresBefore)
 	}
 
 	// enrich items with an InUse condition, if requested
@@ -306,6 +319,20 @@ func filterItemsToOnlyInUse(items []ListItem) []ListItem {
 
 	for _, item := range items {
 		if item.InUse {
+			filtered = append(filtered, item)
+		}
+	}
+
+	return filtered
+}
+
+// filterExpiresBefore filters items to only tickets that expire before the
+// specified duration from now
+func filterExpiresBefore(items []ListItem, expiresBefore time.Duration) []ListItem {
+	var filtered []ListItem
+
+	for _, item := range items {
+		if item.Ticket.ExpiresBefore(expiresBefore) {
 			filtered = append(filtered, item)
 		}
 	}

@@ -83,3 +83,8 @@ func (ticket *MaprTicket) ExpirationTime() time.Time {
 func (ticket *MaprTicket) CreationTime() time.Time {
 	return time.Unix(int64(ticket.GetCreationTimeSec()), 0)
 }
+
+// ExpiresBefore returns true if the ticket expires before the given duration
+func (ticket *MaprTicket) ExpiresBefore(duration time.Duration) bool {
+	return ticket.ExpirationTime().Before(time.Now().Add(duration))
+}
