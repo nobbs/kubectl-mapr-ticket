@@ -21,6 +21,7 @@ type Lister struct {
 	client    kubernetes.Interface
 	namespace string
 
+	sortBy              []SortOptions
 	filterOnlyExpired   bool
 	filterOnlyUnexpired bool
 	filterByMaprCluster *string
@@ -33,6 +34,12 @@ type Lister struct {
 }
 
 type ListerOption func(*Lister)
+
+func WithSortBy(sortBy []SortOptions) ListerOption {
+	return func(l *Lister) {
+		l.sortBy = sortBy
+	}
+}
 
 func WithFilterByMaprCluster(cluster string) ListerOption {
 	return func(l *Lister) {
@@ -90,6 +97,13 @@ func WithShowInUse() ListerOption {
 
 // NewLister creates a new Lister
 func NewLister(client kubernetes.Interface, namespace string, opts ...ListerOption) *Lister {
+	var (
+		defaultSortBy = []SortOptions{
+			SortByNamespace,
+			SortByName,
+		}
+	)
+
 	const (
 		defaultFilterOnlyExpired   = false
 		defaultFilterOnlyUnexpired = false
@@ -98,6 +112,7 @@ func NewLister(client kubernetes.Interface, namespace string, opts ...ListerOpti
 	l := &Lister{
 		client:              client,
 		namespace:           namespace,
+		sortBy:              defaultSortBy,
 		filterOnlyExpired:   defaultFilterOnlyExpired,
 		filterOnlyUnexpired: defaultFilterOnlyUnexpired,
 	}
@@ -165,6 +180,9 @@ func (l *Lister) Run() ([]ListItem, error) {
 	if l.filterByInUse {
 		items = filterItemsToOnlyInUse(items)
 	}
+
+	// sort items by the specified sort options
+	Sort(items, l.sortBy)
 
 	return items, nil
 }

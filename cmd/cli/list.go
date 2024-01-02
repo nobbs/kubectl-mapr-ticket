@@ -18,6 +18,9 @@ type ListOptions struct {
 	// AllNamespaces indicates whether to list secrets in all namespaces
 	AllNamespaces bool
 
+	// SortBy is the list of fields to sort by
+	SortBy []string
+
 	// FilterOnlyExpired indicates whether to filter secrets to only those that
 	// have expired
 	FilterOnlyExpired bool
@@ -95,6 +98,7 @@ some information about them.`,
 	// add flags
 	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", "Output format. One of: table|wide|json|yaml")
 	cmd.Flags().BoolVarP(&o.AllNamespaces, "all-namespaces", "A", false, "If true, list the requested object(s) across all namespaces. Namespace in current context is ignored even if specified with --namespace.")
+	cmd.Flags().StringSliceVar(&o.SortBy, "sort-by", nil, "Sort list by the specified fields. Multiple fields can be specified, separated by commas. Valid fields are: name|namespace|maprCluster|maprUser|creationTimestamp|expiryTime")
 	cmd.Flags().BoolVarP(&o.FilterOnlyExpired, "only-expired", "E", false, "If true, only show secrets with tickets that have expired")
 	cmd.Flags().BoolVarP(&o.FilterOnlyUnexpired, "only-unexpired", "U", false, "If true, only show secrets with tickets that have not expired")
 	cmd.Flags().StringVarP(&o.FilterByMaprCluster, "mapr-cluster", "c", "", "Only show secrets with tickets for the specified MapR cluster")
@@ -131,6 +135,11 @@ func (o *ListOptions) Validate() error {
 		return fmt.Errorf("invalid output format: %s. Must be one of: table|wide|json|yaml", o.OutputFormat)
 	}
 
+	// validate sort options
+	if err := secret.ValidateSortOptions(o.SortBy); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -143,6 +152,16 @@ func (o *ListOptions) Run(cmd *cobra.Command, args []string) error {
 
 	// create list options and pass them to the lister
 	opts := []secret.ListerOption{}
+
+	if cmd.Flags().Changed("sort-by") && o.SortBy != nil {
+		// convert sort options to SortOptions
+		sortOptions := make([]secret.SortOptions, 0, len(o.SortBy))
+		for _, sortBy := range o.SortBy {
+			sortOptions = append(sortOptions, secret.SortOptions(sortBy))
+		}
+
+		opts = append(opts, secret.WithSortBy(sortOptions))
+	}
 
 	if cmd.Flags().Changed("only-expired") && o.FilterOnlyExpired {
 		opts = append(opts, secret.WithFilterOnlyExpired())
