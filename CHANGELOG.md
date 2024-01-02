@@ -3,24 +3,6 @@
 ## [0.1.2](https://github.com/nobbs/kubectl-mapr-ticket/compare/v0.1.1...v0.1.2) (2024-01-02)
 
 
-### Miscellaneous Chores
-
-* **deps:** update go.mod ([30bacf4](https://github.com/nobbs/kubectl-mapr-ticket/commit/30bacf4f1997b46253060931b9749c18c3b20159))
-* **deps:** use v0.1.1 of mapr-ticket-parser ([844f00e](https://github.com/nobbs/kubectl-mapr-ticket/commit/844f00efb79f58588d5a4ff1a4af7043a3077990))
-* **lint:** disable complexity linters for now ([30bacf4](https://github.com/nobbs/kubectl-mapr-ticket/commit/30bacf4f1997b46253060931b9749c18c3b20159))
-
-
-### Continuous Integration
-
-* **release:** also update versions in README ([30bacf4](https://github.com/nobbs/kubectl-mapr-ticket/commit/30bacf4f1997b46253060931b9749c18c3b20159))
-* **renovate:** run `go mod tidy` before PRs ([951d01e](https://github.com/nobbs/kubectl-mapr-ticket/commit/951d01e3c1f1b2e8dfc28d36857cc4e0dd6eb247))
-
-
-### Documentation
-
-* add `used-by` to README ([30bacf4](https://github.com/nobbs/kubectl-mapr-ticket/commit/30bacf4f1997b46253060931b9749c18c3b20159))
-
-
 ### Features
 
 * add `--expires-before &lt;duration&gt;` to `list` ([#17](https://github.com/nobbs/kubectl-mapr-ticket/issues/17)) ([3b802ff](https://github.com/nobbs/kubectl-mapr-ticket/commit/3b802ffd5370c34c2df99ee4785b75c89489a685)), closes [#16](https://github.com/nobbs/kubectl-mapr-ticket/issues/16)
@@ -47,6 +29,17 @@
 * ticket expiry check inverted ([98728bc](https://github.com/nobbs/kubectl-mapr-ticket/commit/98728bcfa2e0141d5976ff37c2c2560e447105db))
 
 
+### Continuous Integration
+
+* **release:** also update versions in README ([30bacf4](https://github.com/nobbs/kubectl-mapr-ticket/commit/30bacf4f1997b46253060931b9749c18c3b20159))
+* **renovate:** run `go mod tidy` before PRs ([951d01e](https://github.com/nobbs/kubectl-mapr-ticket/commit/951d01e3c1f1b2e8dfc28d36857cc4e0dd6eb247))
+
+
+### Documentation
+
+* add `used-by` to README ([30bacf4](https://github.com/nobbs/kubectl-mapr-ticket/commit/30bacf4f1997b46253060931b9749c18c3b20159))
+
+
 ### Code Refactoring
 
 * rename some packages ([4df6597](https://github.com/nobbs/kubectl-mapr-ticket/commit/4df65970b84fd12c69004912236d0a3bf3b9bd65))
@@ -56,6 +49,13 @@
 ### Tests
 
 * add empty tests to fix coverage reporting ([#22](https://github.com/nobbs/kubectl-mapr-ticket/issues/22)) ([47bce7a](https://github.com/nobbs/kubectl-mapr-ticket/commit/47bce7a39d83fba4ee4597f4eb1364c094478366)), closes [#21](https://github.com/nobbs/kubectl-mapr-ticket/issues/21)
+
+
+### Miscellaneous Chores
+
+* **deps:** update go.mod ([30bacf4](https://github.com/nobbs/kubectl-mapr-ticket/commit/30bacf4f1997b46253060931b9749c18c3b20159))
+* **deps:** use v0.1.1 of mapr-ticket-parser ([844f00e](https://github.com/nobbs/kubectl-mapr-ticket/commit/844f00efb79f58588d5a4ff1a4af7043a3077990))
+* **lint:** disable complexity linters for now ([30bacf4](https://github.com/nobbs/kubectl-mapr-ticket/commit/30bacf4f1997b46253060931b9749c18c3b20159))
 
 ## [0.1.1](https://github.com/nobbs/kubectl-mapr-ticket/compare/v0.1.0...v0.1.1) (2023-12-30)
 
@@ -79,6 +79,11 @@
 ## 0.1.0 (2023-12-30)
 
 
+### Features
+
+* initial implementation of ticket list command ([8043689](https://github.com/nobbs/kubectl-mapr-ticket/commit/80436895cf07b160faf3ad6a3a4fda3999ec7425))
+
+
 ### Build System
 
 * fix go version in go.mod ([471b8db](https://github.com/nobbs/kubectl-mapr-ticket/commit/471b8db26887563169542a822e7b2968e0248ba8))
@@ -95,8 +100,3 @@
 * **build:** disable CGO ([1608ca2](https://github.com/nobbs/kubectl-mapr-ticket/commit/1608ca2d3a2a8160d0726e5d4402b613bfd9c7fb))
 * **build:** multi-arch and multi-os build ([2ff900b](https://github.com/nobbs/kubectl-mapr-ticket/commit/2ff900bfc99dad05e7fd1b3fae362a58ec2e6353))
 * **build:** overwrite release assets ([de50d0c](https://github.com/nobbs/kubectl-mapr-ticket/commit/de50d0c88d977e612bc51e26121dfa9b0fc75781))
-
-
-### Features
-
-* initial implementation of ticket list command ([8043689](https://github.com/nobbs/kubectl-mapr-ticket/commit/80436895cf07b160faf3ad6a3a4fda3999ec7425))
