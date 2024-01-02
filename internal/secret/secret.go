@@ -160,7 +160,9 @@ func (l *Lister) Run() ([]ListItem, error) {
 func filterSecretsWithMaprTicketKey(secrets []coreV1.Secret) []coreV1.Secret {
 	var filtered []coreV1.Secret
 
-	for _, secret := range secrets {
+	for i := range secrets {
+		secret := secrets[i]
+
 		if ticket.SecretContainsMaprTicket(&secret) {
 			filtered = append(filtered, secret)
 		}
@@ -173,14 +175,18 @@ func filterSecretsWithMaprTicketKey(secrets []coreV1.Secret) []coreV1.Secret {
 func parseSecretsToItems(secrets []coreV1.Secret) []ListItem {
 	var items []ListItem
 
-	for i := range filterSecretsWithMaprTicketKey(secrets) {
-		ticket, err := ticket.NewMaprTicketFromSecret(&secrets[i])
+	filtered := filterSecretsWithMaprTicketKey(secrets)
+
+	for i := range filtered {
+		secret := filtered[i]
+
+		ticket, err := ticket.NewMaprTicketFromSecret(&secret)
 		if err != nil {
 			continue
 		}
 
 		items = append(items, ListItem{
-			Secret: &secrets[i],
+			Secret: &secret,
 			Ticket: ticket,
 		})
 	}
