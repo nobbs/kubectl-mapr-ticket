@@ -10,27 +10,14 @@
       "release-type": "go",
       "draft": false,
       "prerelease": false,
-      "extra-files": ["internal/version/version.go", "README.md"],
+      "extra-files": [
+        "internal/version/version.go",
+        "README.md"
+      ],
       "initial-version": "0.1.0"
     }
   },
   "changelog-sections": [
-    {
-      "type": "build",
-      "section": "Build System"
-    },
-    {
-      "type": "chore",
-      "section": "Miscellaneous Chores"
-    },
-    {
-      "type": "ci",
-      "section": "Continuous Integration"
-    },
-    {
-      "type": "docs",
-      "section": "Documentation"
-    },
     {
       "type": "feat",
       "section": "Features"
@@ -38,6 +25,26 @@
     {
       "type": "fix",
       "section": "Bug Fixes"
+    },
+    {
+      "type": "test",
+      "section": "Tests"
+    },
+    {
+      "type": "revert",
+      "section": "Reverts"
+    },
+    {
+      "type": "ci",
+      "section": "Continuous Integration"
+    },
+    {
+      "type": "build",
+      "section": "Build System"
+    },
+    {
+      "type": "docs",
+      "section": "Documentation"
     },
     {
       "type": "perf",
@@ -48,12 +55,8 @@
       "section": "Code Refactoring"
     },
     {
-      "type": "revert",
-      "section": "Reverts"
-    },
-    {
-      "type": "test",
-      "section": "Tests"
+      "type": "chore",
+      "section": "Miscellaneous Chores"
     }
   ]
 }
