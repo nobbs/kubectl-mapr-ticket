@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	listTableColumns = []metaV1.TableColumnDefinition{
+	tableColumns = []metaV1.TableColumnDefinition{
 		{
 			Name:        "Name",
 			Type:        "string",
@@ -31,7 +31,7 @@ var (
 			Priority:    0,
 		},
 		{
-			Name:        "User",
+			Name:        "Mapr User",
 			Type:        "string",
 			Description: "Name of the MapR user that the ticket is for",
 			Priority:    0,
@@ -81,6 +81,13 @@ var (
 			Priority:    0,
 		},
 	}
+
+	showInUseTableColumn = metaV1.TableColumnDefinition{
+		Name:        "#PVs",
+		Type:        "integer",
+		Description: "Number of persistent volumes using the ticket",
+		Priority:    0,
+	}
 )
 
 func Print(cmd *cobra.Command, items []ListItem) error {
@@ -123,7 +130,7 @@ func generateTable(items []ListItem) *metaV1.Table {
 	rows := generateRows(items)
 
 	return &metaV1.Table{
-		ColumnDefinitions: listTableColumns,
+		ColumnDefinitions: tableColumns,
 		Rows:              rows,
 	}
 }
@@ -168,24 +175,19 @@ func generateRow(item *ListItem) *metaV1.TableRow {
 // enrichTableWithInUse enriches the table with a column indicating whether the
 // ticket is in use by a persistent volume or not
 func enrichTableWithInUse(table *metaV1.Table, items []ListItem) {
-	numColumns := len(listTableColumns)
+	insertPos := len(tableColumns) - 1
 
 	table.ColumnDefinitions = append(
-		table.ColumnDefinitions[:numColumns-1],
-		metaV1.TableColumnDefinition{
-			Name:        "In Use",
-			Type:        "boolean",
-			Description: "Whether the ticket is in use by a persistent volume or not",
-			Priority:    0,
-		},
-		table.ColumnDefinitions[numColumns-1],
+		table.ColumnDefinitions[:insertPos],
+		showInUseTableColumn,
+		table.ColumnDefinitions[insertPos],
 	)
 
 	for i := range table.Rows {
 		table.Rows[i].Cells = append(
-			table.Rows[i].Cells[:numColumns-1],
+			table.Rows[i].Cells[:insertPos],
 			items[i].InUse,
-			table.Rows[i].Cells[numColumns-1],
+			table.Rows[i].Cells[insertPos],
 		)
 	}
 }
