@@ -216,3 +216,45 @@ func TestIsExpired(t *testing.T) {
 		})
 	}
 }
+
+func TestExpiresBefore(t *testing.T) {
+	assert := assert.New(t)
+
+	tests := []struct {
+		name     string
+		ticket   *ticket.MaprTicket
+		time     time.Duration
+		expected bool
+	}{
+		{
+			name: "ticket expires before the provided time",
+			ticket: func() *ticket.MaprTicket {
+				ticket := ticket.NewMaprTicket()
+				expiresInOneHour := time.Now().Add(1 * time.Hour).Unix()
+				ticket.TicketAndKey.ExpiryTime = ptr.To[uint64](uint64(expiresInOneHour))
+				return ticket
+			}(),
+			time:     2 * time.Hour,
+			expected: true,
+		},
+		{
+			name: "ticket does not expire before the provided time",
+			ticket: func() *ticket.MaprTicket {
+				ticket := ticket.NewMaprTicket()
+				expiresInTwoHours := time.Now().Add(2 * time.Hour).Unix()
+				ticket.TicketAndKey.ExpiryTime = ptr.To[uint64](uint64(expiresInTwoHours))
+				return ticket
+			}(),
+			time:     1 * time.Hour,
+			expected: false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			result := test.ticket.ExpiresBefore(test.time)
+
+			assert.Equal(test.expected, result)
+		})
+	}
+}
