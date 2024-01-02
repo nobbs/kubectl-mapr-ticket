@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/nobbs/kubectl-mapr-ticket/internal/ticket"
+	. "github.com/nobbs/kubectl-mapr-ticket/internal/ticket"
 	"github.com/stretchr/testify/assert"
 	coreV1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,7 +29,7 @@ func TestNewTicketFromSecret(t *testing.T) {
 						Namespace: "default",
 					},
 					Data: map[string][]byte{
-						ticket.SecretMaprTicketKey: []byte("demo.mapr.com +Cze+qwYCbAXGbz56OO7UF+lGqL3WPXrNkO1SLawEEDmSbgNl019xBeBY3kvh+R13iz/mCnwpzsLQw4Y5jEnv5GtuIWbeoC95ha8VKwX8MKcE6Kn9nZ2AF0QminkHwNVBx6TDriGZffyJCfZzivBwBSdKoQEWhBOPFCIMAi7w2zV/SX5Ut7u4qIKvEpr0JHV7sLMWYLhYncM6CKMd7iECGvECsBvEZRVj+dpbEY0BaRN/W54/7wNWaSVELUF6JWHQ8dmsqty4cZlI0/MV10HZzIbl9sMLFQ="),
+						SecretMaprTicketKey: []byte("demo.mapr.com +Cze+qwYCbAXGbz56OO7UF+lGqL3WPXrNkO1SLawEEDmSbgNl019xBeBY3kvh+R13iz/mCnwpzsLQw4Y5jEnv5GtuIWbeoC95ha8VKwX8MKcE6Kn9nZ2AF0QminkHwNVBx6TDriGZffyJCfZzivBwBSdKoQEWhBOPFCIMAi7w2zV/SX5Ut7u4qIKvEpr0JHV7sLMWYLhYncM6CKMd7iECGvECsBvEZRVj+dpbEY0BaRN/W54/7wNWaSVELUF6JWHQ8dmsqty4cZlI0/MV10HZzIbl9sMLFQ="),
 					},
 				}
 
@@ -50,7 +50,7 @@ func TestNewTicketFromSecret(t *testing.T) {
 
 				return secret
 			}(),
-			err: ticket.NewErrSecretDoesNotContainMaprTicket("default", "secret"),
+			err: NewErrSecretDoesNotContainMaprTicket("default", "secret"),
 		},
 		{
 			name: "secret contains invalid MaprTicket",
@@ -61,7 +61,7 @@ func TestNewTicketFromSecret(t *testing.T) {
 						Namespace: "default",
 					},
 					Data: map[string][]byte{
-						ticket.SecretMaprTicketKey: []byte("invalid ticket"),
+						SecretMaprTicketKey: []byte("invalid ticket"),
 					},
 				}
 
@@ -73,7 +73,7 @@ func TestNewTicketFromSecret(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			_, err := ticket.NewMaprTicketFromSecret(test.secret)
+			_, err := NewMaprTicketFromSecret(test.secret)
 
 			if test.err == nil {
 				assert.NoError(err)
@@ -97,7 +97,7 @@ func TestSecretContainsMaprTicket(t *testing.T) {
 			secret: func() *coreV1.Secret {
 				secret := &coreV1.Secret{}
 				secret.Data = make(map[string][]byte)
-				secret.Data[ticket.SecretMaprTicketKey] = []byte("dummy ticket")
+				secret.Data[SecretMaprTicketKey] = []byte("dummy ticket")
 				return secret
 			}(),
 			expected: true,
@@ -115,7 +115,7 @@ func TestSecretContainsMaprTicket(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			result := ticket.SecretContainsMaprTicket(test.secret)
+			result := SecretContainsMaprTicket(test.secret)
 
 			assert.Equal(test.expected, result)
 		})
@@ -127,13 +127,13 @@ func TestExpirationTime(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		ticket   *ticket.MaprTicket
+		ticket   *MaprTicket
 		expected time.Time
 	}{
 		{
 			name: "ticket has expiry time",
-			ticket: func() *ticket.MaprTicket {
-				ticket := ticket.NewMaprTicket()
+			ticket: func() *MaprTicket {
+				ticket := NewMaprTicket()
 				ticket.TicketAndKey.ExpiryTime = ptr.To[uint64](1234567890)
 				return ticket
 			}(),
@@ -155,13 +155,13 @@ func TestCreationTime(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		ticket   *ticket.MaprTicket
+		ticket   *MaprTicket
 		expected time.Time
 	}{
 		{
 			name: "ticket has creation time",
-			ticket: func() *ticket.MaprTicket {
-				ticket := ticket.NewMaprTicket()
+			ticket: func() *MaprTicket {
+				ticket := NewMaprTicket()
 				ticket.TicketAndKey.CreationTimeSec = ptr.To[uint64](1234567890)
 				return ticket
 			}(),
@@ -183,13 +183,13 @@ func TestIsExpired(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		ticket   *ticket.MaprTicket
+		ticket   *MaprTicket
 		expected bool
 	}{
 		{
 			name: "ticket is not expired",
-			ticket: func() *ticket.MaprTicket {
-				ticket := ticket.NewMaprTicket()
+			ticket: func() *MaprTicket {
+				ticket := NewMaprTicket()
 				expiresInOneHour := time.Now().Add(1 * time.Hour).Unix()
 				ticket.TicketAndKey.ExpiryTime = ptr.To[uint64](uint64(expiresInOneHour))
 				return ticket
@@ -198,8 +198,8 @@ func TestIsExpired(t *testing.T) {
 		},
 		{
 			name: "ticket is expired",
-			ticket: func() *ticket.MaprTicket {
-				ticket := ticket.NewMaprTicket()
+			ticket: func() *MaprTicket {
+				ticket := NewMaprTicket()
 				expiredOneHourAgo := time.Now().Add(-1 * time.Hour).Unix()
 				ticket.TicketAndKey.ExpiryTime = ptr.To[uint64](uint64(expiredOneHourAgo))
 				return ticket
@@ -222,14 +222,14 @@ func TestExpiresBefore(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		ticket   *ticket.MaprTicket
+		ticket   *MaprTicket
 		time     time.Duration
 		expected bool
 	}{
 		{
 			name: "ticket expires before the provided time",
-			ticket: func() *ticket.MaprTicket {
-				ticket := ticket.NewMaprTicket()
+			ticket: func() *MaprTicket {
+				ticket := NewMaprTicket()
 				expiresInOneHour := time.Now().Add(1 * time.Hour).Unix()
 				ticket.TicketAndKey.ExpiryTime = ptr.To[uint64](uint64(expiresInOneHour))
 				return ticket
@@ -239,8 +239,8 @@ func TestExpiresBefore(t *testing.T) {
 		},
 		{
 			name: "ticket does not expire before the provided time",
-			ticket: func() *ticket.MaprTicket {
-				ticket := ticket.NewMaprTicket()
+			ticket: func() *MaprTicket {
+				ticket := NewMaprTicket()
 				expiresInTwoHours := time.Now().Add(2 * time.Hour).Unix()
 				ticket.TicketAndKey.ExpiryTime = ptr.To[uint64](uint64(expiresInTwoHours))
 				return ticket
