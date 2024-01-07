@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+# https://github.com/kubernetes/kubernetes/pull/105867
+kubectl mapr-ticket __complete "$@"
