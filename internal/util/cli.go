@@ -1,9 +1,15 @@
 package util
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/xhit/go-str2duration/v2"
+)
+
+const (
+	indend = `  `
 )
 
 // DurationValue is a wrapper around time.Duration that implements the
@@ -40,4 +46,52 @@ func (d *DurationValue) String() string {
 // Cast returns the underlying time.Duration value
 func (d *DurationValue) Cast() time.Duration {
 	return time.Duration(*d)
+}
+
+type stringNormalizer struct {
+	string
+}
+
+func CliLongDesc(desc string, args ...any) string {
+	if desc == "" || len(desc) == 0 {
+		return ""
+	}
+
+	desc = fmt.Sprintf(desc, args...)
+
+	return stringNormalizer{desc}.trim().string
+}
+
+func CliExample(example string, args ...any) string {
+	if example == "" || len(example) == 0 {
+		return ""
+	}
+
+	example = fmt.Sprintf(example, args...)
+
+	return stringNormalizer{example}.trim().indent().string
+}
+
+func (s stringNormalizer) trim() stringNormalizer {
+	s.string = strings.TrimSpace(s.string)
+
+	lines := strings.Split(s.string, "\n")
+
+	for i, line := range strings.Split(s.string, "\n") {
+		lines[i] = strings.TrimSpace(line)
+	}
+
+	s.string = strings.Join(lines, "\n")
+	return s
+}
+
+func (s stringNormalizer) indent() stringNormalizer {
+	lines := strings.Split(s.string, "\n")
+
+	for i, line := range lines {
+		lines[i] = indend + line
+	}
+
+	s.string = strings.Join(lines, "\n")
+	return s
 }

@@ -2,10 +2,25 @@ package cli
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/volume"
 	"github.com/spf13/cobra"
+)
+
+const (
+	usedByUse   = `used-by {secret-name|--all}`
+	usedByShort = "List all persistent volumes that use the specified MapR ticket secret"
+	usedByLong  = `
+		List all persistent volumes that use the specified MapR ticket secret and print
+		some information about them.
+		`
+	usedByExample = `
+		# List all persistent volumes that use the specified MapR ticket secret
+		%[1]s used-by my-secret
+		`
 )
 
 type UsedByOptions struct {
@@ -35,11 +50,11 @@ func newUsedByCmd(rootOpts *rootCmdOptions) *cobra.Command {
 	o := NewUsedByOptions(rootOpts)
 
 	cmd := &cobra.Command{
-		Use:   "used-by {secret-name|--all} [flags]",
-		Short: "List all persistent volumes that use the specified MapR ticket secret",
-		Long: `List all persistent volumes that use the specified MapR ticket secret and print
-some information about them.`,
-		Args: cobra.MaximumNArgs(1),
+		Use:     usedByUse,
+		Short:   usedByShort,
+		Long:    util.CliLongDesc(usedByLong),
+		Example: util.CliExample(usedByExample, filepath.Base(os.Args[0])),
+		Args:    cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := o.Complete(cmd, args); err != nil {
 				return err
