@@ -6,13 +6,12 @@ MapR tickets are used by the [MapR CSI driver](https://github.com/mapr/mapr-csi)
 
 ## Installation
 
-### From Source
+### Using `krew`
 
-To install from source, you will need to have [Go](https://golang.org/) installed on your system. Once you have Go installed, you can build the plugin as follows:
+The easiest way to install the plugin is using the [krew](https://krew.sigs.k8s.io/) plugin manager for `kubectl`. Once you have `krew` installed, you can install the plugin as follows:
 
 ```console
-$ git clone https://github.com/nobbs/kubectl-mapr-ticket.git
-$ cd kubectl-mapr-ticket && CGO_ENABLED=0 go build -buildvcs=true -o ./bin/kubectl-mapr-ticket ./cmd && mv ./bin/kubectl-mapr-ticket /usr/local/bin
+$ kubectl krew install mapr-ticket
 $ kubectl mapr-ticket --help
 ```
 
@@ -30,6 +29,16 @@ $ mv ./kubectl-mapr-ticket /usr/local/bin
 $ kubectl mapr-ticket --help
 ```
 <!-- x-release-please-end -->
+
+### From Source
+
+To install from source, you will need to have [Go](https://golang.org/) installed on your system. Once you have Go installed, you can build the plugin as follows:
+
+```console
+$ git clone https://github.com/nobbs/kubectl-mapr-ticket.git
+$ cd kubectl-mapr-ticket && CGO_ENABLED=0 go build -buildvcs=true -o ./bin/kubectl-mapr-ticket ./cmd && mv ./bin/kubectl-mapr-ticket /usr/local/bin
+$ kubectl mapr-ticket --help
+```
 
 ## Usage
 
