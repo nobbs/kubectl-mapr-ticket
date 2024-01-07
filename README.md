@@ -20,6 +20,7 @@ $ kubectl mapr-ticket --help
 You can download the latest release binaries from the [releases page](https://github.com/nobbs/kubectl-mapr-ticket/releases). Binaries are available for Linux and macOS for both AMD64 and ARM64 architectures.
 
 <!-- x-release-please-start-version -->
+
 Example installation of `v0.2.0` for Apple Silicon (ARM64) macOS:
 
 ```console
@@ -28,6 +29,7 @@ $ tar -xvf kubectl-mapr-ticket-arm64-darwin.tar.gz
 $ mv ./kubectl-mapr-ticket /usr/local/bin
 $ kubectl mapr-ticket --help
 ```
+
 <!-- x-release-please-end -->
 
 ### From Source
@@ -70,6 +72,24 @@ The `used-by` subcommand will list all Persistent Volumes that are using a speci
 $ kubectl mapr-ticket mapr-ticket-secret -n test-csi
 NAME             SECRET NAMESPACE   SECRET               CLAIM NAMESPACE   CLAIM   AGE
 test-static-pv   test-csi           mapr-ticket-secret                             13h
+```
+
+### Shell Completion
+
+The plugin supports shell completion for various shells. To enable shell completion, you will need to source the completion script for your shell. For example, to enable completion for `zsh`, you can run the following command:
+
+```console
+$ source <(kubectl mapr-ticket completion zsh)
+```
+
+Note, that this is only local to your current shell session. To enable completion permanently, you either need to add the command to your shell profile or place the completion script in the appropriate location for your shell.
+
+Unfortunately, the above setup will only provide completion for the `kubectl-mapr_ticket` command, not the actual `kubectl mapr-ticket` alias. To enable completion for the alias, you need to create a special `kubectl_complete-mapr_ticket` executable in your `PATH` that will delegate execution to the plugin. You can find an example of it in the [hack](hack) directory. Place the script somewhere in your `PATH` and make sure it is executable, e.g. by running:
+
+```console
+$ wget -LO https://github.com/nobbs/kubectl-mapr-ticket/raw/main/hack/kubectl_complete-mapr_ticket
+$ chmod +x ./kubectl_complete-mapr_ticket
+$ mv ./kubectl_complete-mapr_ticket /usr/local/bin
 ```
 
 ## Does this require a connection to a MapR cluster?
