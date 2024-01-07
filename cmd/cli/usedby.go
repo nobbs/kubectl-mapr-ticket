@@ -8,7 +8,6 @@ import (
 	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/volume"
 	"github.com/spf13/cobra"
-	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -41,10 +40,6 @@ type UsedByOptions struct {
 	// in the current namespace
 	AllSecrets bool
 
-	// AllNamespaces indicates whether to find persistent volumes for all secrets
-	// in all namespaces
-	AllNamespaces bool
-
 	// OutputFormat is the format to use for output
 	OutputFormat string
 }
@@ -75,7 +70,7 @@ func newUsedByCmd(rootOpts *rootCmdOptions) *cobra.Command {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
 
-			return util.CompleteTicketNames(o.kubernetesConfigFlags, o.AllNamespaces, args, toComplete)
+			return util.CompleteTicketNames(o.kubernetesConfigFlags, false, args, toComplete)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := o.Complete(cmd, args); err != nil {
@@ -102,7 +97,6 @@ func newUsedByCmd(rootOpts *rootCmdOptions) *cobra.Command {
 	// add flags
 	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", "Output format. One of: table|wide")
 	cmd.Flags().BoolVarP(&o.AllSecrets, "all", "a", false, "List persistent volumes for all MapR ticket secrets in the current namespace")
-	cmd.Flags().BoolVarP(&o.AllNamespaces, "all-namespaces", "A", false, "List persistent volumes for all MapR ticket secrets in all namespaces")
 
 	// register completions for flags
 	if err := o.registerCompletions(cmd); err != nil {
@@ -117,12 +111,6 @@ func (o *UsedByOptions) Complete(cmd *cobra.Command, args []string) error {
 
 	if len(args) > 0 {
 		o.SecretName = args[0]
-	}
-
-	// reset namespace if --all-namespaces is set
-	if o.AllNamespaces {
-		namespaceAll := metaV1.NamespaceAll
-		o.kubernetesConfigFlags.Namespace = &namespaceAll
 	}
 
 	return nil
