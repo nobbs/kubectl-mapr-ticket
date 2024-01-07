@@ -2,10 +2,29 @@ package cli
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/volume"
 	"github.com/spf13/cobra"
+)
+
+const (
+	usedByUse   = `used-by {secret-name|--all}`
+	usedByShort = "List all persistent volumes that use the specified MapR ticket secret"
+	usedByLong  = `
+		List all persistent volumes that use the specified MapR ticket secret and print
+		some information about them.
+		`
+	usedByExample = `
+		# List all persistent volumes that use the specified MapR ticket secret
+		%[1]s used-by my-secret
+		`
+)
+
+var (
+	usedByValidOutputFormats = []string{"table", "wide"}
 )
 
 type UsedByOptions struct {
@@ -35,11 +54,24 @@ func newUsedByCmd(rootOpts *rootCmdOptions) *cobra.Command {
 	o := NewUsedByOptions(rootOpts)
 
 	cmd := &cobra.Command{
-		Use:   "used-by {secret-name|--all} [flags]",
-		Short: "List all persistent volumes that use the specified MapR ticket secret",
-		Long: `List all persistent volumes that use the specified MapR ticket secret and print
-some information about them.`,
-		Args: cobra.MaximumNArgs(1),
+		Use:     usedByUse,
+		Short:   usedByShort,
+		Long:    util.CliLongDesc(usedByLong),
+		Example: util.CliExample(usedByExample, filepath.Base(os.Args[0])),
+		Args:    cobra.MaximumNArgs(1),
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			// if we are listing volumes for all secrets in the namespace, we don't want to complete
+			if o.AllSecrets {
+				return nil, cobra.ShellCompDirectiveNoFileComp
+			}
+
+			// we only want one argument, the secret name
+			if len(args) > 0 {
+				return nil, cobra.ShellCompDirectiveNoFileComp
+			}
+
+			return util.CompleteTicketNames(o.kubernetesConfigFlags, false, args, toComplete)
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := o.Complete(cmd, args); err != nil {
 				return err
@@ -65,6 +97,11 @@ some information about them.`,
 	// add flags
 	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", "Output format. One of: table|wide")
 	cmd.Flags().BoolVarP(&o.AllSecrets, "all", "a", false, "List persistent volumes for all MapR ticket secrets in the current namespace")
+
+	// register completions for flags
+	if err := o.registerCompletions(cmd); err != nil {
+		panic(err)
+	}
 
 	return cmd
 }
@@ -118,6 +155,17 @@ func (o *UsedByOptions) Run(cmd *cobra.Command, args []string) error {
 
 	// print the volumes
 	if err := volume.Print(cmd, pvs); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *UsedByOptions) registerCompletions(cmd *cobra.Command) error {
+	err := cmd.RegisterFlagCompletionFunc("output", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return util.CompleteStringValues(usedByValidOutputFormats, toComplete)
+	})
+	if err != nil {
 		return err
 	}
 

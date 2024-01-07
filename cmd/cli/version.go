@@ -1,8 +1,17 @@
 package cli
 
 import (
+	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/version"
 	"github.com/spf13/cobra"
+)
+
+const (
+	versionUse   = `version`
+	versionShort = "Print the version of kubectl-mapr-ticket and exit"
+	versionLong  = `
+		Print the version of kubectl-mapr-ticket and exit.
+		`
 )
 
 // versionOptions holds the options for 'version' sub command
@@ -21,9 +30,14 @@ func newVersionCmd(rootOpts *rootCmdOptions) *cobra.Command {
 	o := newVersionOptions(rootOpts)
 
 	cmd := &cobra.Command{
-		Use:     "version",
 		Aliases: []string{"v"},
-		Short:   "Print the version of kubectl-mapr-ticket and exit",
+		Use:     versionUse,
+		Short:   versionShort,
+		Long:    util.CliLongDesc(versionLong),
+		Args:    cobra.NoArgs,
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			o.PrintVersionInfo(cmd)
 		},

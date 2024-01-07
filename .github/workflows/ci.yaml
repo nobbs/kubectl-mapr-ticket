@@ -91,6 +91,7 @@ jobs:
           mkdir -p ./bin/${{ matrix.goarch }}/${{ matrix.goos }}
           cp ./LICENSE ./bin/${{ matrix.goarch }}/${{ matrix.goos }}/
           cp ./README.md ./bin/${{ matrix.goarch }}/${{ matrix.goos }}/
+          cp ./hack/kubectl_complete-mapr_ticket ./bin/${{ matrix.goarch }}/${{ matrix.goos }}/
 
           # Compress artifact directory contents
           tar -czvf \

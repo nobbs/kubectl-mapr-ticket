@@ -2,11 +2,46 @@ package cli
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/nobbs/kubectl-mapr-ticket/internal/secret"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	"github.com/spf13/cobra"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+const (
+	listUse   = `list`
+	listShort = "List all secrets containing MapR tickets in the current namespace"
+	listLong  = `
+		List all secrets containing MapR tickets in the current namespace and print
+		some information about them.
+		`
+	listExample = `
+		# List all MapR tickets in the current namespace
+		%[1]s list
+
+		# List all MapR tickets in all namespaces
+		%[1]s list --all-namespaces
+
+		# List only expired MapR tickets
+		%[1]s list --only-expired
+
+		# List only MapR tickets that expire in the next 7 days
+		%[1]s list --expires-before 7d
+
+		# List MapR tickets for a specific MapR user in all namespaces
+		%[1]s list --mapr-user mapr --all-namespaces
+
+		# List MapR tickets with number of persistent volumes that use them
+		%[1]s list --show-in-use
+		`
+)
+
+var (
+	listValidOutputFormats = []string{"table", "wide", "json", "yaml"}
+	listValidSortByFields  = []string{"name", "namespace", "maprCluster", "maprUser", "creationTimestamp", "expiryTime"}
 )
 
 type ListOptions struct {
@@ -68,11 +103,15 @@ func newListCmd(rootOpts *rootCmdOptions) *cobra.Command {
 	o := NewListOptions(rootOpts)
 
 	cmd := &cobra.Command{
-		Use:     "list",
 		Aliases: []string{"ls"},
-		Short:   "List all secrets containing MapR tickets in the current namespace",
-		Long: `List all secrets containing MapR tickets in the current namespace and print
-some information about them.`,
+		Use:     listUse,
+		Short:   listShort,
+		Long:    util.CliLongDesc(listLong),
+		Example: util.CliExample(listExample, filepath.Base(os.Args[0])),
+		Args:    cobra.NoArgs,
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := o.Complete(cmd, args); err != nil {
 				return err
@@ -110,13 +149,18 @@ some information about them.`,
 	cmd.Flags().BoolVarP(&o.ShowInUse, "show-in-use", "i", false, "If true, add a column to the output indicating whether the secret is in use by a persistent volume")
 	cmd.MarkFlagsMutuallyExclusive("only-expired", "only-unexpired")
 
+	// register completions for flags
+	if err := o.registerCompletions(cmd); err != nil {
+		panic(err)
+	}
+
 	return cmd
 }
 
 func (o *ListOptions) Complete(cmd *cobra.Command, args []string) error {
 	// set namespace
 	if o.kubernetesConfigFlags.Namespace == nil || *o.kubernetesConfigFlags.Namespace == "" {
-		namespace := util.GetNamespace(o.kubernetesConfigFlags)
+		namespace := util.GetNamespace(o.kubernetesConfigFlags, o.AllNamespaces)
 		o.kubernetesConfigFlags.Namespace = &namespace
 	}
 
@@ -210,6 +254,24 @@ func (o *ListOptions) Run(cmd *cobra.Command, args []string) error {
 
 	// print output
 	if err := secret.Print(cmd, items); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (o *ListOptions) registerCompletions(cmd *cobra.Command) error {
+	err := cmd.RegisterFlagCompletionFunc("output", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return util.CompleteStringValues(listValidOutputFormats, toComplete)
+	})
+	if err != nil {
+		return err
+	}
+
+	err = cmd.RegisterFlagCompletionFunc("sort-by", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return util.CompleteStringValues(listValidSortByFields, toComplete)
+	})
+	if err != nil {
 		return err
 	}
 

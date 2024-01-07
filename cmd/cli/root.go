@@ -1,50 +1,72 @@
 package cli
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/cli-runtime/pkg/genericiooptions"
+)
+
+const (
+	rootUse   = `%[1]s`
+	rootShort = "A kubectl plugin to list and inspect MapR tickets"
+	rootLong  = `
+		A kubectl plugin that allows you to list and inspect MapR tickets from a
+		Kubernetes cluster, including details stored in the ticket itself without
+		requiring access to the MapR cluster.
+		`
 )
 
 type rootCmdOptions struct {
 	kubernetesConfigFlags *genericclioptions.ConfigFlags
-	IOStreams             genericclioptions.IOStreams
+	IOStreams             genericiooptions.IOStreams
 }
 
-func NewCmdOptions(kubernetesConfigFlags *genericclioptions.ConfigFlags, streams genericclioptions.IOStreams) *rootCmdOptions {
+func NewCmdOptions(kubernetesConfigFlags *genericclioptions.ConfigFlags, streams genericiooptions.IOStreams) *rootCmdOptions {
 	return &rootCmdOptions{
 		kubernetesConfigFlags: kubernetesConfigFlags,
 		IOStreams:             streams,
 	}
 }
 
-func NewRootCmd(flags *genericclioptions.ConfigFlags, streams genericclioptions.IOStreams) *cobra.Command {
-	rootOpts := NewCmdOptions(
+func NewRootCmd(flags *genericclioptions.ConfigFlags, streams genericiooptions.IOStreams) *cobra.Command {
+	o := NewCmdOptions(
 		flags,
 		streams,
 	)
 
 	rootCmd := &cobra.Command{
-		Use:   "kubectl-mapr-ticket",
-		Short: "A kubectl plugin to list and inspect MapR tickets",
-		Long: `A kubectl plugin that allows you to list and inspect MapR tickets from a
-Kubernetes cluster, including details stored in the ticket itself without
-requiring access to the MapR cluster.`,
+		Use:   fmt.Sprintf(rootUse, filepath.Base(os.Args[0])),
+		Short: rootShort,
+		Long:  util.CliLongDesc(rootLong),
 	}
 
 	// set IOStreams for the command
-	rootCmd.SetIn(rootOpts.IOStreams.In)
-	rootCmd.SetOut(rootOpts.IOStreams.Out)
-	rootCmd.SetErr(rootOpts.IOStreams.ErrOut)
+	rootCmd.SetIn(o.IOStreams.In)
+	rootCmd.SetOut(o.IOStreams.Out)
+	rootCmd.SetErr(o.IOStreams.ErrOut)
 
 	// add default kubernetes flags as global flags
-	rootOpts.kubernetesConfigFlags.AddFlags(rootCmd.PersistentFlags())
+	o.kubernetesConfigFlags.AddFlags(rootCmd.PersistentFlags())
 
 	// add subcommands
 	rootCmd.AddCommand(
-		newListCmd(rootOpts),
-		newVersionCmd(rootOpts),
-		newUsedByCmd(rootOpts),
+		newListCmd(o),
+		newVersionCmd(o),
+		newUsedByCmd(o),
 	)
+
+	// add completions
+	err := rootCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return util.CompleteNamespaceNames(o.kubernetesConfigFlags, toComplete)
+	})
+	if err != nil {
+		panic(err)
+	}
 
 	return rootCmd
 }
