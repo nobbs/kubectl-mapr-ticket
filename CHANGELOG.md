@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.2.0](https://github.com/nobbs/kubectl-mapr-ticket/compare/v0.1.2...v0.2.0) (2024-01-07)
+
+
+### Features
+
+* add shell completions for cli flags and args ([6264bfd](https://github.com/nobbs/kubectl-mapr-ticket/commit/6264bfdd7a55ec228206d620073e97aa33f26a6a))
+* clean up cli implementation, add completions ([#30](https://github.com/nobbs/kubectl-mapr-ticket/issues/30)) ([6264bfd](https://github.com/nobbs/kubectl-mapr-ticket/commit/6264bfdd7a55ec228206d620073e97aa33f26a6a))
+
+
+### Bug Fixes
+
+* remove `--all-namespaces` flag from `usedby` ([6264bfd](https://github.com/nobbs/kubectl-mapr-ticket/commit/6264bfdd7a55ec228206d620073e97aa33f26a6a))
+
+
+### Continuous Integration
+
+* **release:** add `krew` update action ([ea72720](https://github.com/nobbs/kubectl-mapr-ticket/commit/ea72720eec131e2b4fbf0f1654c65216c8c8487f))
+
+
+### Documentation
+
+* add `krew` installation method ([ea72720](https://github.com/nobbs/kubectl-mapr-ticket/commit/ea72720eec131e2b4fbf0f1654c65216c8c8487f))
+
+
+### Code Refactoring
+
+* move cli help text to constants ([6264bfd](https://github.com/nobbs/kubectl-mapr-ticket/commit/6264bfdd7a55ec228206d620073e97aa33f26a6a))
+
+
+### Miscellaneous Chores
+
+* add `krew` release manifest template ([#5](https://github.com/nobbs/kubectl-mapr-ticket/issues/5)) ([ea72720](https://github.com/nobbs/kubectl-mapr-ticket/commit/ea72720eec131e2b4fbf0f1654c65216c8c8487f))
+* add helper script to enable kubectl completion ([6264bfd](https://github.com/nobbs/kubectl-mapr-ticket/commit/6264bfdd7a55ec228206d620073e97aa33f26a6a))
+* fix changelog section order ([#27](https://github.com/nobbs/kubectl-mapr-ticket/issues/27)) ([7d27551](https://github.com/nobbs/kubectl-mapr-ticket/commit/7d275513fa83993c056eb5372685eab88dae0b23))
+
 ## [0.1.2](https://github.com/nobbs/kubectl-mapr-ticket/compare/v0.1.1...v0.1.2) (2024-01-02)
 
 
