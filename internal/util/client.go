@@ -18,11 +18,15 @@ func ClientFromFlags(flags *genericclioptions.ConfigFlags) (kubernetes.Interface
 }
 
 // GetNamespace returns the namespace from the flags passed to the CLI.
-func GetNamespace(flags *genericclioptions.ConfigFlags) string {
+func GetNamespace(flags *genericclioptions.ConfigFlags, allNamespaces bool) string {
 	namespace, _, err := flags.ToRawKubeConfigLoader().Namespace()
 
 	if err != nil || namespace == "" {
 		namespace = apiV1.NamespaceDefault
+	}
+
+	if allNamespaces {
+		namespace = apiV1.NamespaceAll
 	}
 
 	return namespace

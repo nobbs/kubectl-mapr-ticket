@@ -34,6 +34,10 @@ func newVersionCmd(rootOpts *rootCmdOptions) *cobra.Command {
 		Use:     versionUse,
 		Short:   versionShort,
 		Long:    util.CliLongDesc(versionLong),
+		Args:    cobra.NoArgs,
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			o.PrintVersionInfo(cmd)
 		},
