@@ -107,10 +107,17 @@ func newUsedByCmd(rootOpts *rootCmdOptions) *cobra.Command {
 }
 
 func (o *UsedByOptions) Complete(cmd *cobra.Command, args []string) error {
+	// parse the arguments
 	o.args = args
 
 	if len(args) > 0 {
 		o.SecretName = args[0]
+	}
+
+	// set namespace
+	if o.kubernetesConfigFlags.Namespace == nil || *o.kubernetesConfigFlags.Namespace == "" {
+		namespace := util.GetNamespace(o.kubernetesConfigFlags, false)
+		o.kubernetesConfigFlags.Namespace = &namespace
 	}
 
 	return nil
