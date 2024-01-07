@@ -20,10 +20,10 @@ $ kubectl mapr-ticket --help
 You can download the latest release binaries from the [releases page](https://github.com/nobbs/kubectl-mapr-ticket/releases). Binaries are available for Linux and macOS for both AMD64 and ARM64 architectures.
 
 <!-- x-release-please-start-version -->
-Example installation of `v0.1.2` for Apple Silicon (ARM64) macOS:
+Example installation of `v0.2.0` for Apple Silicon (ARM64) macOS:
 
 ```console
-$ curl -LO https://github.com/nobbs/kubectl-mapr-ticket/releases/download/v0.1.2/kubectl-mapr-ticket-arm64-darwin.tar.gz
+$ curl -LO https://github.com/nobbs/kubectl-mapr-ticket/releases/download/v0.2.0/kubectl-mapr-ticket-arm64-darwin.tar.gz
 $ tar -xvf kubectl-mapr-ticket-arm64-darwin.tar.gz
 $ mv ./kubectl-mapr-ticket /usr/local/bin
 $ kubectl mapr-ticket --help
