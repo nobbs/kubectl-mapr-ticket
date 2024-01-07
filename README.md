@@ -87,7 +87,7 @@ Note, that this is only local to your current shell session. To enable completio
 Unfortunately, the above setup will only provide completion for the `kubectl-mapr_ticket` command, not the actual `kubectl mapr-ticket` alias. To enable completion for the alias, you need to create a special `kubectl_complete-mapr_ticket` executable in your `PATH` that will delegate execution to the plugin. You can find an example of it in the [hack](hack) directory. Place the script somewhere in your `PATH` and make sure it is executable, e.g. by running:
 
 ```console
-$ wget -LO https://github.com/nobbs/kubectl-mapr-ticket/raw/main/hack/kubectl_complete-mapr_ticket
+$ curl -LO https://github.com/nobbs/kubectl-mapr-ticket/raw/main/hack/kubectl_complete-mapr_ticket
 $ chmod +x ./kubectl_complete-mapr_ticket
 $ mv ./kubectl_complete-mapr_ticket /usr/local/bin
 ```
