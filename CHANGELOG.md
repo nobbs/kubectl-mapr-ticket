@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.1](https://github.com/nobbs/kubectl-mapr-ticket/compare/v0.2.0...v0.2.1) (2024-01-08)
+
+
+### Bug Fixes
+
+* add option to sort secrets by number of PVCs using them ([#36](https://github.com/nobbs/kubectl-mapr-ticket/issues/36)) ([cc43942](https://github.com/nobbs/kubectl-mapr-ticket/commit/cc439424f037a503b83a92985dc2cb4b436e9b8c))
+* set namespace correctly for `used-by` command ([#33](https://github.com/nobbs/kubectl-mapr-ticket/issues/33)) ([b6163fa](https://github.com/nobbs/kubectl-mapr-ticket/commit/b6163fa064c274078ed4e171e0fa369191ed69c0)), closes [#31](https://github.com/nobbs/kubectl-mapr-ticket/issues/31)
+
+
+### Documentation
+
+* add shell completion instructions ([#34](https://github.com/nobbs/kubectl-mapr-ticket/issues/34)) ([d7e47fb](https://github.com/nobbs/kubectl-mapr-ticket/commit/d7e47fb7d4a0ab5ede5d32a937735e74dc146fb9)), closes [#32](https://github.com/nobbs/kubectl-mapr-ticket/issues/32)
+* use curl instead of wget ([d7e47fb](https://github.com/nobbs/kubectl-mapr-ticket/commit/d7e47fb7d4a0ab5ede5d32a937735e74dc146fb9))
+
 ## [0.2.0](https://github.com/nobbs/kubectl-mapr-ticket/compare/v0.1.2...v0.2.0) (2024-01-07)
 
 
