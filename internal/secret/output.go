@@ -186,7 +186,7 @@ func enrichTableWithInUse(table *metaV1.Table, items []ListItem) {
 	for i := range table.Rows {
 		table.Rows[i].Cells = append(
 			table.Rows[i].Cells[:insertPos],
-			items[i].InUse,
+			items[i].NumPVC,
 			table.Rows[i].Cells[insertPos],
 		)
 	}

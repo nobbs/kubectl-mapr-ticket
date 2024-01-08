@@ -14,6 +14,7 @@ const (
 	SortByMaprUser          SortOptions = "maprUser"
 	SortByCreationTimestamp SortOptions = "creationTimestamp"
 	SortByExpiryTime        SortOptions = "expiryTime"
+	SortByNumPVC            SortOptions = "numPVC"
 )
 
 // ValidateSortOptions validates the specified sort options
@@ -26,6 +27,7 @@ func ValidateSortOptions(sortOptions []string) error {
 		case string(SortByMaprUser):
 		case string(SortByCreationTimestamp):
 		case string(SortByExpiryTime):
+		case string(SortByNumPVC):
 		default:
 			return fmt.Errorf("invalid sort option: %s. Must be one of: name|namespace|maprCluster|maprUser|creationTimestamp|expiryTime", sortOption)
 		}
@@ -76,6 +78,14 @@ func sortByExpiryTime(items []ListItem) {
 	})
 }
 
+// sortByNumPVC sorts the items by the number of persistent volumes that are
+// using the secret
+func sortByNumPVC(items []ListItem) {
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].NumPVC < items[j].NumPVC
+	})
+}
+
 // Sort sorts the items by the specified sort options, in reverse order of the
 // order in which they are specified. This makes for a more natural sort result
 // when using multiple sort options.
@@ -101,6 +111,8 @@ func Sort(items []ListItem, sortOptions []SortOptions) {
 			sortByCreationTimestamp(items)
 		case SortByExpiryTime:
 			sortByExpiryTime(items)
+		case SortByNumPVC:
+			sortByNumPVC(items)
 		}
 	}
 }

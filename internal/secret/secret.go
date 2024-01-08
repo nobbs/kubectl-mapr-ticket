@@ -14,7 +14,7 @@ import (
 type ListItem struct {
 	Secret *coreV1.Secret     `json:"originalSecret"`
 	Ticket *ticket.MaprTicket `json:"parsedTicket"`
-	InUse  uint32             `json:"inUse"`
+	NumPVC uint32             `json:"numPVC"`
 }
 
 type Lister struct {
@@ -322,7 +322,7 @@ func (l *Lister) enrichItemsWithInUseCondition(items []ListItem) ([]ListItem, er
 	for i := range items {
 		for _, pv := range maprVolumes {
 			if volume.UsesTicket(&pv, items[i].Secret.Name, items[i].Secret.Namespace) {
-				items[i].InUse++
+				items[i].NumPVC++
 			}
 		}
 	}
@@ -335,7 +335,7 @@ func filterItemsToOnlyInUse(items []ListItem) []ListItem {
 	var filtered []ListItem
 
 	for _, item := range items {
-		if item.InUse > 0 {
+		if item.NumPVC > 0 {
 			filtered = append(filtered, item)
 		}
 	}

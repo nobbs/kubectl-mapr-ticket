@@ -95,7 +95,7 @@ func newUsedByCmd(rootOpts *rootCmdOptions) *cobra.Command {
 	cmd.SetErr(o.IOStreams.ErrOut)
 
 	// add flags
-	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", "Output format. One of: table|wide")
+	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", fmt.Sprintf("Output format. One of (%s)", util.StringSliceToFlagOptions(usedByValidOutputFormats)))
 	cmd.Flags().BoolVarP(&o.AllSecrets, "all", "a", false, "List persistent volumes for all MapR ticket secrets in the current namespace")
 
 	// register completions for flags
