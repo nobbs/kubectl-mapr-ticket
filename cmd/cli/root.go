@@ -56,8 +56,9 @@ func NewRootCmd(flags *genericclioptions.ConfigFlags, streams genericiooptions.I
 	// add subcommands
 	rootCmd.AddCommand(
 		newListCmd(o),
-		newVersionCmd(o),
+		newPVCCmd(o),
 		newUsedByCmd(o),
+		newVersionCmd(o),
 	)
 
 	// add completions
