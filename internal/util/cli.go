@@ -95,3 +95,7 @@ func (s stringNormalizer) indent() stringNormalizer {
 	s.string = strings.Join(lines, "\n")
 	return s
 }
+
+func StringSliceToFlagOptions(slice []string) string {
+	return strings.Join(slice, ", ")
+}

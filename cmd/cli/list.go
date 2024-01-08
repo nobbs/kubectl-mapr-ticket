@@ -41,7 +41,7 @@ const (
 
 var (
 	listValidOutputFormats = []string{"table", "wide", "json", "yaml"}
-	listValidSortByFields  = []string{"name", "namespace", "maprCluster", "maprUser", "creationTimestamp", "expiryTime"}
+	listValidSortByFields  = []string{"name", "namespace", "maprCluster", "maprUser", "creationTimestamp", "expiryTime", "numPVC"}
 )
 
 type ListOptions struct {
@@ -135,9 +135,9 @@ func newListCmd(rootOpts *rootCmdOptions) *cobra.Command {
 	cmd.SetErr(o.IOStreams.ErrOut)
 
 	// add flags
-	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", "Output format. One of: table|wide|json|yaml")
+	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", fmt.Sprintf("Output format. One of (%s)", util.StringSliceToFlagOptions(listValidOutputFormats)))
 	cmd.Flags().BoolVarP(&o.AllNamespaces, "all-namespaces", "A", false, "If true, list the requested object(s) across all namespaces. Namespace in current context is ignored even if specified with --namespace.")
-	cmd.Flags().StringSliceVar(&o.SortBy, "sort-by", nil, "Sort list by the specified fields. Multiple fields can be specified, separated by commas. Valid fields are: name|namespace|maprCluster|maprUser|creationTimestamp|expiryTime")
+	cmd.Flags().StringSliceVar(&o.SortBy, "sort-by", nil, fmt.Sprintf("Sort list of secrets by the specified fields. One of (%s)", util.StringSliceToFlagOptions(listValidSortByFields)))
 	cmd.Flags().BoolVarP(&o.FilterOnlyExpired, "only-expired", "E", false, "If true, only show secrets with tickets that have expired")
 	cmd.Flags().BoolVarP(&o.FilterOnlyUnexpired, "only-unexpired", "U", false, "If true, only show secrets with tickets that have not expired")
 	cmd.Flags().StringVarP(&o.FilterByMaprCluster, "mapr-cluster", "c", "", "Only show secrets with tickets for the specified MapR cluster")
