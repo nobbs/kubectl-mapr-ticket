@@ -18,3 +18,9 @@ linters-settings:
     rewrite-rules:
       - pattern: "interface{}"
         replacement: "any"
+
+issues:
+  exclude-rules:
+    - path: (.+)_test.go
+      linters:
+        - funlen
