@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	. "github.com/nobbs/kubectl-mapr-ticket/internal/util"
-
 	"github.com/stretchr/testify/assert"
 )
 
