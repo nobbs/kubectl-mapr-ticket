@@ -236,7 +236,7 @@ func (o *ListOptions) Run(cmd *cobra.Command, args []string) error {
 	}
 
 	if cmd.Flags().Changed("expires-before") {
-		opts = append(opts, secret.WithFilterExpiresBefore(o.FilterExpiresBefore.Cast()))
+		opts = append(opts, secret.WithFilterExpiresBefore(o.FilterExpiresBefore.Duration()))
 	}
 
 	if cmd.Flags().Changed("show-in-use") && o.ShowInUse {

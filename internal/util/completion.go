@@ -7,7 +7,7 @@ import (
 	"github.com/nobbs/kubectl-mapr-ticket/internal/ticket"
 	"github.com/spf13/cobra"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/client-go/kubernetes"
 )
 
 func CompleteStringValues(values []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -21,12 +21,7 @@ func CompleteStringValues(values []string, toComplete string) ([]string, cobra.S
 	return suggestions, cobra.ShellCompDirectiveNoFileComp
 }
 
-func CompleteNamespaceNames(flags *genericclioptions.ConfigFlags, toComplete string) ([]string, cobra.ShellCompDirective) {
-	client, err := ClientFromFlags(flags)
-	if err != nil {
-		return nil, cobra.ShellCompDirectiveError
-	}
-
+func CompleteNamespaceNames(client kubernetes.Interface, toComplete string) ([]string, cobra.ShellCompDirective) {
 	namespaces, err := client.CoreV1().Namespaces().List(context.TODO(), metaV1.ListOptions{})
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveError
@@ -42,14 +37,7 @@ func CompleteNamespaceNames(flags *genericclioptions.ConfigFlags, toComplete str
 	return suggestions, cobra.ShellCompDirectiveNoFileComp
 }
 
-func CompleteTicketNames(flags *genericclioptions.ConfigFlags, allNamespaces bool, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	client, err := ClientFromFlags(flags)
-	if err != nil {
-		return nil, cobra.ShellCompDirectiveError
-	}
-
-	namespace := GetNamespace(flags, allNamespaces)
-
+func CompleteTicketNames(client kubernetes.Interface, namespace string, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	secrets, err := client.CoreV1().Secrets(namespace).List(context.TODO(), metaV1.ListOptions{})
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveError

@@ -70,7 +70,14 @@ func newUsedByCmd(rootOpts *rootCmdOptions) *cobra.Command {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
 
-			return util.CompleteTicketNames(o.kubernetesConfigFlags, false, args, toComplete)
+			client, err := util.ClientFromFlags(o.kubernetesConfigFlags)
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveError
+			}
+
+			namespace := util.GetNamespace(o.kubernetesConfigFlags, false)
+
+			return util.CompleteTicketNames(client, namespace, args, toComplete)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := o.Complete(cmd, args); err != nil {
