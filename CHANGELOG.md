@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.2.2](https://github.com/nobbs/kubectl-mapr-ticket/compare/v0.2.1...v0.2.2) (2024-01-09)
+
+
+### Tests
+
+* add test for cli completion functions ([7875ffd](https://github.com/nobbs/kubectl-mapr-ticket/commit/7875ffd145ee3ada1a1c9dbc68c779b461680976))
+* add tests for duration pflag type ([7875ffd](https://github.com/nobbs/kubectl-mapr-ticket/commit/7875ffd145ee3ada1a1c9dbc68c779b461680976))
+* add tests for util/cli.go ([7875ffd](https://github.com/nobbs/kubectl-mapr-ticket/commit/7875ffd145ee3ada1a1c9dbc68c779b461680976))
+
+
+### Continuous Integration
+
+* add pre-commit config ([7875ffd](https://github.com/nobbs/kubectl-mapr-ticket/commit/7875ffd145ee3ada1a1c9dbc68c779b461680976))
+* exclude test files from funlen check ([7875ffd](https://github.com/nobbs/kubectl-mapr-ticket/commit/7875ffd145ee3ada1a1c9dbc68c779b461680976))
+
+
+### Code Refactoring
+
+* move duration functions util functions ([7875ffd](https://github.com/nobbs/kubectl-mapr-ticket/commit/7875ffd145ee3ada1a1c9dbc68c779b461680976))
+* remove duplicate util definitions ([7875ffd](https://github.com/nobbs/kubectl-mapr-ticket/commit/7875ffd145ee3ada1a1c9dbc68c779b461680976))
+
+
+### Miscellaneous Chores
+
+* prepare debug logging ([#37](https://github.com/nobbs/kubectl-mapr-ticket/issues/37)) ([7875ffd](https://github.com/nobbs/kubectl-mapr-ticket/commit/7875ffd145ee3ada1a1c9dbc68c779b461680976))
+* use charmbracelet/log for debug logging ([7875ffd](https://github.com/nobbs/kubectl-mapr-ticket/commit/7875ffd145ee3ada1a1c9dbc68c779b461680976))
+
 ## [0.2.1](https://github.com/nobbs/kubectl-mapr-ticket/compare/v0.2.0...v0.2.1) (2024-01-08)
 
 
