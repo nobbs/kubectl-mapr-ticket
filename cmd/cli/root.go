@@ -71,7 +71,12 @@ func NewRootCmd(flags *genericclioptions.ConfigFlags, streams genericiooptions.I
 
 	// add completions
 	err := rootCmd.RegisterFlagCompletionFunc("namespace", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return util.CompleteNamespaceNames(o.kubernetesConfigFlags, toComplete)
+		client, err := util.ClientFromFlags(o.kubernetesConfigFlags)
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+
+		return util.CompleteNamespaceNames(client, toComplete)
 	})
 	if err != nil {
 		panic(err)
