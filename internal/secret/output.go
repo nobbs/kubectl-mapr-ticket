@@ -90,7 +90,7 @@ var (
 	}
 )
 
-func Print(cmd *cobra.Command, items []ListItem) error {
+func Print(cmd *cobra.Command, items []TicketSecret) error {
 	format := cmd.Flag("output").Value.String()
 	allNamespaces := cmd.Flag("all-namespaces").Changed && cmd.Flag("all-namespaces").Value.String() == "true"
 	withInUse := cmd.Flag("show-in-use").Changed && cmd.Flag("show-in-use").Value.String() == "true"
@@ -126,7 +126,7 @@ func Print(cmd *cobra.Command, items []ListItem) error {
 }
 
 // generateTable generates a table from the secrets containing MapR tickets
-func generateTable(items []ListItem) *metaV1.Table {
+func generateTable(items []TicketSecret) *metaV1.Table {
 	rows := generateRows(items)
 
 	return &metaV1.Table{
@@ -137,7 +137,7 @@ func generateTable(items []ListItem) *metaV1.Table {
 
 // generateRows generates the rows for the table from the secrets containing
 // MapR tickets
-func generateRows(items []ListItem) []metaV1.TableRow {
+func generateRows(items []TicketSecret) []metaV1.TableRow {
 	rows := make([]metaV1.TableRow, 0, len(items))
 
 	for _, item := range items {
@@ -149,7 +149,7 @@ func generateRows(items []ListItem) []metaV1.TableRow {
 
 // generateRow generates a row for the table from the secret containing a MapR
 // ticket
-func generateRow(item *ListItem) *metaV1.TableRow {
+func generateRow(item *TicketSecret) *metaV1.TableRow {
 	row := &metaV1.TableRow{
 		Object: runtime.RawExtension{
 			Object: item.Secret,
@@ -174,7 +174,7 @@ func generateRow(item *ListItem) *metaV1.TableRow {
 
 // enrichTableWithInUse enriches the table with a column indicating whether the
 // ticket is in use by a persistent volume or not
-func enrichTableWithInUse(table *metaV1.Table, items []ListItem) {
+func enrichTableWithInUse(table *metaV1.Table, items []TicketSecret) {
 	insertPos := len(tableColumns) - 1
 
 	table.ColumnDefinitions = append(
@@ -192,7 +192,7 @@ func enrichTableWithInUse(table *metaV1.Table, items []ListItem) {
 	}
 }
 
-func printEncoded(items []ListItem, format string, stream io.Writer) error {
+func printEncoded(items []TicketSecret, format string, stream io.Writer) error {
 	bytesBuffer := bytes.NewBuffer([]byte{})
 
 	if len(items) == 1 {
@@ -218,7 +218,7 @@ func printEncoded(items []ListItem, format string, stream io.Writer) error {
 	return nil
 }
 
-func encodeItems(items []ListItem, format string) []byte {
+func encodeItems(items []TicketSecret, format string) []byte {
 	switch format {
 	case "json":
 		encoded, err := json.MarshalIndent(items, "", "  ")
@@ -239,7 +239,7 @@ func encodeItems(items []ListItem, format string) []byte {
 	return nil
 }
 
-func encodeItem(item *ListItem, format string) []byte {
+func encodeItem(item *TicketSecret, format string) []byte {
 	switch format {
 	case "json":
 		encoded, err := json.MarshalIndent(item, "", "  ")
