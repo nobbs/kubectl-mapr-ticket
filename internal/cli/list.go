@@ -8,7 +8,6 @@ import (
 	"github.com/nobbs/kubectl-mapr-ticket/internal/secret"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	"github.com/spf13/cobra"
-	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -158,17 +157,9 @@ func newListCmd(rootOpts *rootCmdOptions) *cobra.Command {
 }
 
 func (o *ListOptions) Complete(cmd *cobra.Command, args []string) error {
-	// set namespace
-	if o.kubernetesConfigFlags.Namespace == nil || *o.kubernetesConfigFlags.Namespace == "" {
-		namespace := util.GetNamespace(o.kubernetesConfigFlags, o.AllNamespaces)
-		o.kubernetesConfigFlags.Namespace = &namespace
-	}
-
-	// reset namespace if --all-namespaces is set
-	if o.AllNamespaces {
-		namespaceAll := metaV1.NamespaceAll
-		o.kubernetesConfigFlags.Namespace = &namespaceAll
-	}
+	// set namespace based on flags
+	ns := util.GetNamespace(o.kubernetesConfigFlags, o.AllNamespaces)
+	o.kubernetesConfigFlags.Namespace = &ns
 
 	return nil
 }
