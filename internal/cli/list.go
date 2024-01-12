@@ -40,7 +40,6 @@ const (
 
 var (
 	listValidOutputFormats = []string{"table", "wide", "json", "yaml"}
-	listValidSortByFields  = []string{"name", "namespace", "maprCluster", "maprUser", "creationTimestamp", "expiryTime", "numPVC"}
 )
 
 type ListOptions struct {
@@ -136,7 +135,7 @@ func newListCmd(rootOpts *rootCmdOptions) *cobra.Command {
 	// add flags
 	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", fmt.Sprintf("Output format. One of (%s)", util.StringSliceToFlagOptions(listValidOutputFormats)))
 	cmd.Flags().BoolVarP(&o.AllNamespaces, "all-namespaces", "A", false, "If true, list the requested object(s) across all namespaces. Namespace in current context is ignored even if specified with --namespace.")
-	cmd.Flags().StringSliceVar(&o.SortBy, "sort-by", nil, fmt.Sprintf("Sort list of secrets by the specified fields. One of (%s)", util.StringSliceToFlagOptions(listValidSortByFields)))
+	cmd.Flags().StringSliceVar(&o.SortBy, "sort-by", nil, fmt.Sprintf("Sort list of secrets by the specified fields. One of (%s)", util.StringSliceToFlagOptions(secret.SortOptionsList)))
 	cmd.Flags().BoolVarP(&o.FilterOnlyExpired, "only-expired", "E", false, "If true, only show secrets with tickets that have expired")
 	cmd.Flags().BoolVarP(&o.FilterOnlyUnexpired, "only-unexpired", "U", false, "If true, only show secrets with tickets that have not expired")
 	cmd.Flags().StringVarP(&o.FilterByMaprCluster, "mapr-cluster", "c", "", "Only show secrets with tickets for the specified MapR cluster")
@@ -238,7 +237,7 @@ func (o *ListOptions) Run(cmd *cobra.Command, args []string) error {
 	lister := secret.NewLister(client, *o.kubernetesConfigFlags.Namespace, opts...)
 
 	// run lister
-	items, err := lister.Run()
+	items, err := lister.List()
 	if err != nil {
 		return err
 	}
@@ -260,7 +259,7 @@ func (o *ListOptions) registerCompletions(cmd *cobra.Command) error {
 	}
 
 	err = cmd.RegisterFlagCompletionFunc("sort-by", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return util.CompleteStringValues(listValidSortByFields, toComplete)
+		return util.CompleteStringValues(secret.SortOptionsList, toComplete)
 	})
 	if err != nil {
 		return err

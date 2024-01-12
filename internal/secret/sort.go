@@ -17,17 +17,40 @@ const (
 	SortByNumPVC            SortOptions = "numPVC"
 )
 
+var (
+	// SortOptionsList is the list of valid sort options
+	SortOptionsList = []string{
+		SortByName.String(),
+		SortByNamespace.String(),
+		SortByMaprCluster.String(),
+		SortByMaprUser.String(),
+		SortByCreationTimestamp.String(),
+		SortByExpiryTime.String(),
+		SortByNumPVC.String(),
+	}
+
+	// DefaultSortBy is the default sort order
+	DefaultSortBy = []SortOptions{
+		SortByNamespace,
+		SortByName,
+	}
+)
+
+func (s SortOptions) String() string {
+	return string(s)
+}
+
 // ValidateSortOptions validates the specified sort options
 func ValidateSortOptions(sortOptions []string) error {
 	for _, sortOption := range sortOptions {
 		switch sortOption {
-		case string(SortByName):
-		case string(SortByNamespace):
-		case string(SortByMaprCluster):
-		case string(SortByMaprUser):
-		case string(SortByCreationTimestamp):
-		case string(SortByExpiryTime):
-		case string(SortByNumPVC):
+		case SortByName.String():
+		case SortByNamespace.String():
+		case SortByMaprCluster.String():
+		case SortByMaprUser.String():
+		case SortByCreationTimestamp.String():
+		case SortByExpiryTime.String():
+		case SortByNumPVC.String():
 		default:
 			return fmt.Errorf("invalid sort option: %s. Must be one of: name|namespace|maprCluster|maprUser|creationTimestamp|expiryTime", sortOption)
 		}
@@ -89,30 +112,32 @@ func sortByNumPVC(items []TicketSecret) {
 // Sort sorts the items by the specified sort options, in reverse order of the
 // order in which they are specified. This makes for a more natural sort result
 // when using multiple sort options.
-func Sort(items []TicketSecret, sortOptions []SortOptions) {
+func (l *Lister) Sort() *Lister {
 	// reverse the order of the sort options
-	order := make([]SortOptions, len(sortOptions))
-	for i, j := 0, len(sortOptions)-1; i < len(sortOptions); i, j = i+1, j-1 {
-		order[i] = sortOptions[j]
+	order := make([]SortOptions, len(l.sortBy))
+	for i, j := 0, len(l.sortBy)-1; i < len(l.sortBy); i, j = i+1, j-1 {
+		order[i] = l.sortBy[j]
 	}
 
 	// sort the items by each sort option
 	for _, sortOption := range order {
 		switch sortOption {
 		case SortByName:
-			sortByName(items)
+			sortByName(l.tickets)
 		case SortByNamespace:
-			sortByNamespace(items)
+			sortByNamespace(l.tickets)
 		case SortByMaprCluster:
-			sortByMaprCluster(items)
+			sortByMaprCluster(l.tickets)
 		case SortByMaprUser:
-			sortByMaprUser(items)
+			sortByMaprUser(l.tickets)
 		case SortByCreationTimestamp:
-			sortByCreationTimestamp(items)
+			sortByCreationTimestamp(l.tickets)
 		case SortByExpiryTime:
-			sortByExpiryTime(items)
+			sortByExpiryTime(l.tickets)
 		case SortByNumPVC:
-			sortByNumPVC(items)
+			sortByNumPVC(l.tickets)
 		}
 	}
+
+	return l
 }

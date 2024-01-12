@@ -31,6 +31,30 @@ type Lister struct {
 	filterByInUse       bool
 	filterExpiresBefore time.Duration
 	showInUse           bool
+
+	tickets []TicketSecret
+}
+
+// NewLister creates a new Lister
+func NewLister(client kubernetes.Interface, namespace string, opts ...ListerOption) *Lister {
+	const (
+		defaultFilterOnlyExpired   = false
+		defaultFilterOnlyUnexpired = false
+	)
+
+	l := &Lister{
+		client:              client,
+		namespace:           namespace,
+		sortBy:              DefaultSortBy,
+		filterOnlyExpired:   defaultFilterOnlyExpired,
+		filterOnlyUnexpired: defaultFilterOnlyUnexpired,
+	}
+
+	for _, opt := range opts {
+		opt(l)
+	}
+
+	return l
 }
 
 type ListerOption func(*Lister)
@@ -95,100 +119,41 @@ func WithShowInUse() ListerOption {
 	}
 }
 
-// NewLister creates a new Lister
-func NewLister(client kubernetes.Interface, namespace string, opts ...ListerOption) *Lister {
-	var (
-		defaultSortBy = []SortOptions{
-			SortByNamespace,
-			SortByName,
-		}
-	)
-
-	const (
-		defaultFilterOnlyExpired   = false
-		defaultFilterOnlyUnexpired = false
-	)
-
-	l := &Lister{
-		client:              client,
-		namespace:           namespace,
-		sortBy:              defaultSortBy,
-		filterOnlyExpired:   defaultFilterOnlyExpired,
-		filterOnlyUnexpired: defaultFilterOnlyUnexpired,
-	}
-
-	for _, opt := range opts {
-		opt(l)
-	}
-
-	return l
-}
-
-func (l *Lister) Run() ([]TicketSecret, error) {
-	secrets, err := l.client.CoreV1().Secrets(l.namespace).List(context.TODO(), metaV1.ListOptions{})
-	if err != nil {
+func (l *Lister) List() ([]TicketSecret, error) {
+	if err := l.getSecretsWithTickets(); err != nil {
 		return nil, err
 	}
 
-	// convert secrets to items, parse all tickets
-	items := parseSecretsToItems(secrets.Items)
+	// run all filters and sorts
+	l.filterTicketsOnlyExpired().
+		filterTicketsOnlyUnexpired().
+		filterTicketsByMaprCluster().
+		filterTicketsByMaprUser().
+		filterTicketsByUID().
+		filterTicketsByGID().
+		filterTicketsExpiresBefore().
+		collectPVsUsingTickets().
+		filterTicketsInUse().
+		Sort()
 
-	// filter items to only expired tickets, if requested
-	if l.filterOnlyExpired {
-		items = filterItemsOnlyExpired(items)
-	}
-
-	// filter items to only unexpired tickets, if requested
-	if l.filterOnlyUnexpired {
-		items = filterItemsOnlyUnexpired(items)
-	}
-
-	// filter items to only tickets for the specified MapR cluster, if requested
-	if l.filterByMaprCluster != nil && *l.filterByMaprCluster != "" {
-		items = filterItemsByMaprCluster(items, *l.filterByMaprCluster)
-	}
-
-	// filter items to only tickets for the specified MapR user, if requested
-	if l.filterByMaprUser != nil && *l.filterByMaprUser != "" {
-		items = filterItemsByMaprUser(items, *l.filterByMaprUser)
-	}
-
-	// filter items to only tickets for the specified UID, if requested
-	if l.filterByUID != nil {
-		items = filterItemsByUID(items, *l.filterByUID)
-	}
-
-	// filter items to only tickets for the specified GID, if requested
-	if l.filterByGID != nil {
-		items = filterItemsByGID(items, *l.filterByGID)
-	}
-
-	// filter items to only tickets that expire before the specified duration from now, if requested
-	if l.filterExpiresBefore > 0 {
-		items = filterExpiresBefore(items, l.filterExpiresBefore)
-	}
-
-	// enrich items with an InUse condition, if requested
-	if l.showInUse || l.filterByInUse {
-		items, err = l.enrichItemsWithInUseCondition(items)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// filter items to only tickets that are in use by a persistent volume, if requested
-	if l.filterByInUse {
-		items = filterItemsToOnlyInUse(items)
-	}
-
-	// sort items by the specified sort options
-	Sort(items, l.sortBy)
-
-	return items, nil
+	return l.tickets, nil
 }
 
-// filterSecretsWithMaprTicketKey filters secrets to only those that contain a MapR ticket key
-func filterSecretsWithMaprTicketKey(secrets []coreV1.Secret) []coreV1.Secret {
+// getSecretsWithTickets retrieves the list of ticket secrets
+func (l *Lister) getSecretsWithTickets() error {
+	secrets, err := l.client.CoreV1().Secrets(l.namespace).List(context.TODO(), metaV1.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	// convert secrets to items, parse all tickets
+	l.tickets = parseTicketsFromSecrets(secrets.Items)
+
+	return nil
+}
+
+// rejectSecretsWithoutTicket filters secrets to only those that contain a MapR ticket key
+func rejectSecretsWithoutTicket(secrets []coreV1.Secret) []coreV1.Secret {
 	var filtered []coreV1.Secret
 
 	for i := range secrets {
@@ -202,11 +167,11 @@ func filterSecretsWithMaprTicketKey(secrets []coreV1.Secret) []coreV1.Secret {
 	return filtered
 }
 
-// parseSecretsToItems parses secrets to items, ignoring secrets that don't contain a MapR ticket
-func parseSecretsToItems(secrets []coreV1.Secret) []TicketSecret {
-	var items []TicketSecret
+// parseTicketsFromSecrets parses secrets to items, ignoring secrets that don't contain a MapR ticket
+func parseTicketsFromSecrets(secrets []coreV1.Secret) []TicketSecret {
+	items := make([]TicketSecret, 0, len(secrets))
 
-	filtered := filterSecretsWithMaprTicketKey(secrets)
+	filtered := rejectSecretsWithoutTicket(secrets)
 
 	for i := range filtered {
 		secret := filtered[i]
@@ -225,134 +190,194 @@ func parseSecretsToItems(secrets []coreV1.Secret) []TicketSecret {
 	return items
 }
 
-// filterItemsOnlyExpired filters items to only tickets that are expired already
-func filterItemsOnlyExpired(items []TicketSecret) []TicketSecret {
+// filterTicketsOnlyExpired filters tickets to only those that are expired
+func (l *Lister) filterTicketsOnlyExpired() *Lister {
+	// if the filter is not enabled, we can skip this step
+	if !l.filterOnlyExpired {
+		return l
+	}
+
 	var filtered []TicketSecret
 
-	for _, item := range items {
+	for _, item := range l.tickets {
 		if item.Ticket.IsExpired() {
 			filtered = append(filtered, item)
 		}
 	}
 
-	return filtered
+	l.tickets = filtered
+
+	return l
 }
 
-// filterItemsOnlyUnexpired filters items to only tickets that are not expired yet
-func filterItemsOnlyUnexpired(items []TicketSecret) []TicketSecret {
+// filterTicketsOnlyUnexpired filters tickets to only those that are not expired
+func (l *Lister) filterTicketsOnlyUnexpired() *Lister {
+	// if the filter is not enabled, we can skip this step
+	if !l.filterOnlyUnexpired {
+		return l
+	}
+
 	var filtered []TicketSecret
 
-	for _, item := range items {
+	for _, item := range l.tickets {
 		if !item.Ticket.IsExpired() {
 			filtered = append(filtered, item)
 		}
 	}
 
-	return filtered
+	l.tickets = filtered
+
+	return l
 }
 
-// filterItemsByMaprCluster filters items to only tickets for the specified MapR cluster
-func filterItemsByMaprCluster(items []TicketSecret, cluster string) []TicketSecret {
+// filterTicketsByMaprCluster filters tickets to only those that match the specified MapR cluster
+func (l *Lister) filterTicketsByMaprCluster() *Lister {
+	// if the filter is not enabled, we can skip this step
+	if l.filterByMaprCluster == nil || *l.filterByMaprCluster == "" {
+		return l
+	}
+
 	var filtered []TicketSecret
 
-	for _, item := range items {
-		if item.Ticket.Cluster == cluster {
+	for _, item := range l.tickets {
+		if item.Ticket.Cluster == *l.filterByMaprCluster {
 			filtered = append(filtered, item)
 		}
 	}
 
-	return filtered
+	l.tickets = filtered
+
+	return l
 }
 
-// filterItemsByMaprUser filters items to only tickets for the specified MapR user
-func filterItemsByMaprUser(items []TicketSecret, user string) []TicketSecret {
+// filterTicketsByMaprUser filters tickets to only those that match the specified MapR user
+func (l *Lister) filterTicketsByMaprUser() *Lister {
+	// if the filter is not enabled, we can skip this step
+	if l.filterByMaprUser == nil || *l.filterByMaprUser == "" {
+		return l
+	}
+
 	var filtered []TicketSecret
 
-	for _, item := range items {
-		if item.Ticket.UserCreds.GetUserName() == user {
+	for _, item := range l.tickets {
+		if item.Ticket.UserCreds.GetUserName() == *l.filterByMaprUser {
 			filtered = append(filtered, item)
 		}
 	}
 
-	return filtered
+	l.tickets = filtered
+
+	return l
 }
 
-// filterItemsByUID filters items to only tickets for the specified UID
-func filterItemsByUID(items []TicketSecret, uid uint32) []TicketSecret {
+// filterTicketsByUID filters tickets to only those that match the specified UID
+func (l *Lister) filterTicketsByUID() *Lister {
+	// if the filter is not enabled, we can skip this step
+	if l.filterByUID == nil {
+		return l
+	}
+
 	var filtered []TicketSecret
 
-	for _, item := range items {
-		if *item.Ticket.UserCreds.Uid == uid {
+	for _, item := range l.tickets {
+		if *item.Ticket.UserCreds.Uid == *l.filterByUID {
 			filtered = append(filtered, item)
 		}
 	}
 
-	return filtered
+	l.tickets = filtered
+
+	return l
 }
 
-// filterItemsByGID filters items to only tickets for the specified GID
-func filterItemsByGID(items []TicketSecret, gid uint32) []TicketSecret {
+// filterTicketsByGID filters tickets to only those that match the specified GID
+func (l *Lister) filterTicketsByGID() *Lister {
+	// if the filter is not enabled, we can skip this step
+	if l.filterByGID == nil {
+		return l
+	}
+
 	var filtered []TicketSecret
 
-	for _, item := range items {
-		// check if GID is in the list of GIDs
-		for _, gotGid := range item.Ticket.UserCreds.Gids {
-			if gotGid == gid {
+	for _, item := range l.tickets {
+		for _, gid := range item.Ticket.UserCreds.Gids {
+			if gid == *l.filterByGID {
 				filtered = append(filtered, item)
 				break
 			}
 		}
 	}
 
-	return filtered
+	l.tickets = filtered
+
+	return l
 }
 
-// enrichItemsWithInUseCondition enriches items with an InUse condition based on whether a
-// persistent volume is using the ticket or not
-func (l *Lister) enrichItemsWithInUseCondition(items []TicketSecret) ([]TicketSecret, error) {
+// filterTicketsExpiresBefore filters tickets to only those that expire before the specified
+// duration
+func (l *Lister) filterTicketsExpiresBefore() *Lister {
+	// if the filter is not enabled, we can skip this step
+	if l.filterExpiresBefore <= 0 {
+		return l
+	}
+
+	var filtered []TicketSecret
+
+	for _, item := range l.tickets {
+		if item.Ticket.ExpiresBefore(l.filterExpiresBefore) {
+			filtered = append(filtered, item)
+		}
+	}
+
+	l.tickets = filtered
+
+	return l
+}
+
+// filterTicketsInUse filters tickets to only those that are in use by a persistent volume
+func (l *Lister) filterTicketsInUse() *Lister {
+	// if the filter is not enabled, we can skip this step
+	if !l.filterByInUse {
+		return l
+	}
+
+	var filtered []TicketSecret
+
+	for _, item := range l.tickets {
+		if item.NumPVC > 0 {
+			filtered = append(filtered, item)
+		}
+	}
+
+	l.tickets = filtered
+
+	return l
+}
+
+// collectPVsUsingTickets enriches the ticket items with the number of PVCs using the ticket
+func (l *Lister) collectPVsUsingTickets() *Lister {
+	// if we don't need to show in use, or filter by in use, we can skip this step
+	if !l.showInUse && !l.filterByInUse {
+		return l
+	}
+
+	// get all persistent volumes
 	pvs, err := l.client.CoreV1().PersistentVolumes().List(context.TODO(), metaV1.ListOptions{})
 	if err != nil {
-		return nil, err
+		return l
 	}
 
 	// Filter the volumes to only MapR CSI-based ones
 	maprVolumes := volume.FilterVolumesToMaprCSI(pvs.Items)
 
 	// check for each ticket if it is in use by a persistent volume
-	for i := range items {
+	for i := range l.tickets {
 		for _, pv := range maprVolumes {
-			if volume.UsesTicket(&pv, items[i].Secret.Name, items[i].Secret.Namespace) {
-				items[i].NumPVC++
+			if volume.UsesTicket(&pv, l.tickets[i].Secret.Name, l.tickets[i].Secret.Namespace) {
+				l.tickets[i].NumPVC++
 			}
 		}
 	}
 
-	return items, nil
-}
-
-// filterItemsToOnlyInUse filters items to only tickets that are in use by a persistent volume
-func filterItemsToOnlyInUse(items []TicketSecret) []TicketSecret {
-	var filtered []TicketSecret
-
-	for _, item := range items {
-		if item.NumPVC > 0 {
-			filtered = append(filtered, item)
-		}
-	}
-
-	return filtered
-}
-
-// filterExpiresBefore filters items to only tickets that expire before the
-// specified duration from now
-func filterExpiresBefore(items []TicketSecret, expiresBefore time.Duration) []TicketSecret {
-	var filtered []TicketSecret
-
-	for _, item := range items {
-		if item.Ticket.ExpiresBefore(expiresBefore) {
-			filtered = append(filtered, item)
-		}
-	}
-
-	return filtered
+	return l
 }
