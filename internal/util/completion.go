@@ -4,8 +4,10 @@ import (
 	"context"
 	"strings"
 
-	"github.com/nobbs/kubectl-mapr-ticket/internal/ticket"
 	"github.com/spf13/cobra"
+
+	"github.com/nobbs/kubectl-mapr-ticket/internal/ticket"
+
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )

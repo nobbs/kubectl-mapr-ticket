@@ -5,8 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	"github.com/spf13/cobra"
+
+	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
+
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/cli-runtime/pkg/genericiooptions"
 )

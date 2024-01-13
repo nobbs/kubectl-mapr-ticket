@@ -3,10 +3,12 @@ package util_test
 import (
 	"testing"
 
-	"github.com/nobbs/kubectl-mapr-ticket/internal/ticket"
-	. "github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/nobbs/kubectl-mapr-ticket/internal/ticket"
+	. "github.com/nobbs/kubectl-mapr-ticket/internal/util"
+
 	coreV1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"

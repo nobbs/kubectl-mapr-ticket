@@ -5,8 +5,10 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/nobbs/kubectl-mapr-ticket/internal/ticket"
 	"github.com/stretchr/testify/assert"
+
+	. "github.com/nobbs/kubectl-mapr-ticket/internal/ticket"
+
 	coreV1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"

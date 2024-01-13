@@ -5,9 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/spf13/cobra"
+
 	"github.com/nobbs/kubectl-mapr-ticket/internal/secret"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
-	"github.com/spf13/cobra"
 )
 
 const (

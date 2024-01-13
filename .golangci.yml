@@ -1,14 +1,14 @@
 # docs: <https://golangci-lint.run/usage/configuration/>
+
+run:
+  timeout: "1m"
+
 linters:
   enable:
-    - gofmt
-    - gci
     - errorlint
-    - dogsled
-    - nilnil
-    - funlen
-    - dupl
+    - gci
     - gocritic
+    - gofmt
 
 linters-settings:
   funlen:
@@ -18,6 +18,12 @@ linters-settings:
     rewrite-rules:
       - pattern: "interface{}"
         replacement: "any"
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(k8s.io,sigs.k8s.io)
+      - prefix(github.com/nobbs)
 
 issues:
   exclude-rules:

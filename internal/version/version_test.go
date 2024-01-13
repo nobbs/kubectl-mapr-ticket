@@ -3,8 +3,9 @@ package version_test
 import (
 	"testing"
 
-	. "github.com/nobbs/kubectl-mapr-ticket/internal/version"
 	"github.com/stretchr/testify/assert"
+
+	. "github.com/nobbs/kubectl-mapr-ticket/internal/version"
 )
 
 func TestVersionString(t *testing.T) {

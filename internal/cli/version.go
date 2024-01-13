@@ -1,9 +1,10 @@
 package cli
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/version"
-	"github.com/spf13/cobra"
 )
 
 const (

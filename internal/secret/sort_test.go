@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/nobbs/kubectl-mapr-ticket/internal/secret"
 	"github.com/stretchr/testify/assert"
+
+	. "github.com/nobbs/kubectl-mapr-ticket/internal/secret"
 )
 
 func TestValidateSortOptions(t *testing.T) {

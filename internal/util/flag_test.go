@@ -4,9 +4,10 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+
+	. "github.com/nobbs/kubectl-mapr-ticket/internal/util"
 )
 
 func TestDurationValue_Set(t *testing.T) {

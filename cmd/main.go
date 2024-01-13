@@ -3,8 +3,10 @@ package main
 import (
 	"os"
 
-	"github.com/nobbs/kubectl-mapr-ticket/internal/cli"
 	"github.com/spf13/pflag"
+
+	"github.com/nobbs/kubectl-mapr-ticket/internal/cli"
+
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/cli-runtime/pkg/genericiooptions"
 )

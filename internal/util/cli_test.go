@@ -3,8 +3,9 @@ package util_test
 import (
 	"testing"
 
-	. "github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	"github.com/stretchr/testify/assert"
+
+	. "github.com/nobbs/kubectl-mapr-ticket/internal/util"
 )
 
 func TestStringSliceToFlagOptions(t *testing.T) {

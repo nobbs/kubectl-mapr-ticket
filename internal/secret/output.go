@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/spf13/cobra"
+
 	"github.com/nobbs/kubectl-mapr-ticket/internal/ticket"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
-	"github.com/spf13/cobra"
+
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/cli-runtime/pkg/printers"
