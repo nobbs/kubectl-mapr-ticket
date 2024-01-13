@@ -10,6 +10,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+// CompleteStringValues returns a list of suggestions for the given available
+// values and the toComplete string. If toComplete is empty, all values are
+// returned. Otherwise, only values that start with toComplete are returned.
 func CompleteStringValues(values []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	var suggestions []string
 	for _, v := range values {
@@ -21,6 +24,10 @@ func CompleteStringValues(values []string, toComplete string) ([]string, cobra.S
 	return suggestions, cobra.ShellCompDirectiveNoFileComp
 }
 
+// CompleteNamespaceNames returns a list of suggestions for the given available
+// namespaces and the toComplete string. If toComplete is empty, all namespaces
+// are returned. Otherwise, only namespaces that start with toComplete are
+// returned.
 func CompleteNamespaceNames(client kubernetes.Interface, toComplete string) ([]string, cobra.ShellCompDirective) {
 	namespaces, err := client.CoreV1().Namespaces().List(context.TODO(), metaV1.ListOptions{})
 	if err != nil {
@@ -37,6 +44,11 @@ func CompleteNamespaceNames(client kubernetes.Interface, toComplete string) ([]s
 	return suggestions, cobra.ShellCompDirectiveNoFileComp
 }
 
+// CompleteTicketNames returns a list of suggestions for the given available
+// tickets and the toComplete string. If toComplete is empty, all tickets are
+// returned. Otherwise, only tickets that start with toComplete are returned.
+// Tickets that have already been completed as part of the command are not
+// returned.
 func CompleteTicketNames(client kubernetes.Interface, namespace string, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	secrets, err := client.CoreV1().Secrets(namespace).List(context.TODO(), metaV1.ListOptions{})
 	if err != nil {

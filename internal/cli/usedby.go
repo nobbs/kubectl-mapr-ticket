@@ -65,17 +65,20 @@ func newUsedByCmd(rootOpts *rootCmdOptions) *cobra.Command {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
 
-			// we only want one argument, the secret name
+			// we only want one argument, so don't complete once we have one
 			if len(args) > 0 {
 				return nil, cobra.ShellCompDirectiveNoFileComp
 			}
 
+			// set namespace based on flags
+			namespace := util.GetNamespace(o.kubernetesConfigFlags, false)
+			o.kubernetesConfigFlags.Namespace = &namespace
+
+			// get client
 			client, err := util.ClientFromFlags(o.kubernetesConfigFlags)
 			if err != nil {
 				return nil, cobra.ShellCompDirectiveError
 			}
-
-			namespace := util.GetNamespace(o.kubernetesConfigFlags, false)
 
 			return util.CompleteTicketNames(client, namespace, args, toComplete)
 		},
@@ -121,11 +124,9 @@ func (o *UsedByOptions) Complete(cmd *cobra.Command, args []string) error {
 		o.SecretName = args[0]
 	}
 
-	// set namespace
-	if o.kubernetesConfigFlags.Namespace == nil || *o.kubernetesConfigFlags.Namespace == "" {
-		namespace := util.GetNamespace(o.kubernetesConfigFlags, false)
-		o.kubernetesConfigFlags.Namespace = &namespace
-	}
+	// set namespace based on flags
+	namespace := util.GetNamespace(o.kubernetesConfigFlags, false)
+	o.kubernetesConfigFlags.Namespace = &namespace
 
 	return nil
 }
