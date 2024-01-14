@@ -45,16 +45,16 @@ func SecretContainsMaprTicket(secret *coreV1.Secret) bool {
 	return ok
 }
 
-// Wrapper around parse.MaprTicket to add methods
-type MaprTicket parse.MaprTicket
+// Wrapper around parse.Ticket to add methods
+type Ticket parse.MaprTicket
 
 // NewMaprTicket returns a new empty MaprTicket
-func NewMaprTicket() *MaprTicket {
-	return (*MaprTicket)(parse.NewMaprTicket())
+func NewMaprTicket() *Ticket {
+	return (*Ticket)(parse.NewMaprTicket())
 }
 
 // NewMaprTicketFromSecret parses the ticket from the secret and returns it
-func NewMaprTicketFromSecret(secret *coreV1.Secret) (*MaprTicket, error) {
+func NewMaprTicketFromSecret(secret *coreV1.Secret) (*Ticket, error) {
 	// get ticket from secret
 	ticketBytes, ok := secret.Data[SecretMaprTicketKey]
 	if !ok {
@@ -67,25 +67,30 @@ func NewMaprTicketFromSecret(secret *coreV1.Secret) (*MaprTicket, error) {
 		return nil, err
 	}
 
-	return (*MaprTicket)(ticket), nil
+	return (*Ticket)(ticket), nil
 }
 
 // isExpired returns true if the ticket is expired
-func (ticket *MaprTicket) IsExpired() bool {
+func (ticket *Ticket) IsExpired() bool {
 	return time.Now().After(ticket.ExpirationTime())
 }
 
 // ExpirationTime returns the expiry time of the ticket as a time.Time object
-func (ticket *MaprTicket) ExpirationTime() time.Time {
+func (ticket *Ticket) ExpirationTime() time.Time {
 	return time.Unix(int64(ticket.GetExpiryTime()), 0)
 }
 
 // CreationTime returns the creation time of the ticket as a time.Time object
-func (ticket *MaprTicket) CreationTime() time.Time {
+func (ticket *Ticket) CreationTime() time.Time {
 	return time.Unix(int64(ticket.GetCreationTimeSec()), 0)
 }
 
 // ExpiresBefore returns true if the ticket expires before the given duration
-func (ticket *MaprTicket) ExpiresBefore(duration time.Duration) bool {
+func (ticket *Ticket) ExpiresBefore(duration time.Duration) bool {
 	return ticket.ExpirationTime().Before(time.Now().Add(duration))
+}
+
+// AsMaprTicket returns the ticket as a parse.MaprTicket object
+func (ticket *Ticket) AsMaprTicket() *parse.MaprTicket {
+	return (*parse.MaprTicket)(ticket)
 }

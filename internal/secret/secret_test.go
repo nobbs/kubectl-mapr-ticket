@@ -1462,7 +1462,7 @@ func secretFromTicketJSON(t *testing.T, namespace, name string, in []byte) *core
 	}
 }
 
-func marshalTicket(t *ticket.MaprTicket) []byte {
-	b, _ := parse.Marshal((*parse.MaprTicket)(t))
+func marshalTicket(t *ticket.Ticket) []byte {
+	b, _ := parse.Marshal(t.AsMaprTicket())
 	return b
 }

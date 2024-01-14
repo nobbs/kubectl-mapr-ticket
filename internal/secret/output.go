@@ -262,7 +262,7 @@ func encodeItem(item *TicketSecret, format string) []byte {
 	return nil
 }
 
-func getStatus(ticket *ticket.MaprTicket) string {
+func getStatus(ticket *ticket.Ticket) string {
 	if ticket.IsExpired() {
 		return fmt.Sprintf("Expired (%s ago)", util.ShortHumanDurationComparedToNow(ticket.ExpirationTime()))
 	}

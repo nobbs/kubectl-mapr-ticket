@@ -13,9 +13,9 @@ import (
 )
 
 type TicketSecret struct {
-	Secret *coreV1.Secret     `json:"originalSecret"`
-	Ticket *ticket.MaprTicket `json:"parsedTicket"`
-	NumPVC uint32             `json:"numPVC"`
+	Secret *coreV1.Secret `json:"originalSecret"`
+	Ticket *ticket.Ticket `json:"parsedTicket"`
+	NumPVC uint32         `json:"numPVC"`
 }
 
 type Lister struct {

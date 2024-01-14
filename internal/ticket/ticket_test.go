@@ -129,12 +129,12 @@ func TestExpirationTime(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		ticket   *MaprTicket
+		ticket   *Ticket
 		expected time.Time
 	}{
 		{
 			name: "ticket has expiry time",
-			ticket: func() *MaprTicket {
+			ticket: func() *Ticket {
 				ticket := NewMaprTicket()
 				ticket.TicketAndKey.ExpiryTime = ptr.To[uint64](1234567890)
 				return ticket
@@ -157,12 +157,12 @@ func TestCreationTime(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		ticket   *MaprTicket
+		ticket   *Ticket
 		expected time.Time
 	}{
 		{
 			name: "ticket has creation time",
-			ticket: func() *MaprTicket {
+			ticket: func() *Ticket {
 				ticket := NewMaprTicket()
 				ticket.TicketAndKey.CreationTimeSec = ptr.To[uint64](1234567890)
 				return ticket
@@ -185,12 +185,12 @@ func TestIsExpired(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		ticket   *MaprTicket
+		ticket   *Ticket
 		expected bool
 	}{
 		{
 			name: "ticket is not expired",
-			ticket: func() *MaprTicket {
+			ticket: func() *Ticket {
 				ticket := NewMaprTicket()
 				expiresInOneHour := time.Now().Add(1 * time.Hour).Unix()
 				ticket.TicketAndKey.ExpiryTime = ptr.To[uint64](uint64(expiresInOneHour))
@@ -200,7 +200,7 @@ func TestIsExpired(t *testing.T) {
 		},
 		{
 			name: "ticket is expired",
-			ticket: func() *MaprTicket {
+			ticket: func() *Ticket {
 				ticket := NewMaprTicket()
 				expiredOneHourAgo := time.Now().Add(-1 * time.Hour).Unix()
 				ticket.TicketAndKey.ExpiryTime = ptr.To[uint64](uint64(expiredOneHourAgo))
@@ -224,13 +224,13 @@ func TestExpiresBefore(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		ticket   *MaprTicket
+		ticket   *Ticket
 		time     time.Duration
 		expected bool
 	}{
 		{
 			name: "ticket expires before the provided time",
-			ticket: func() *MaprTicket {
+			ticket: func() *Ticket {
 				ticket := NewMaprTicket()
 				expiresInOneHour := time.Now().Add(1 * time.Hour).Unix()
 				ticket.TicketAndKey.ExpiryTime = ptr.To[uint64](uint64(expiresInOneHour))
@@ -241,7 +241,7 @@ func TestExpiresBefore(t *testing.T) {
 		},
 		{
 			name: "ticket does not expire before the provided time",
-			ticket: func() *MaprTicket {
+			ticket: func() *Ticket {
 				ticket := NewMaprTicket()
 				expiresInTwoHours := time.Now().Add(2 * time.Hour).Unix()
 				ticket.TicketAndKey.ExpiryTime = ptr.To[uint64](uint64(expiresInTwoHours))
