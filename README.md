@@ -1,5 +1,12 @@
 # kubectl-mapr-ticket
 
+[![GitHub Release](https://img.shields.io/github/v/release/nobbs/kubectl-mapr-ticket)](https://github.com/nobbs/kubectl-mapr-ticket/releases/latest)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/nobbs/kubectl-mapr-ticket/ci.yaml?branch=release-please--branches--main&label=CI%20Build)](https://github.com/nobbs/kubectl-mapr-ticket/actions/workflows/ci.yaml)
+[![Codecov](https://img.shields.io/codecov/c/github/nobbs/kubectl-mapr-ticket)](https://app.codecov.io/gh/nobbs/kubectl-mapr-ticket)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/nobbs/kubectl-mapr-ticket)
+
+
+
 `kubectl-mapr-ticket` is a `kubectl` plugin that allows you to list and inspect MapR tickets deployed as Kubernetes secrets in a cluster.
 
 MapR tickets are used by the [MapR CSI driver](https://github.com/mapr/mapr-csi) to authenticate and authorize access to Persistent Volumes backed by MapR storage.
