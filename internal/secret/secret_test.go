@@ -1429,16 +1429,16 @@ func newExpectedSecret(namespace, name string) expectedSecret {
 	}
 }
 
-func assertTicketSecret(t *testing.T, secrets []TicketSecret, tickets []expectedSecret) {
+func assertTicketSecret(t *testing.T, secrets []TicketSecret, expected []expectedSecret) {
 	t.Helper()
 
 	assert := assert.New(t)
 
-	assert.Equal(len(tickets), len(secrets))
+	assert.Len(secrets, len(expected))
 
 	for i := range secrets {
-		assert.Equal(tickets[i].name, secrets[i].Secret.Name)
-		assert.Equal(tickets[i].namespace, secrets[i].Secret.Namespace)
+		assert.Equal(expected[i].name, secrets[i].Secret.Name)
+		assert.Equal(expected[i].namespace, secrets[i].Secret.Namespace)
 	}
 }
 

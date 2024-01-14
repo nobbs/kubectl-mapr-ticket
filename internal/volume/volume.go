@@ -8,6 +8,10 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+const (
+	SecretAll = "<all>"
+)
+
 var (
 	// maprCSIProvisioners is a list of the default MapR CSI provisioners
 	// that we support.
@@ -22,92 +26,73 @@ type Lister struct {
 	secretName string
 	namespace  string
 
-	allSecrets bool
+	volumes []coreV1.PersistentVolume
 }
 
-type ListerOption func(*Lister)
-
-func WithAllSecrets() ListerOption {
-	return func(l *Lister) {
-		l.allSecrets = true
-	}
-}
-
-func NewLister(client kubernetes.Interface, secretName string, namespace string, opts ...ListerOption) *Lister {
+func NewLister(client kubernetes.Interface, secretName string, namespace string) *Lister {
 	l := &Lister{
 		client:     client,
 		secretName: secretName,
 		namespace:  namespace,
 	}
 
-	for _, opt := range opts {
-		opt(l)
-	}
-
 	return l
 }
 
-func (l *Lister) Run() ([]coreV1.PersistentVolume, error) {
-	// Unfortunately, we have to list all persistent volumes and filter them
-	// ourselves, because there is no way to filter them by label selector.
-	volumes, err := l.client.CoreV1().PersistentVolumes().List(context.TODO(), metaV1.ListOptions{})
-	if err != nil {
+func (l *Lister) List() ([]coreV1.PersistentVolume, error) {
+	if err := l.getVolumes(); err != nil {
 		return nil, err
 	}
 
-	// Filter the volumes to only MapR CSI-based ones
-	filtered := FilterVolumesToMaprCSI(volumes.Items)
+	l.filterVolumesToMaprCSI().
+		filterVolumeUsesTicket()
 
-	// If we are listing volumes for all secrets in the namespace, let's
-	// filter the volumes to only ones that use a NodePublishSecretRef in
-	// the namespace. Otherwise, let's filter the volumes to only ones that
-	// use the specified secret.
-	if l.allSecrets {
-		filtered = filterVolumeUsesTicketFromNamespace(filtered, l.namespace)
-	} else {
-		filtered = filterVolumeUsesTicket(filtered, l.secretName, l.namespace)
-	}
-
-	return filtered, nil
+	return l.volumes, nil
 }
 
-func FilterVolumesToMaprCSI(volumes []coreV1.PersistentVolume) []coreV1.PersistentVolume {
+func (l *Lister) getVolumes() error {
+	volumes, err := l.client.CoreV1().PersistentVolumes().List(context.TODO(), metaV1.ListOptions{})
+	if err != nil {
+		return err
+	}
+
+	l.volumes = volumes.Items
+
+	return nil
+}
+
+func (l *Lister) filterVolumesToMaprCSI() *Lister {
 	var filtered []coreV1.PersistentVolume
 
-	for _, volume := range volumes {
+	for _, volume := range l.volumes {
 		if isMaprCSIBased(&volume) {
 			filtered = append(filtered, volume)
 		}
 	}
 
-	return filtered
+	l.volumes = filtered
+
+	return l
 }
 
-func filterVolumeUsesTicketFromNamespace(volumes []coreV1.PersistentVolume, namespace string) []coreV1.PersistentVolume {
+func (l *Lister) filterVolumeUsesTicket() *Lister {
 	var filtered []coreV1.PersistentVolume
 
-	for _, volume := range volumes {
-		if usesTicketFromNamespace(&volume, namespace) {
+	for _, volume := range l.volumes {
+		if TicketUsesSecret(&volume, &coreV1.SecretReference{
+			Name:      l.secretName,
+			Namespace: l.namespace,
+		}) {
 			filtered = append(filtered, volume)
 		}
 	}
 
-	return filtered
+	l.volumes = filtered
+
+	return l
 }
 
-func filterVolumeUsesTicket(volumes []coreV1.PersistentVolume, secretName, namespace string) []coreV1.PersistentVolume {
-	var filtered []coreV1.PersistentVolume
-
-	for _, volume := range volumes {
-		if UsesTicket(&volume, secretName, namespace) {
-			filtered = append(filtered, volume)
-		}
-	}
-
-	return filtered
-}
-
-func usesTicketFromNamespace(volume *coreV1.PersistentVolume, namespace string) bool {
+func TicketUsesSecret(volume *coreV1.PersistentVolume, secretRef *coreV1.SecretReference) bool {
 	// Check if the volume uses a CSI driver
 	if volume.Spec.CSI == nil {
 		return false
@@ -118,32 +103,23 @@ func usesTicketFromNamespace(volume *coreV1.PersistentVolume, namespace string) 
 		return false
 	}
 
-	// Check if the volume uses a NodePublishSecretRef in the specified namespace
-	if volume.Spec.CSI.NodePublishSecretRef.Namespace != namespace {
-		return false
+	// Check if we want secrets from all namespaces
+	if secretRef.Namespace == metaV1.NamespaceAll {
+		return true
 	}
 
-	return true
-}
-
-func UsesTicket(volume *coreV1.PersistentVolume, secretName, namespace string) bool {
-	// Check if the volume uses a CSI driver
-	if volume.Spec.CSI == nil {
-		return false
-	}
-
-	// Check if the volume uses a NodePublishSecretRef
-	if volume.Spec.CSI.NodePublishSecretRef == nil {
-		return false
+	// Check if we want all secrets from the specified namespace
+	if secretRef.Name == SecretAll && volume.Spec.CSI.NodePublishSecretRef.Namespace == secretRef.Namespace {
+		return true
 	}
 
 	// Check if the volume uses the specified secret
-	if volume.Spec.CSI.NodePublishSecretRef.Name != secretName {
+	if volume.Spec.CSI.NodePublishSecretRef.Name != secretRef.Name {
 		return false
 	}
 
 	// Check if the volume uses the specified namespace
-	if volume.Spec.CSI.NodePublishSecretRef.Namespace != namespace {
+	if volume.Spec.CSI.NodePublishSecretRef.Namespace != secretRef.Namespace {
 		return false
 	}
 
