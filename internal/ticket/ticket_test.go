@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	. "github.com/nobbs/kubectl-mapr-ticket/internal/ticket"
+	"github.com/nobbs/mapr-ticket-parser/pkg/parse"
 
 	coreV1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -255,6 +256,35 @@ func TestExpiresBefore(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			result := test.ticket.ExpiresBefore(test.time)
+
+			assert.Equal(test.expected, result)
+		})
+	}
+}
+
+func TestAsMaprTicket(t *testing.T) {
+	assert := assert.New(t)
+
+	tests := []struct {
+		name     string
+		ticket   *Ticket
+		expected *parse.MaprTicket
+	}{
+		{
+			name:     "ticket is nil",
+			ticket:   nil,
+			expected: nil,
+		},
+		{
+			name:     "ticket is not nil",
+			ticket:   NewMaprTicket(),
+			expected: parse.NewMaprTicket(),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			result := test.ticket.AsMaprTicket()
 
 			assert.Equal(test.expected, result)
 		})
