@@ -21,22 +21,22 @@ import (
 func TestLister_List(t *testing.T) {
 	tests := []struct {
 		name    string
-		fields  fields
-		want    []testSecret
+		fields  listerFields
+		want    []expectedSecret
 		wantErr bool
 	}{
 		{
 			name: "no secrets in default namespace",
-			fields: fields{
+			fields: listerFields{
 				client:    fake.NewSimpleClientset(),
 				namespace: "default",
 			},
-			want:    []testSecret{},
+			want:    []expectedSecret{},
 			wantErr: false,
 		},
 		{
 			name: "one secret without ticket in default namespace",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(&coreV1.Secret{
 					ObjectMeta: metaV1.ObjectMeta{
 						Name:      "test-secret",
@@ -45,12 +45,12 @@ func TestLister_List(t *testing.T) {
 				}),
 				namespace: "default",
 			},
-			want:    []testSecret{},
+			want:    []expectedSecret{},
 			wantErr: false,
 		},
 		{
 			name: "secret with invalid ticket data",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(&coreV1.Secret{
 					ObjectMeta: metaV1.ObjectMeta{
 						Name:      "test-secret",
@@ -62,12 +62,12 @@ func TestLister_List(t *testing.T) {
 				}),
 				namespace: "default",
 			},
-			want:    []testSecret{},
+			want:    []expectedSecret{},
 			wantErr: false,
 		},
 		{
 			name: "one secret with ticket in default namespace",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -78,14 +78,14 @@ func TestLister_List(t *testing.T) {
 				),
 				namespace: "default",
 			},
-			want: []testSecret{
-				newTestSecret("default", "test-secret"),
+			want: []expectedSecret{
+				newExpectedSecret("default", "test-secret"),
 			},
 			wantErr: false,
 		},
 		{
 			name: "two secrets with ticket in kube-system namespace",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -102,9 +102,9 @@ func TestLister_List(t *testing.T) {
 				),
 				namespace: "kube-system",
 			},
-			want: []testSecret{
-				newTestSecret("kube-system", "test-secret-1"),
-				newTestSecret("kube-system", "test-secret-2"),
+			want: []expectedSecret{
+				newExpectedSecret("kube-system", "test-secret-1"),
+				newExpectedSecret("kube-system", "test-secret-2"),
 			},
 			wantErr: false,
 		},
@@ -116,7 +116,7 @@ func TestLister_List(t *testing.T) {
 
 			got, err := l.List()
 
-			checkTicketSecret(t, got, tt.want)
+			assertTicketSecret(t, got, tt.want)
 			assert.Equal(t, tt.wantErr, err != nil)
 		})
 	}
@@ -125,13 +125,13 @@ func TestLister_List(t *testing.T) {
 func TestLister_ListWithFilterByMaprCluster(t *testing.T) {
 	tests := []struct {
 		name    string
-		fields  fields
-		want    []testSecret
+		fields  listerFields
+		want    []expectedSecret
 		wantErr bool
 	}{
 		{
 			name: "one secret with ticket in default namespace",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -145,14 +145,14 @@ func TestLister_ListWithFilterByMaprCluster(t *testing.T) {
 					WithFilterByMaprCluster("test-cluster"),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("default", "test-secret"),
+			want: []expectedSecret{
+				newExpectedSecret("default", "test-secret"),
 			},
 			wantErr: false,
 		},
 		{
 			name: "one secret with ticket in default namespace, filter by different cluster",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -166,12 +166,12 @@ func TestLister_ListWithFilterByMaprCluster(t *testing.T) {
 					WithFilterByMaprCluster("test-cluster-2"),
 				},
 			},
-			want:    []testSecret{},
+			want:    []expectedSecret{},
 			wantErr: false,
 		},
 		{
 			name: "two secrets with ticket in kube-system namespace, filter by one cluster",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -191,14 +191,14 @@ func TestLister_ListWithFilterByMaprCluster(t *testing.T) {
 					WithFilterByMaprCluster("test-cluster-1"),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("kube-system", "test-secret-1"),
+			want: []expectedSecret{
+				newExpectedSecret("kube-system", "test-secret-1"),
 			},
 			wantErr: false,
 		},
 		{
 			name: "two secrets with ticket in kube-system namespace, filter by different cluster",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -218,7 +218,7 @@ func TestLister_ListWithFilterByMaprCluster(t *testing.T) {
 					WithFilterByMaprCluster("test-cluster-3"),
 				},
 			},
-			want:    []testSecret{},
+			want:    []expectedSecret{},
 			wantErr: false,
 		},
 	}
@@ -229,7 +229,7 @@ func TestLister_ListWithFilterByMaprCluster(t *testing.T) {
 
 			got, err := l.List()
 
-			checkTicketSecret(t, got, tt.want)
+			assertTicketSecret(t, got, tt.want)
 			assert.Equal(t, tt.wantErr, err != nil)
 		})
 	}
@@ -238,13 +238,13 @@ func TestLister_ListWithFilterByMaprCluster(t *testing.T) {
 func TestLister_ListWithFilterByMaprUser(t *testing.T) {
 	tests := []struct {
 		name    string
-		fields  fields
-		want    []testSecret
+		fields  listerFields
+		want    []expectedSecret
 		wantErr bool
 	}{
 		{
 			name: "one secret with ticket in default namespace",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -258,14 +258,14 @@ func TestLister_ListWithFilterByMaprUser(t *testing.T) {
 					WithFilterByMaprUser("test-user"),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("default", "test-secret"),
+			want: []expectedSecret{
+				newExpectedSecret("default", "test-secret"),
 			},
 			wantErr: false,
 		},
 		{
 			name: "one secret with ticket in default namespace, filter by different user",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -279,12 +279,12 @@ func TestLister_ListWithFilterByMaprUser(t *testing.T) {
 					WithFilterByMaprUser("test-user-2"),
 				},
 			},
-			want:    []testSecret{},
+			want:    []expectedSecret{},
 			wantErr: false,
 		},
 		{
 			name: "two secrets with ticket in kube-system namespace, filter by one user",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -304,14 +304,14 @@ func TestLister_ListWithFilterByMaprUser(t *testing.T) {
 					WithFilterByMaprUser("test-user-1"),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("kube-system", "test-secret-1"),
+			want: []expectedSecret{
+				newExpectedSecret("kube-system", "test-secret-1"),
 			},
 			wantErr: false,
 		},
 		{
 			name: "two secrets with ticket in kube-system namespace, filter by different user",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -331,7 +331,7 @@ func TestLister_ListWithFilterByMaprUser(t *testing.T) {
 					WithFilterByMaprUser("test-user-3"),
 				},
 			},
-			want:    []testSecret{},
+			want:    []expectedSecret{},
 			wantErr: false,
 		},
 	}
@@ -342,7 +342,7 @@ func TestLister_ListWithFilterByMaprUser(t *testing.T) {
 
 			got, err := l.List()
 
-			checkTicketSecret(t, got, tt.want)
+			assertTicketSecret(t, got, tt.want)
 			assert.Equal(t, tt.wantErr, err != nil)
 		})
 	}
@@ -351,13 +351,13 @@ func TestLister_ListWithFilterByMaprUser(t *testing.T) {
 func TestLister_ListWithFilterByUID(t *testing.T) {
 	tests := []struct {
 		name    string
-		fields  fields
-		want    []testSecret
+		fields  listerFields
+		want    []expectedSecret
 		wantErr bool
 	}{
 		{
 			name: "one secret with ticket in default namespace",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -371,14 +371,14 @@ func TestLister_ListWithFilterByUID(t *testing.T) {
 					WithFilterByUID(1000),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("default", "test-secret"),
+			want: []expectedSecret{
+				newExpectedSecret("default", "test-secret"),
 			},
 			wantErr: false,
 		},
 		{
 			name: "one secret with ticket in default namespace, filter by different uid",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -392,7 +392,7 @@ func TestLister_ListWithFilterByUID(t *testing.T) {
 					WithFilterByUID(2000),
 				},
 			},
-			want:    []testSecret{},
+			want:    []expectedSecret{},
 			wantErr: false,
 		},
 	}
@@ -403,7 +403,7 @@ func TestLister_ListWithFilterByUID(t *testing.T) {
 
 			got, err := l.List()
 
-			checkTicketSecret(t, got, tt.want)
+			assertTicketSecret(t, got, tt.want)
 			assert.Equal(t, tt.wantErr, err != nil)
 		})
 	}
@@ -412,13 +412,13 @@ func TestLister_ListWithFilterByUID(t *testing.T) {
 func TestLister_ListWithFilterByGID(t *testing.T) {
 	tests := []struct {
 		name    string
-		fields  fields
-		want    []testSecret
+		fields  listerFields
+		want    []expectedSecret
 		wantErr bool
 	}{
 		{
 			name: "one secret with ticket in default namespace",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -432,14 +432,14 @@ func TestLister_ListWithFilterByGID(t *testing.T) {
 					WithFilterByGID(1000),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("default", "test-secret"),
+			want: []expectedSecret{
+				newExpectedSecret("default", "test-secret"),
 			},
 			wantErr: false,
 		},
 		{
 			name: "one secret with ticket in default namespace, filter by different gid",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -453,12 +453,12 @@ func TestLister_ListWithFilterByGID(t *testing.T) {
 					WithFilterByGID(2000),
 				},
 			},
-			want:    []testSecret{},
+			want:    []expectedSecret{},
 			wantErr: false,
 		},
 		{
 			name: "two secrets with ticket in kube-system namespace, filter by one common gid",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -478,9 +478,9 @@ func TestLister_ListWithFilterByGID(t *testing.T) {
 					WithFilterByGID(2000),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("kube-system", "test-secret-1"),
-				newTestSecret("kube-system", "test-secret-2"),
+			want: []expectedSecret{
+				newExpectedSecret("kube-system", "test-secret-1"),
+				newExpectedSecret("kube-system", "test-secret-2"),
 			},
 			wantErr: false,
 		},
@@ -492,7 +492,7 @@ func TestLister_ListWithFilterByGID(t *testing.T) {
 
 			got, err := l.List()
 
-			checkTicketSecret(t, got, tt.want)
+			assertTicketSecret(t, got, tt.want)
 			assert.Equal(t, tt.wantErr, err != nil)
 		})
 	}
@@ -500,19 +500,19 @@ func TestLister_ListWithFilterByGID(t *testing.T) {
 
 func TestLister_ListWithFilterOnlyExpired(t *testing.T) {
 	ticketWithExpiryTime := func(t *testing.T, expiryTime time.Time) []byte {
-		var unix uint64 = uint64(expiryTime.Unix())
+		unix := uint64(expiryTime.Unix())
 		return []byte(fmt.Sprintf(`{"ticket":{"expiryTime":%d}}`, unix))
 	}
 
 	tests := []struct {
 		name    string
-		fields  fields
-		want    []testSecret
+		fields  listerFields
+		want    []expectedSecret
 		wantErr bool
 	}{
 		{
 			name: "one unexpired secret with ticket in default namespace",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -526,12 +526,12 @@ func TestLister_ListWithFilterOnlyExpired(t *testing.T) {
 					WithFilterOnlyExpired(),
 				},
 			},
-			want:    []testSecret{},
+			want:    []expectedSecret{},
 			wantErr: false,
 		},
 		{
 			name: "one expired secret with ticket in default namespace",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -545,14 +545,14 @@ func TestLister_ListWithFilterOnlyExpired(t *testing.T) {
 					WithFilterOnlyExpired(),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("default", "expired-secret-1"),
+			want: []expectedSecret{
+				newExpectedSecret("default", "expired-secret-1"),
 			},
 			wantErr: false,
 		},
 		{
 			name: "two secrets with ticket in kube-system namespace, one expired, one unexpired",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -572,8 +572,8 @@ func TestLister_ListWithFilterOnlyExpired(t *testing.T) {
 					WithFilterOnlyExpired(),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("kube-system", "expired-secret-1"),
+			want: []expectedSecret{
+				newExpectedSecret("kube-system", "expired-secret-1"),
 			},
 			wantErr: false,
 		},
@@ -585,7 +585,7 @@ func TestLister_ListWithFilterOnlyExpired(t *testing.T) {
 
 			got, err := l.List()
 
-			checkTicketSecret(t, got, tt.want)
+			assertTicketSecret(t, got, tt.want)
 			assert.Equal(t, tt.wantErr, err != nil)
 		})
 	}
@@ -593,19 +593,19 @@ func TestLister_ListWithFilterOnlyExpired(t *testing.T) {
 
 func TestLister_ListWithFilterOnlyUnexpired(t *testing.T) {
 	ticketWithExpiryTime := func(t *testing.T, expiryTime time.Time) []byte {
-		var unix uint64 = uint64(expiryTime.Unix())
+		unix := uint64(expiryTime.Unix())
 		return []byte(fmt.Sprintf(`{"ticket":{"expiryTime":%d}}`, unix))
 	}
 
 	tests := []struct {
 		name    string
-		fields  fields
-		want    []testSecret
+		fields  listerFields
+		want    []expectedSecret
 		wantErr bool
 	}{
 		{
 			name: "one expired secret with ticket in default namespace",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -619,12 +619,12 @@ func TestLister_ListWithFilterOnlyUnexpired(t *testing.T) {
 					WithFilterOnlyUnexpired(),
 				},
 			},
-			want:    []testSecret{},
+			want:    []expectedSecret{},
 			wantErr: false,
 		},
 		{
 			name: "one unexpired secret with ticket in default namespace",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -638,14 +638,14 @@ func TestLister_ListWithFilterOnlyUnexpired(t *testing.T) {
 					WithFilterOnlyUnexpired(),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("default", "expired-secret-1"),
+			want: []expectedSecret{
+				newExpectedSecret("default", "expired-secret-1"),
 			},
 			wantErr: false,
 		},
 		{
 			name: "two secrets with ticket in kube-system namespace, one expired, one unexpired",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -665,8 +665,8 @@ func TestLister_ListWithFilterOnlyUnexpired(t *testing.T) {
 					WithFilterOnlyUnexpired(),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("kube-system", "expired-secret-1"),
+			want: []expectedSecret{
+				newExpectedSecret("kube-system", "expired-secret-1"),
 			},
 			wantErr: false,
 		},
@@ -678,7 +678,7 @@ func TestLister_ListWithFilterOnlyUnexpired(t *testing.T) {
 
 			got, err := l.List()
 
-			checkTicketSecret(t, got, tt.want)
+			assertTicketSecret(t, got, tt.want)
 			assert.Equal(t, tt.wantErr, err != nil)
 		})
 	}
@@ -686,19 +686,19 @@ func TestLister_ListWithFilterOnlyUnexpired(t *testing.T) {
 
 func TestLister_ListWithFilterExpiresBefore(t *testing.T) {
 	ticketWithExpiryTime := func(t *testing.T, expiryTime time.Time) []byte {
-		var unix uint64 = uint64(expiryTime.Unix())
+		unix := uint64(expiryTime.Unix())
 		return []byte(fmt.Sprintf(`{"ticket":{"expiryTime":%d}}`, unix))
 	}
 
 	tests := []struct {
 		name    string
-		fields  fields
-		want    []testSecret
+		fields  listerFields
+		want    []expectedSecret
 		wantErr bool
 	}{
 		{
 			name: "one secret with ticket in default namespace, expires in 24 hours, filter expires before 12 hours",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -712,12 +712,12 @@ func TestLister_ListWithFilterExpiresBefore(t *testing.T) {
 					WithFilterExpiresBefore(12 * time.Hour),
 				},
 			},
-			want:    []testSecret{},
+			want:    []expectedSecret{},
 			wantErr: false,
 		},
 		{
 			name: "one secret with ticket in default namespace, expires in 12 hours, filter expires before 24 hours",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -731,14 +731,14 @@ func TestLister_ListWithFilterExpiresBefore(t *testing.T) {
 					WithFilterExpiresBefore(24 * time.Hour),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("default", "test-secret-1"),
+			want: []expectedSecret{
+				newExpectedSecret("default", "test-secret-1"),
 			},
 			wantErr: false,
 		},
 		{
 			name: "two secrets with ticket in kube-system namespace, one expires in 24 hours, one expires in 6 hours, filter expires before 12 hours",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -758,8 +758,8 @@ func TestLister_ListWithFilterExpiresBefore(t *testing.T) {
 					WithFilterExpiresBefore(12 * time.Hour),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("kube-system", "test-secret-1"),
+			want: []expectedSecret{
+				newExpectedSecret("kube-system", "test-secret-1"),
 			},
 			wantErr: false,
 		},
@@ -771,7 +771,7 @@ func TestLister_ListWithFilterExpiresBefore(t *testing.T) {
 
 			got, err := l.List()
 
-			checkTicketSecret(t, got, tt.want)
+			assertTicketSecret(t, got, tt.want)
 			assert.Equal(t, tt.wantErr, err != nil)
 		})
 	}
@@ -780,13 +780,13 @@ func TestLister_ListWithFilterExpiresBefore(t *testing.T) {
 func TestList_WithMultipleFilters(t *testing.T) {
 	tests := []struct {
 		name    string
-		fields  fields
-		want    []testSecret
+		fields  listerFields
+		want    []expectedSecret
 		wantErr bool
 	}{
 		{
 			name: "multiple secrets with ticket in kube-system namespace, filter by cluster and user",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -813,14 +813,14 @@ func TestList_WithMultipleFilters(t *testing.T) {
 					WithFilterByMaprUser("test-user-2"),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("kube-system", "test-secret-2"),
+			want: []expectedSecret{
+				newExpectedSecret("kube-system", "test-secret-2"),
 			},
 			wantErr: false,
 		},
 		{
 			name: "multiple secrets with ticket in kube-system namespace, filter by uid and gid",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -847,15 +847,15 @@ func TestList_WithMultipleFilters(t *testing.T) {
 					WithFilterByGID(1000),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("kube-system", "test-secret-1"),
-				newTestSecret("kube-system", "test-secret-3"),
+			want: []expectedSecret{
+				newExpectedSecret("kube-system", "test-secret-1"),
+				newExpectedSecret("kube-system", "test-secret-3"),
 			},
 			wantErr: false,
 		},
 		{
 			name: "multiple secrets with ticket in kube-system namespace, filter by cluster, user, uid and gid",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -879,7 +879,7 @@ func TestList_WithMultipleFilters(t *testing.T) {
 					WithFilterByGID(1000),
 				},
 			},
-			want:    []testSecret{},
+			want:    []expectedSecret{},
 			wantErr: false,
 		},
 	}
@@ -890,7 +890,7 @@ func TestList_WithMultipleFilters(t *testing.T) {
 
 			got, err := l.List()
 
-			checkTicketSecret(t, got, tt.want)
+			assertTicketSecret(t, got, tt.want)
 			assert.Equal(t, tt.wantErr, err != nil)
 		})
 	}
@@ -899,13 +899,13 @@ func TestList_WithMultipleFilters(t *testing.T) {
 func TestList_WithSortByName(t *testing.T) {
 	tests := []struct {
 		name    string
-		fields  fields
-		want    []testSecret
+		fields  listerFields
+		want    []expectedSecret
 		wantErr bool
 	}{
 		{
 			name: "two secrets with ticket in kube-system namespace, sort by name",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -925,15 +925,15 @@ func TestList_WithSortByName(t *testing.T) {
 					WithSortBy([]SortOptions{SortByName}),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("kube-system", "test-secret-1"),
-				newTestSecret("kube-system", "test-secret-2"),
+			want: []expectedSecret{
+				newExpectedSecret("kube-system", "test-secret-1"),
+				newExpectedSecret("kube-system", "test-secret-2"),
 			},
 			wantErr: false,
 		},
 		{
 			name: "three secrets, different namespaces, sort all by name",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -959,10 +959,10 @@ func TestList_WithSortByName(t *testing.T) {
 					WithSortBy([]SortOptions{SortByName}),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("kube-system", "test-secret-1"),
-				newTestSecret("default", "test-secret-2"),
-				newTestSecret("kube-public", "test-secret-3"),
+			want: []expectedSecret{
+				newExpectedSecret("kube-system", "test-secret-1"),
+				newExpectedSecret("default", "test-secret-2"),
+				newExpectedSecret("kube-public", "test-secret-3"),
 			},
 			wantErr: false,
 		},
@@ -974,7 +974,7 @@ func TestList_WithSortByName(t *testing.T) {
 
 			got, err := l.List()
 
-			checkTicketSecret(t, got, tt.want)
+			assertTicketSecret(t, got, tt.want)
 			assert.Equal(t, tt.wantErr, err != nil)
 		})
 	}
@@ -983,13 +983,13 @@ func TestList_WithSortByName(t *testing.T) {
 func TestList_WithSortByNamespace(t *testing.T) {
 	tests := []struct {
 		name    string
-		fields  fields
-		want    []testSecret
+		fields  listerFields
+		want    []expectedSecret
 		wantErr bool
 	}{
 		{
 			name: "two secrets with ticket in kube-system namespace, sort by namespace",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -1009,15 +1009,15 @@ func TestList_WithSortByNamespace(t *testing.T) {
 					WithSortBy([]SortOptions{SortByNamespace}),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("default", "test-secret-2"),
-				newTestSecret("kube-system", "test-secret-1"),
+			want: []expectedSecret{
+				newExpectedSecret("default", "test-secret-2"),
+				newExpectedSecret("kube-system", "test-secret-1"),
 			},
 			wantErr: false,
 		},
 		{
 			name: "three secrets, different namespaces, sort all by namespace",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -1043,10 +1043,10 @@ func TestList_WithSortByNamespace(t *testing.T) {
 					WithSortBy([]SortOptions{SortByNamespace}),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("default", "test-secret-2"),
-				newTestSecret("kube-public", "test-secret-3"),
-				newTestSecret("kube-system", "test-secret-1"),
+			want: []expectedSecret{
+				newExpectedSecret("default", "test-secret-2"),
+				newExpectedSecret("kube-public", "test-secret-3"),
+				newExpectedSecret("kube-system", "test-secret-1"),
 			},
 			wantErr: false,
 		},
@@ -1058,7 +1058,7 @@ func TestList_WithSortByNamespace(t *testing.T) {
 
 			got, err := l.List()
 
-			checkTicketSecret(t, got, tt.want)
+			assertTicketSecret(t, got, tt.want)
 			assert.Equal(t, tt.wantErr, err != nil)
 		})
 	}
@@ -1067,13 +1067,13 @@ func TestList_WithSortByNamespace(t *testing.T) {
 func TestList_WithSortByMaprCluster(t *testing.T) {
 	tests := []struct {
 		name    string
-		fields  fields
-		want    []testSecret
+		fields  listerFields
+		want    []expectedSecret
 		wantErr bool
 	}{
 		{
 			name: "two secrets with ticket in kube-system namespace, sort by mapr cluster",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -1093,15 +1093,15 @@ func TestList_WithSortByMaprCluster(t *testing.T) {
 					WithSortBy([]SortOptions{SortByMaprCluster}),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("kube-system", "test-secret-1"),
-				newTestSecret("default", "test-secret-2"),
+			want: []expectedSecret{
+				newExpectedSecret("kube-system", "test-secret-1"),
+				newExpectedSecret("default", "test-secret-2"),
 			},
 			wantErr: false,
 		},
 		{
 			name: "three secrets, different namespaces, sort all by mapr cluster",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -1127,10 +1127,10 @@ func TestList_WithSortByMaprCluster(t *testing.T) {
 					WithSortBy([]SortOptions{SortByMaprCluster}),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("kube-system", "test-secret-1"),
-				newTestSecret("default", "test-secret-2"),
-				newTestSecret("kube-public", "test-secret-3"),
+			want: []expectedSecret{
+				newExpectedSecret("kube-system", "test-secret-1"),
+				newExpectedSecret("default", "test-secret-2"),
+				newExpectedSecret("kube-public", "test-secret-3"),
 			},
 			wantErr: false,
 		},
@@ -1142,7 +1142,7 @@ func TestList_WithSortByMaprCluster(t *testing.T) {
 
 			got, err := l.List()
 
-			checkTicketSecret(t, got, tt.want)
+			assertTicketSecret(t, got, tt.want)
 			assert.Equal(t, tt.wantErr, err != nil)
 		})
 	}
@@ -1151,13 +1151,13 @@ func TestList_WithSortByMaprCluster(t *testing.T) {
 func TestList_WithSortByMaprUser(t *testing.T) {
 	tests := []struct {
 		name    string
-		fields  fields
-		want    []testSecret
+		fields  listerFields
+		want    []expectedSecret
 		wantErr bool
 	}{
 		{
 			name: "two secrets with ticket in kube-system namespace, sort by mapr user",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -1177,15 +1177,15 @@ func TestList_WithSortByMaprUser(t *testing.T) {
 					WithSortBy([]SortOptions{SortByMaprUser}),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("kube-system", "test-secret-1"),
-				newTestSecret("default", "test-secret-2"),
+			want: []expectedSecret{
+				newExpectedSecret("kube-system", "test-secret-1"),
+				newExpectedSecret("default", "test-secret-2"),
 			},
 			wantErr: false,
 		},
 		{
 			name: "three secrets, different namespaces, sort all by mapr user",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -1211,10 +1211,10 @@ func TestList_WithSortByMaprUser(t *testing.T) {
 					WithSortBy([]SortOptions{SortByMaprUser}),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("kube-system", "test-secret-1"),
-				newTestSecret("default", "test-secret-2"),
-				newTestSecret("kube-public", "test-secret-3"),
+			want: []expectedSecret{
+				newExpectedSecret("kube-system", "test-secret-1"),
+				newExpectedSecret("default", "test-secret-2"),
+				newExpectedSecret("kube-public", "test-secret-3"),
 			},
 			wantErr: false,
 		},
@@ -1226,7 +1226,7 @@ func TestList_WithSortByMaprUser(t *testing.T) {
 
 			got, err := l.List()
 
-			checkTicketSecret(t, got, tt.want)
+			assertTicketSecret(t, got, tt.want)
 			assert.Equal(t, tt.wantErr, err != nil)
 		})
 	}
@@ -1234,20 +1234,20 @@ func TestList_WithSortByMaprUser(t *testing.T) {
 
 func TestList_WithSortByCreationTime(t *testing.T) {
 	ticketWithCreationTime := func(t *testing.T, creationTime time.Time) []byte {
-		var unix uint64 = uint64(creationTime.Unix())
+		unix := uint64(creationTime.Unix())
 		return []byte(fmt.Sprintf(`{"ticket":{"creationTimeSec":%d}}`, unix))
 	}
 
 	tests := []struct {
 		name    string
-		fields  fields
-		want    []testSecret
+		fields  listerFields
+		want    []expectedSecret
 		wantErr bool
 	}{
 
 		{
 			name: "two secrets with ticket in kube-system namespace, sort by creation time",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -1267,15 +1267,15 @@ func TestList_WithSortByCreationTime(t *testing.T) {
 					WithSortBy([]SortOptions{SortByCreationTimestamp}),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("kube-system", "test-secret-1"),
-				newTestSecret("kube-system", "test-secret-2"),
+			want: []expectedSecret{
+				newExpectedSecret("kube-system", "test-secret-1"),
+				newExpectedSecret("kube-system", "test-secret-2"),
 			},
 			wantErr: false,
 		},
 		{
 			name: "three secrets, different namespaces, sort all by creation time",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -1301,10 +1301,10 @@ func TestList_WithSortByCreationTime(t *testing.T) {
 					WithSortBy([]SortOptions{SortByCreationTimestamp}),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("kube-public", "test-secret-3"),
-				newTestSecret("kube-system", "test-secret-1"),
-				newTestSecret("default", "test-secret-2"),
+			want: []expectedSecret{
+				newExpectedSecret("kube-public", "test-secret-3"),
+				newExpectedSecret("kube-system", "test-secret-1"),
+				newExpectedSecret("default", "test-secret-2"),
 			},
 			wantErr: false,
 		},
@@ -1316,7 +1316,7 @@ func TestList_WithSortByCreationTime(t *testing.T) {
 
 			got, err := l.List()
 
-			checkTicketSecret(t, got, tt.want)
+			assertTicketSecret(t, got, tt.want)
 			assert.Equal(t, tt.wantErr, err != nil)
 		})
 	}
@@ -1324,19 +1324,19 @@ func TestList_WithSortByCreationTime(t *testing.T) {
 
 func TestList_WithSortByExpiryTime(t *testing.T) {
 	ticketWithExpiryTime := func(t *testing.T, expiryTime time.Time) []byte {
-		var unix uint64 = uint64(expiryTime.Unix())
+		unix := uint64(expiryTime.Unix())
 		return []byte(fmt.Sprintf(`{"ticket":{"expiryTime":%d}}`, unix))
 	}
 
 	tests := []struct {
 		name    string
-		fields  fields
-		want    []testSecret
+		fields  listerFields
+		want    []expectedSecret
 		wantErr bool
 	}{
 		{
 			name: "two secrets with ticket in kube-system namespace, sort by expiry time",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -1356,15 +1356,15 @@ func TestList_WithSortByExpiryTime(t *testing.T) {
 					WithSortBy([]SortOptions{SortByExpiryTime}),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("kube-system", "test-secret-2"),
-				newTestSecret("kube-system", "test-secret-1"),
+			want: []expectedSecret{
+				newExpectedSecret("kube-system", "test-secret-2"),
+				newExpectedSecret("kube-system", "test-secret-1"),
 			},
 			wantErr: false,
 		},
 		{
 			name: "three secrets, different namespaces, sort all by expiry time",
-			fields: fields{
+			fields: listerFields{
 				client: fake.NewSimpleClientset(
 					secretFromTicketJSON(
 						t,
@@ -1390,10 +1390,10 @@ func TestList_WithSortByExpiryTime(t *testing.T) {
 					WithSortBy([]SortOptions{SortByExpiryTime}),
 				},
 			},
-			want: []testSecret{
-				newTestSecret("kube-system", "test-secret-1"),
-				newTestSecret("default", "test-secret-2"),
-				newTestSecret("kube-public", "test-secret-3"),
+			want: []expectedSecret{
+				newExpectedSecret("kube-system", "test-secret-1"),
+				newExpectedSecret("default", "test-secret-2"),
+				newExpectedSecret("kube-public", "test-secret-3"),
 			},
 			wantErr: false,
 		},
@@ -1405,51 +1405,56 @@ func TestList_WithSortByExpiryTime(t *testing.T) {
 
 			got, err := l.List()
 
-			checkTicketSecret(t, got, tt.want)
+			assertTicketSecret(t, got, tt.want)
 			assert.Equal(t, tt.wantErr, err != nil)
 		})
 	}
 }
 
-type fields struct {
+type listerFields struct {
 	client    kubernetes.Interface
 	namespace string
 	opts      []ListerOption
 }
 
-type testSecret struct {
+type expectedSecret struct {
 	name      string
 	namespace string
 }
 
-func newTestSecret(namespace, name string) testSecret {
-	return testSecret{
+func newExpectedSecret(namespace, name string) expectedSecret {
+	return expectedSecret{
 		name:      name,
 		namespace: namespace,
 	}
 }
 
-func checkTicketSecret(t *testing.T, secrets []TicketSecret, tickets []testSecret) {
+func assertTicketSecret(t *testing.T, secrets []TicketSecret, tickets []expectedSecret) {
 	t.Helper()
 
-	assert.Equal(t, len(tickets), len(secrets))
+	assert := assert.New(t)
+
+	assert.Equal(len(tickets), len(secrets))
 
 	for i := range secrets {
-		assert.Equal(t, tickets[i].name, secrets[i].Secret.Name)
-		assert.Equal(t, tickets[i].namespace, secrets[i].Secret.Namespace)
+		assert.Equal(tickets[i].name, secrets[i].Secret.Name)
+		assert.Equal(tickets[i].namespace, secrets[i].Secret.Namespace)
 	}
 }
 
 func secretFromTicketJSON(t *testing.T, namespace, name string, in []byte) *coreV1.Secret {
 	t.Helper()
 
-	v := ticket.NewMaprTicket()
-	err := json.Unmarshal(in, &v)
+	obj := ticket.NewMaprTicket()
+	err := json.Unmarshal(in, &obj)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	out := marshalTicket(v)
+	out, err := parse.Marshal(obj.AsMaprTicket())
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	return &coreV1.Secret{
 		ObjectMeta: metaV1.ObjectMeta{
@@ -1460,9 +1465,4 @@ func secretFromTicketJSON(t *testing.T, namespace, name string, in []byte) *core
 			ticket.SecretMaprTicketKey: out,
 		},
 	}
-}
-
-func marshalTicket(t *ticket.Ticket) []byte {
-	b, _ := parse.Marshal(t.AsMaprTicket())
-	return b
 }

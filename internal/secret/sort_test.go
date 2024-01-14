@@ -10,6 +10,8 @@ import (
 )
 
 func TestValidateSortOptions(t *testing.T) {
+	assert := assert.New(t)
+
 	tests := []struct {
 		name        string
 		sortOptions []string
@@ -43,7 +45,7 @@ func TestValidateSortOptions(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			err := ValidateSortOptions(test.sortOptions)
 
-			assert.Equal(t, test.expectedErr, err)
+			assert.Equal(test.expectedErr, err)
 		})
 	}
 }
