@@ -41,6 +41,10 @@ type UsedByOptions struct {
 	// in the current namespace
 	AllSecrets bool
 
+	// AllNamespaces indicates whether to find persistent volumes for all secrets
+	// in all namespaces
+	AllNamespaces bool
+
 	// OutputFormat is the format to use for output
 	OutputFormat string
 }
@@ -108,6 +112,7 @@ func newUsedByCmd(rootOpts *rootCmdOptions) *cobra.Command {
 	// add flags
 	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", fmt.Sprintf("Output format. One of (%s)", util.StringSliceToFlagOptions(usedByValidOutputFormats)))
 	cmd.Flags().BoolVarP(&o.AllSecrets, "all", "a", false, "List persistent volumes for all MapR ticket secrets in the current namespace")
+	cmd.Flags().BoolVarP(&o.AllNamespaces, "all-namespaces", "A", false, "List persistent volumes for all MapR ticket secrets in all namespaces")
 
 	// register completions for flags
 	if err := o.registerCompletions(cmd); err != nil {
@@ -126,16 +131,21 @@ func (o *UsedByOptions) Complete(cmd *cobra.Command, args []string) error {
 	}
 
 	// set namespace based on flags
-	namespace := util.GetNamespace(o.kubernetesConfigFlags, false)
+	namespace := util.GetNamespace(o.kubernetesConfigFlags, o.AllNamespaces)
 	o.kubernetesConfigFlags.Namespace = &namespace
+
+	// set the secret name to all if we are listing volumes for all secrets
+	if o.AllSecrets {
+		o.SecretName = volume.SecretAll
+	}
 
 	return nil
 }
 
 func (o *UsedByOptions) Validate() error {
 	// ensure that the secret name was provided
-	if !o.AllSecrets && o.SecretName == "" {
-		return fmt.Errorf("either --all or a secret name must be provided")
+	if !o.AllNamespaces && !o.AllSecrets && o.SecretName == "" {
+		return fmt.Errorf("either --all-namespaces, --all or a secret name must be provided")
 	}
 
 	// ensure that the output format is valid
@@ -152,19 +162,11 @@ func (o *UsedByOptions) Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// create list options
-	opts := []volume.ListerOption{}
-
-	// if we are listing volumes for all secrets in the namespace, create an option to do so
-	if o.AllSecrets {
-		opts = append(opts, volume.WithAllSecrets())
-	}
-
 	// create lister
-	lister := volume.NewLister(client, o.SecretName, *o.kubernetesConfigFlags.Namespace, opts...)
+	lister := volume.NewLister(client, o.SecretName, *o.kubernetesConfigFlags.Namespace)
 
 	// run the lister
-	pvs, err := lister.Run()
+	pvs, err := lister.List()
 	if err != nil {
 		return err
 	}

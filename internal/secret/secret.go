@@ -362,19 +362,21 @@ func (l *Lister) collectPVsUsingTickets() *Lister {
 		return l
 	}
 
+	volumeLister := volume.NewLister(l.client, volume.SecretAll, metaV1.NamespaceAll)
+
 	// get all persistent volumes
-	pvs, err := l.client.CoreV1().PersistentVolumes().List(context.TODO(), metaV1.ListOptions{})
+	pvs, err := volumeLister.List()
 	if err != nil {
 		return l
 	}
 
-	// Filter the volumes to only MapR CSI-based ones
-	maprVolumes := volume.FilterVolumesToMaprCSI(pvs.Items)
-
 	// check for each ticket if it is in use by a persistent volume
 	for i := range l.tickets {
-		for _, pv := range maprVolumes {
-			if volume.UsesTicket(&pv, l.tickets[i].Secret.Name, l.tickets[i].Secret.Namespace) {
+		for _, pv := range pvs {
+			if volume.TicketUsesSecret(&pv, &coreV1.SecretReference{
+				Name:      l.tickets[i].Secret.Name,
+				Namespace: l.tickets[i].Secret.Namespace,
+			}) {
 				l.tickets[i].NumPVC++
 			}
 		}
