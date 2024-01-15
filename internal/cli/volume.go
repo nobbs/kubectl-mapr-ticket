@@ -12,23 +12,23 @@ import (
 )
 
 const (
-	usedByUse   = `used-by {secret-name|--all}`
-	usedByShort = "List all persistent volumes that use the specified MapR ticket secret"
-	usedByLong  = `
+	volumeUse   = `volume [secret-name]`
+	volumeShort = "List all persistent volumes that use the specified MapR ticket secret"
+	volumeLong  = `
 		List all persistent volumes that use the specified MapR ticket secret and print
 		some information about them.
 		`
-	usedByExample = `
+	volumeExample = `
 		# List all persistent volumes that use the specified MapR ticket secret
 		%[1]s used-by my-secret
 		`
 )
 
 var (
-	usedByValidOutputFormats = []string{"table", "wide"}
+	volumeValidOutputFormats = []string{"table", "wide"}
 )
 
-type UsedByOptions struct {
+type VolumeOptions struct {
 	*rootCmdOptions
 
 	// Args are the arguments passed to the command
@@ -49,20 +49,21 @@ type UsedByOptions struct {
 	OutputFormat string
 }
 
-func NewUsedByOptions(rootOpts *rootCmdOptions) *UsedByOptions {
-	return &UsedByOptions{
+func NewVolumeOptions(rootOpts *rootCmdOptions) *VolumeOptions {
+	return &VolumeOptions{
 		rootCmdOptions: rootOpts,
 	}
 }
 
-func newUsedByCmd(rootOpts *rootCmdOptions) *cobra.Command {
-	o := NewUsedByOptions(rootOpts)
+func newVolumeCmd(rootOpts *rootCmdOptions) *cobra.Command {
+	o := NewVolumeOptions(rootOpts)
 
 	cmd := &cobra.Command{
-		Use:     usedByUse,
-		Short:   usedByShort,
-		Long:    util.CliLongDesc(usedByLong),
-		Example: util.CliExample(usedByExample, filepath.Base(os.Args[0])),
+		Aliases: []string{"pv"},
+		Use:     volumeUse,
+		Short:   volumeShort,
+		Long:    util.CliLongDesc(volumeLong),
+		Example: util.CliExample(volumeExample, filepath.Base(os.Args[0])),
 		Args:    cobra.MaximumNArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			// if we are listing volumes for all secrets in the namespace, we don't want to complete
@@ -110,7 +111,7 @@ func newUsedByCmd(rootOpts *rootCmdOptions) *cobra.Command {
 	cmd.SetErr(o.IOStreams.ErrOut)
 
 	// add flags
-	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", fmt.Sprintf("Output format. One of (%s)", util.StringSliceToFlagOptions(usedByValidOutputFormats)))
+	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", fmt.Sprintf("Output format. One of (%s)", util.StringSliceToFlagOptions(volumeValidOutputFormats)))
 	cmd.Flags().BoolVarP(&o.AllSecrets, "all", "a", false, "List persistent volumes for all MapR ticket secrets in the current namespace")
 	cmd.Flags().BoolVarP(&o.AllNamespaces, "all-namespaces", "A", false, "List persistent volumes for all MapR ticket secrets in all namespaces")
 
@@ -122,7 +123,7 @@ func newUsedByCmd(rootOpts *rootCmdOptions) *cobra.Command {
 	return cmd
 }
 
-func (o *UsedByOptions) Complete(cmd *cobra.Command, args []string) error {
+func (o *VolumeOptions) Complete(cmd *cobra.Command, args []string) error {
 	// parse the arguments
 	o.args = args
 
@@ -142,7 +143,7 @@ func (o *UsedByOptions) Complete(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *UsedByOptions) Validate() error {
+func (o *VolumeOptions) Validate() error {
 	// ensure that the secret name was provided
 	if !o.AllNamespaces && !o.AllSecrets && o.SecretName == "" {
 		return fmt.Errorf("either --all-namespaces, --all or a secret name must be provided")
@@ -156,7 +157,7 @@ func (o *UsedByOptions) Validate() error {
 	return nil
 }
 
-func (o *UsedByOptions) Run(cmd *cobra.Command, args []string) error {
+func (o *VolumeOptions) Run(cmd *cobra.Command, args []string) error {
 	client, err := util.ClientFromFlags(o.kubernetesConfigFlags)
 	if err != nil {
 		return err
@@ -179,9 +180,9 @@ func (o *UsedByOptions) Run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *UsedByOptions) registerCompletions(cmd *cobra.Command) error {
+func (o *VolumeOptions) registerCompletions(cmd *cobra.Command) error {
 	err := cmd.RegisterFlagCompletionFunc("output", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return util.CompleteStringValues(usedByValidOutputFormats, toComplete)
+		return util.CompleteStringValues(volumeValidOutputFormats, toComplete)
 	})
 	if err != nil {
 		return err
