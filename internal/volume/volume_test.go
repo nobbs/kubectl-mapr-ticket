@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	. "github.com/nobbs/kubectl-mapr-ticket/internal/volume"
 
 	coreV1 "k8s.io/api/core/v1"
@@ -330,7 +331,7 @@ func newExpectedSecret(name string) expectedVolume {
 	}
 }
 
-func assertVolumes(t *testing.T, expected []expectedVolume, actual []coreV1.PersistentVolume) {
+func assertVolumes(t *testing.T, expected []expectedVolume, actual []util.Volume) {
 	t.Helper()
 
 	assert := assert.New(t)
@@ -338,7 +339,7 @@ func assertVolumes(t *testing.T, expected []expectedVolume, actual []coreV1.Pers
 	assert.Len(actual, len(expected))
 
 	for i, e := range expected {
-		assert.Equal(e.name, actual[i].Name)
+		assert.Equal(e.name, actual[i].PV.Name)
 	}
 }
 

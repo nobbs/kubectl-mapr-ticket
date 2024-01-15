@@ -7,8 +7,11 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/nobbs/kubectl-mapr-ticket/internal/secret"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/volume"
+
+	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -155,8 +158,19 @@ func (o *VolumeOptions) Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// create secret lister
+	secretLister := secret.NewLister(
+		client,
+		metaV1.NamespaceAll,
+	)
+
 	// create lister
-	lister := volume.NewLister(client, o.SecretName, *o.kubernetesConfigFlags.Namespace)
+	lister := volume.NewLister(
+		client,
+		o.SecretName,
+		*o.kubernetesConfigFlags.Namespace,
+		volume.WithSecretLister(secretLister),
+	)
 
 	// run the lister
 	pvs, err := lister.List()

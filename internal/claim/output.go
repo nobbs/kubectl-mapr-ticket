@@ -41,7 +41,7 @@ var (
 	}
 )
 
-func Print(cmd *cobra.Command, volumeClaims []VolumeClaim) error {
+func Print(cmd *cobra.Command, volumeClaims []util.VolumeClaim) error {
 	format := cmd.Flag("output").Value.String()
 
 	// generate the table
@@ -60,7 +60,7 @@ func Print(cmd *cobra.Command, volumeClaims []VolumeClaim) error {
 	return nil
 }
 
-func generableTable(volumeClaims []VolumeClaim) *metaV1.Table {
+func generableTable(volumeClaims []util.VolumeClaim) *metaV1.Table {
 	rows := generateRows(volumeClaims)
 
 	return &metaV1.Table{
@@ -69,7 +69,7 @@ func generableTable(volumeClaims []VolumeClaim) *metaV1.Table {
 	}
 }
 
-func generateRows(volumeClaims []VolumeClaim) []metaV1.TableRow {
+func generateRows(volumeClaims []util.VolumeClaim) []metaV1.TableRow {
 	rows := make([]metaV1.TableRow, 0, len(volumeClaims))
 
 	for _, pv := range volumeClaims {
@@ -79,34 +79,34 @@ func generateRows(volumeClaims []VolumeClaim) []metaV1.TableRow {
 	return rows
 }
 
-func generateRow(volumeClaims *VolumeClaim) *metaV1.TableRow {
+func generateRow(volumeClaims *util.VolumeClaim) *metaV1.TableRow {
 	row := &metaV1.TableRow{
 		Object: runtime.RawExtension{
-			Object: volumeClaims.pvc,
+			Object: volumeClaims.PVC,
 		},
 	}
 
 	row.Cells = []any{
-		volumeClaims.pvc.Name,
+		volumeClaims.PVC.Name,
 		getNodePublishSecretRefNamespace(volumeClaims),
 		getNodePublishSecretRefName(volumeClaims),
-		util.HumanDurationUntilNow(volumeClaims.pvc.CreationTimestamp.Time),
+		util.HumanDurationUntilNow(volumeClaims.PVC.CreationTimestamp.Time),
 	}
 
 	return row
 }
 
-func getNodePublishSecretRefName(volumeClaim *VolumeClaim) string {
-	if volumeClaim.pv.Spec.CSI != nil && volumeClaim.pv.Spec.CSI.NodePublishSecretRef != nil {
-		return volumeClaim.pv.Spec.CSI.NodePublishSecretRef.Name
+func getNodePublishSecretRefName(volumeClaim *util.VolumeClaim) string {
+	if volumeClaim.PV.Spec.CSI != nil && volumeClaim.PV.Spec.CSI.NodePublishSecretRef != nil {
+		return volumeClaim.PV.Spec.CSI.NodePublishSecretRef.Name
 	}
 
 	return ""
 }
 
-func getNodePublishSecretRefNamespace(volumeClaim *VolumeClaim) string {
-	if volumeClaim.pv.Spec.CSI != nil && volumeClaim.pv.Spec.CSI.NodePublishSecretRef != nil {
-		return volumeClaim.pv.Spec.CSI.NodePublishSecretRef.Namespace
+func getNodePublishSecretRefNamespace(volumeClaim *util.VolumeClaim) string {
+	if volumeClaim.PV.Spec.CSI != nil && volumeClaim.PV.Spec.CSI.NodePublishSecretRef != nil {
+		return volumeClaim.PV.Spec.CSI.NodePublishSecretRef.Namespace
 	}
 
 	return ""
