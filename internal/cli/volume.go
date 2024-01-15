@@ -20,7 +20,13 @@ const (
 		`
 	volumeExample = `
 		# List all persistent volumes that use the specified MapR ticket secret
-		%[1]s used-by my-secret
+		%[1]s volume my-secret
+
+		# List all persistent volumes that use any MapR ticket secret in the current namespace
+		%[1]s volume
+
+		# List all persistent volumes that use any MapR ticket secret in all namespaces
+		%[1]s volume --all-namespaces
 		`
 )
 
@@ -36,10 +42,6 @@ type VolumeOptions struct {
 
 	// SecretName is the name of the secret to find persistent volumes for
 	SecretName string
-
-	// AllSecrets indicates whether to find persistent volumes for all secrets
-	// in the current namespace
-	AllSecrets bool
 
 	// AllNamespaces indicates whether to find persistent volumes for all secrets
 	// in all namespaces
@@ -66,11 +68,6 @@ func newVolumeCmd(rootOpts *rootCmdOptions) *cobra.Command {
 		Example: util.CliExample(volumeExample, filepath.Base(os.Args[0])),
 		Args:    cobra.MaximumNArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			// if we are listing volumes for all secrets in the namespace, we don't want to complete
-			if o.AllSecrets {
-				return nil, cobra.ShellCompDirectiveNoFileComp
-			}
-
 			// we only want one argument, so don't complete once we have one
 			if len(args) > 0 {
 				return nil, cobra.ShellCompDirectiveNoFileComp
@@ -112,7 +109,6 @@ func newVolumeCmd(rootOpts *rootCmdOptions) *cobra.Command {
 
 	// add flags
 	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", fmt.Sprintf("Output format. One of (%s)", util.StringSliceToFlagOptions(volumeValidOutputFormats)))
-	cmd.Flags().BoolVarP(&o.AllSecrets, "all", "a", false, "List persistent volumes for all MapR ticket secrets in the current namespace")
 	cmd.Flags().BoolVarP(&o.AllNamespaces, "all-namespaces", "A", false, "List persistent volumes for all MapR ticket secrets in all namespaces")
 
 	// register completions for flags
@@ -127,28 +123,24 @@ func (o *VolumeOptions) Complete(cmd *cobra.Command, args []string) error {
 	// parse the arguments
 	o.args = args
 
-	if len(args) > 0 {
+	// set secret name based on args
+	switch len(args) {
+	case 0:
+		o.SecretName = volume.SecretAll
+	case 1:
 		o.SecretName = args[0]
+	default:
+		return fmt.Errorf("too many arguments provided, either provide a secret name or nothing")
 	}
 
 	// set namespace based on flags
 	namespace := util.GetNamespace(o.kubernetesConfigFlags, o.AllNamespaces)
 	o.kubernetesConfigFlags.Namespace = &namespace
 
-	// set the secret name to all if we are listing volumes for all secrets
-	if o.AllSecrets {
-		o.SecretName = volume.SecretAll
-	}
-
 	return nil
 }
 
 func (o *VolumeOptions) Validate() error {
-	// ensure that the secret name was provided
-	if !o.AllNamespaces && !o.AllSecrets && o.SecretName == "" {
-		return fmt.Errorf("either --all-namespaces, --all or a secret name must be provided")
-	}
-
 	// ensure that the output format is valid
 	if o.OutputFormat != "table" && o.OutputFormat != "wide" {
 		return fmt.Errorf("output format %s is not valid", o.OutputFormat)
