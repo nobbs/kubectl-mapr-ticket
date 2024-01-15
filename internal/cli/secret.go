@@ -12,38 +12,38 @@ import (
 )
 
 const (
-	listUse   = `list`
-	listShort = "List all secrets containing MapR tickets in the current namespace"
-	listLong  = `
+	secretUse   = `secret`
+	secretShort = "List all secrets containing MapR tickets in the current namespace"
+	secretLong  = `
 		List all secrets containing MapR tickets in the current namespace and print
 		some information about them.
 		`
-	listExample = `
+	secretExample = `
 		# List all MapR tickets in the current namespace
-		%[1]s list
+		%[1]s secret
 
 		# List all MapR tickets in all namespaces
-		%[1]s list --all-namespaces
+		%[1]s secret --all-namespaces
 
 		# List only expired MapR tickets
-		%[1]s list --only-expired
+		%[1]s secret --only-expired
 
 		# List only MapR tickets that expire in the next 7 days
-		%[1]s list --expires-before 7d
+		%[1]s secret --expires-before 7d
 
 		# List MapR tickets for a specific MapR user in all namespaces
-		%[1]s list --mapr-user mapr --all-namespaces
+		%[1]s secret --mapr-user mapr --all-namespaces
 
 		# List MapR tickets with number of persistent volumes that use them
-		%[1]s list --show-in-use
+		%[1]s secret --show-in-use
 		`
 )
 
 var (
-	listValidOutputFormats = []string{"table", "wide", "json", "yaml"}
+	secretValidOutputFormats = []string{"table", "wide", "json", "yaml"}
 )
 
-type ListOptions struct {
+type SecretOptions struct {
 	*rootCmdOptions
 
 	// OutputFormat is the format to use for output
@@ -92,21 +92,21 @@ type ListOptions struct {
 	ShowInUse bool
 }
 
-func NewListOptions(rootOpts *rootCmdOptions) *ListOptions {
-	return &ListOptions{
+func NewSecretOptions(rootOpts *rootCmdOptions) *SecretOptions {
+	return &SecretOptions{
 		rootCmdOptions: rootOpts,
 	}
 }
 
-func newListCmd(rootOpts *rootCmdOptions) *cobra.Command {
-	o := NewListOptions(rootOpts)
+func newSecretCmd(rootOpts *rootCmdOptions) *cobra.Command {
+	o := NewSecretOptions(rootOpts)
 
 	cmd := &cobra.Command{
-		Aliases: []string{"ls"},
-		Use:     listUse,
-		Short:   listShort,
-		Long:    util.CliLongDesc(listLong),
-		Example: util.CliExample(listExample, filepath.Base(os.Args[0])),
+		Aliases: []string{"s"},
+		Use:     secretUse,
+		Short:   secretShort,
+		Long:    util.CliLongDesc(secretLong),
+		Example: util.CliExample(secretExample, filepath.Base(os.Args[0])),
 		Args:    cobra.NoArgs,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
@@ -134,7 +134,7 @@ func newListCmd(rootOpts *rootCmdOptions) *cobra.Command {
 	cmd.SetErr(o.IOStreams.ErrOut)
 
 	// add flags
-	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", fmt.Sprintf("Output format. One of (%s)", util.StringSliceToFlagOptions(listValidOutputFormats)))
+	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", fmt.Sprintf("Output format. One of (%s)", util.StringSliceToFlagOptions(secretValidOutputFormats)))
 	cmd.Flags().BoolVarP(&o.AllNamespaces, "all-namespaces", "A", false, "If true, list the requested object(s) across all namespaces. Namespace in current context is ignored even if specified with --namespace.")
 	cmd.Flags().StringSliceVar(&o.SortBy, "sort-by", nil, fmt.Sprintf("Sort list of secrets by the specified fields. One of (%s)", util.StringSliceToFlagOptions(secret.SortOptionsList)))
 	cmd.Flags().BoolVarP(&o.FilterOnlyExpired, "only-expired", "E", false, "If true, only show secrets with tickets that have expired")
@@ -156,7 +156,7 @@ func newListCmd(rootOpts *rootCmdOptions) *cobra.Command {
 	return cmd
 }
 
-func (o *ListOptions) Complete(cmd *cobra.Command, args []string) error {
+func (o *SecretOptions) Complete(cmd *cobra.Command, args []string) error {
 	// set namespace based on flags
 	ns := util.GetNamespace(o.kubernetesConfigFlags, o.AllNamespaces)
 	o.kubernetesConfigFlags.Namespace = &ns
@@ -164,7 +164,7 @@ func (o *ListOptions) Complete(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *ListOptions) Validate() error {
+func (o *SecretOptions) Validate() error {
 	// validate output format
 	if o.OutputFormat != "table" && o.OutputFormat != "wide" && o.OutputFormat != "json" && o.OutputFormat != "yaml" {
 		return fmt.Errorf("invalid output format: %s. Must be one of: table|wide|json|yaml", o.OutputFormat)
@@ -179,7 +179,7 @@ func (o *ListOptions) Validate() error {
 }
 
 //gocyclo:ignore
-func (o *ListOptions) Run(cmd *cobra.Command, args []string) error {
+func (o *SecretOptions) Run(cmd *cobra.Command, args []string) error {
 	client, err := util.ClientFromFlags(o.kubernetesConfigFlags)
 	if err != nil {
 		return err
@@ -251,9 +251,9 @@ func (o *ListOptions) Run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (o *ListOptions) registerCompletions(cmd *cobra.Command) error {
+func (o *SecretOptions) registerCompletions(cmd *cobra.Command) error {
 	err := cmd.RegisterFlagCompletionFunc("output", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return util.CompleteStringValues(listValidOutputFormats, toComplete)
+		return util.CompleteStringValues(secretValidOutputFormats, toComplete)
 	})
 	if err != nil {
 		return err
