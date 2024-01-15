@@ -9,6 +9,9 @@ import (
 
 	"github.com/nobbs/kubectl-mapr-ticket/internal/secret"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
+	"github.com/nobbs/kubectl-mapr-ticket/internal/volume"
+
+	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -224,6 +227,10 @@ func (o *SecretOptions) Run(cmd *cobra.Command, args []string) error {
 
 	if cmd.Flags().Changed("in-use") && o.FilterByInUse {
 		opts = append(opts, secret.WithFilterByInUse())
+
+		// add volume lister, since we need to know which secrets are in use
+		volumeLister := volume.NewLister(client, volume.SecretAll, metaV1.NamespaceAll)
+		opts = append(opts, secret.WithVolumeLister(volumeLister))
 	}
 
 	if cmd.Flags().Changed("expires-before") {
@@ -232,6 +239,10 @@ func (o *SecretOptions) Run(cmd *cobra.Command, args []string) error {
 
 	if cmd.Flags().Changed("show-in-use") && o.ShowInUse {
 		opts = append(opts, secret.WithShowInUse())
+
+		// add volume lister, since we need to know which secrets are in use
+		volumeLister := volume.NewLister(client, volume.SecretAll, metaV1.NamespaceAll)
+		opts = append(opts, secret.WithVolumeLister(volumeLister))
 	}
 
 	// create lister

@@ -5,18 +5,12 @@ import (
 	"time"
 
 	"github.com/nobbs/kubectl-mapr-ticket/internal/ticket"
-	"github.com/nobbs/kubectl-mapr-ticket/internal/volume"
+	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 
 	coreV1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
-
-type TicketSecret struct {
-	Secret *coreV1.Secret `json:"originalSecret"`
-	Ticket *ticket.Ticket `json:"parsedTicket"`
-	NumPVC uint32         `json:"numPVC"`
-}
 
 type Lister struct {
 	client    kubernetes.Interface
@@ -33,7 +27,14 @@ type Lister struct {
 	filterExpiresBefore time.Duration
 	showInUse           bool
 
-	tickets []TicketSecret
+	volumeLister volumeLister
+
+	tickets []util.TicketSecret
+}
+
+type volumeLister interface {
+	List() ([]util.Volume, error)
+	TicketUsesSecret(pv *coreV1.PersistentVolume, secret *coreV1.SecretReference) bool
 }
 
 // NewLister creates a new Lister
@@ -120,7 +121,13 @@ func WithShowInUse() ListerOption {
 	}
 }
 
-func (l *Lister) List() ([]TicketSecret, error) {
+func WithVolumeLister(volumeLister volumeLister) ListerOption {
+	return func(l *Lister) {
+		l.volumeLister = volumeLister
+	}
+}
+
+func (l *Lister) List() ([]util.TicketSecret, error) {
 	if err := l.getSecretsWithTickets(); err != nil {
 		return nil, err
 	}
@@ -169,8 +176,8 @@ func rejectSecretsWithoutTicket(secrets []coreV1.Secret) []coreV1.Secret {
 }
 
 // parseTicketsFromSecrets parses secrets to items, ignoring secrets that don't contain a MapR ticket
-func parseTicketsFromSecrets(secrets []coreV1.Secret) []TicketSecret {
-	items := make([]TicketSecret, 0, len(secrets))
+func parseTicketsFromSecrets(secrets []coreV1.Secret) []util.TicketSecret {
+	items := make([]util.TicketSecret, 0, len(secrets))
 
 	filtered := rejectSecretsWithoutTicket(secrets)
 
@@ -182,7 +189,7 @@ func parseTicketsFromSecrets(secrets []coreV1.Secret) []TicketSecret {
 			continue
 		}
 
-		items = append(items, TicketSecret{
+		items = append(items, util.TicketSecret{
 			Secret: &secret,
 			Ticket: ticket,
 		})
@@ -198,7 +205,7 @@ func (l *Lister) filterTicketsOnlyExpired() *Lister {
 		return l
 	}
 
-	var filtered []TicketSecret
+	var filtered []util.TicketSecret
 
 	for _, item := range l.tickets {
 		if item.Ticket.IsExpired() {
@@ -218,7 +225,7 @@ func (l *Lister) filterTicketsOnlyUnexpired() *Lister {
 		return l
 	}
 
-	var filtered []TicketSecret
+	var filtered []util.TicketSecret
 
 	for _, item := range l.tickets {
 		if !item.Ticket.IsExpired() {
@@ -238,7 +245,7 @@ func (l *Lister) filterTicketsByMaprCluster() *Lister {
 		return l
 	}
 
-	var filtered []TicketSecret
+	var filtered []util.TicketSecret
 
 	for _, item := range l.tickets {
 		if item.Ticket.Cluster == *l.filterByMaprCluster {
@@ -258,7 +265,7 @@ func (l *Lister) filterTicketsByMaprUser() *Lister {
 		return l
 	}
 
-	var filtered []TicketSecret
+	var filtered []util.TicketSecret
 
 	for _, item := range l.tickets {
 		if item.Ticket.UserCreds.GetUserName() == *l.filterByMaprUser {
@@ -278,7 +285,7 @@ func (l *Lister) filterTicketsByUID() *Lister {
 		return l
 	}
 
-	var filtered []TicketSecret
+	var filtered []util.TicketSecret
 
 	for _, item := range l.tickets {
 		if *item.Ticket.UserCreds.Uid == *l.filterByUID {
@@ -298,7 +305,7 @@ func (l *Lister) filterTicketsByGID() *Lister {
 		return l
 	}
 
-	var filtered []TicketSecret
+	var filtered []util.TicketSecret
 
 	for _, item := range l.tickets {
 		for _, gid := range item.Ticket.UserCreds.Gids {
@@ -322,7 +329,7 @@ func (l *Lister) filterTicketsExpiresBefore() *Lister {
 		return l
 	}
 
-	var filtered []TicketSecret
+	var filtered []util.TicketSecret
 
 	for _, item := range l.tickets {
 		if item.Ticket.ExpiresBefore(l.filterExpiresBefore) {
@@ -342,7 +349,7 @@ func (l *Lister) filterTicketsInUse() *Lister {
 		return l
 	}
 
-	var filtered []TicketSecret
+	var filtered []util.TicketSecret
 
 	for _, item := range l.tickets {
 		if item.NumPVC > 0 {
@@ -357,23 +364,26 @@ func (l *Lister) filterTicketsInUse() *Lister {
 
 // collectPVsUsingTickets enriches the ticket items with the number of PVCs using the ticket
 func (l *Lister) collectPVsUsingTickets() *Lister {
+	// if we don't have a volume lister, we need to skip this step
+	if l.volumeLister == nil {
+		return l
+	}
+
 	// if we don't need to show in use, or filter by in use, we can skip this step
 	if !l.showInUse && !l.filterByInUse {
 		return l
 	}
 
-	volumeLister := volume.NewLister(l.client, volume.SecretAll, metaV1.NamespaceAll)
-
 	// get all persistent volumes
-	pvs, err := volumeLister.List()
+	pvs, err := l.volumeLister.List()
 	if err != nil {
 		return l
 	}
 
 	// check for each ticket if it is in use by a persistent volume
 	for i := range l.tickets {
-		for _, pv := range pvs {
-			if volume.TicketUsesSecret(&pv, &coreV1.SecretReference{
+		for _, volume := range pvs {
+			if l.volumeLister.TicketUsesSecret(volume.PV, &coreV1.SecretReference{
 				Name:      l.tickets[i].Secret.Name,
 				Namespace: l.tickets[i].Secret.Namespace,
 			}) {

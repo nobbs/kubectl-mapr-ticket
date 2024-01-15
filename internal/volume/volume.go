@@ -3,6 +3,8 @@ package volume
 import (
 	"context"
 
+	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
+
 	coreV1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -21,51 +23,78 @@ var (
 	}
 )
 
+type secretLister interface {
+	List() ([]util.TicketSecret, error)
+}
+
 type Lister struct {
 	client     kubernetes.Interface
 	secretName string
 	namespace  string
 
-	volumes []coreV1.PersistentVolume
+	secretLister secretLister
+
+	volumes []util.Volume
 }
 
-func NewLister(client kubernetes.Interface, secretName string, namespace string) *Lister {
+type ListerOption func(*Lister)
+
+func WithSecretLister(secretLister secretLister) ListerOption {
+	return func(l *Lister) {
+		l.secretLister = secretLister
+	}
+}
+
+func NewLister(client kubernetes.Interface, secretName string, namespace string, opts ...ListerOption) *Lister {
 	l := &Lister{
 		client:     client,
 		secretName: secretName,
 		namespace:  namespace,
 	}
 
+	for _, opt := range opts {
+		opt(l)
+	}
+
 	return l
 }
 
-func (l *Lister) List() ([]coreV1.PersistentVolume, error) {
+func (l *Lister) List() ([]util.Volume, error) {
 	if err := l.getVolumes(); err != nil {
 		return nil, err
 	}
 
 	l.filterVolumesToMaprCSI().
-		filterVolumeUsesTicket()
+		filterVolumeUsesTicket().
+		collectSecrets()
 
 	return l.volumes, nil
 }
 
 func (l *Lister) getVolumes() error {
-	volumes, err := l.client.CoreV1().PersistentVolumes().List(context.TODO(), metaV1.ListOptions{})
+	pvs, err := l.client.CoreV1().PersistentVolumes().List(context.TODO(), metaV1.ListOptions{})
 	if err != nil {
 		return err
 	}
 
-	l.volumes = volumes.Items
+	volumes := make([]util.Volume, 0, len(pvs.Items))
+
+	for i := range pvs.Items {
+		volumes = append(volumes, util.Volume{
+			PV: &pvs.Items[i],
+		})
+	}
+
+	l.volumes = volumes
 
 	return nil
 }
 
 func (l *Lister) filterVolumesToMaprCSI() *Lister {
-	var filtered []coreV1.PersistentVolume
+	var filtered []util.Volume
 
 	for _, volume := range l.volumes {
-		if IsMaprCSIBased(&volume) {
+		if IsMaprCSIBased(volume.PV) {
 			filtered = append(filtered, volume)
 		}
 	}
@@ -76,10 +105,10 @@ func (l *Lister) filterVolumesToMaprCSI() *Lister {
 }
 
 func (l *Lister) filterVolumeUsesTicket() *Lister {
-	var filtered []coreV1.PersistentVolume
+	var filtered []util.Volume
 
 	for _, volume := range l.volumes {
-		if TicketUsesSecret(&volume, &coreV1.SecretReference{
+		if l.TicketUsesSecret(volume.PV, &coreV1.SecretReference{
 			Name:      l.secretName,
 			Namespace: l.namespace,
 		}) {
@@ -92,7 +121,7 @@ func (l *Lister) filterVolumeUsesTicket() *Lister {
 	return l
 }
 
-func TicketUsesSecret(volume *coreV1.PersistentVolume, secretRef *coreV1.SecretReference) bool {
+func (l *Lister) TicketUsesSecret(volume *coreV1.PersistentVolume, secretRef *coreV1.SecretReference) bool {
 	// Check if the volume uses a CSI driver
 	if volume.Spec.CSI == nil {
 		return false
@@ -140,4 +169,28 @@ func IsMaprCSIBased(volume *coreV1.PersistentVolume) bool {
 	}
 
 	return false
+}
+
+func (l *Lister) collectSecrets() *Lister {
+	// check if we have a secret lister, if not, return early
+	if l.secretLister == nil {
+		return l
+	}
+
+	// collect secrets
+	secrets, err := l.secretLister.List()
+	if err != nil {
+		return l
+	}
+
+	// add secrets to volumes
+	for i := range l.volumes {
+		for j := range secrets {
+			if l.volumes[i].PV.Spec.CSI.NodePublishSecretRef.Name == secrets[j].Secret.Name {
+				l.volumes[i].Ticket = secrets[j].Ticket
+			}
+		}
+	}
+
+	return l
 }

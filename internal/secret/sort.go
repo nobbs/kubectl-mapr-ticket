@@ -3,6 +3,8 @@ package secret
 import (
 	"fmt"
 	"sort"
+
+	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 )
 
 type SortOptions string
@@ -60,42 +62,42 @@ func ValidateSortOptions(sortOptions []string) error {
 }
 
 // sortByName sorts the items by secret name
-func sortByName(items []TicketSecret) {
+func sortByName(items []util.TicketSecret) {
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].Secret.Name < items[j].Secret.Name
 	})
 }
 
 // sortByNamespace sorts the items by secret namespace
-func sortByNamespace(items []TicketSecret) {
+func sortByNamespace(items []util.TicketSecret) {
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].Secret.Namespace < items[j].Secret.Namespace
 	})
 }
 
 // sortByMaprCluster sorts the items by MapR cluster that the ticket is for
-func sortByMaprCluster(items []TicketSecret) {
+func sortByMaprCluster(items []util.TicketSecret) {
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].Ticket.Cluster < items[j].Ticket.Cluster
 	})
 }
 
 // sortByMaprUser sorts the items by MapR user that the ticket is for
-func sortByMaprUser(items []TicketSecret) {
+func sortByMaprUser(items []util.TicketSecret) {
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].Ticket.UserCreds.GetUserName() < items[j].Ticket.UserCreds.GetUserName()
 	})
 }
 
 // sortByCreationTimestamp sorts the items by creation timestamp of the ticket
-func sortByCreationTimestamp(items []TicketSecret) {
+func sortByCreationTimestamp(items []util.TicketSecret) {
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].Ticket.CreationTime().Before(items[j].Ticket.CreationTime())
 	})
 }
 
 // sortByExpiryTime sorts the items by expiry time of the ticket
-func sortByExpiryTime(items []TicketSecret) {
+func sortByExpiryTime(items []util.TicketSecret) {
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].Ticket.ExpirationTime().Before(items[j].Ticket.ExpirationTime())
 	})
@@ -103,7 +105,7 @@ func sortByExpiryTime(items []TicketSecret) {
 
 // sortByNumPVC sorts the items by the number of persistent volumes that are
 // using the secret
-func sortByNumPVC(items []TicketSecret) {
+func sortByNumPVC(items []util.TicketSecret) {
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].NumPVC < items[j].NumPVC
 	})

@@ -92,7 +92,7 @@ var (
 	}
 )
 
-func Print(cmd *cobra.Command, items []TicketSecret) error {
+func Print(cmd *cobra.Command, items []util.TicketSecret) error {
 	format := cmd.Flag("output").Value.String()
 	allNamespaces := cmd.Flag("all-namespaces").Changed && cmd.Flag("all-namespaces").Value.String() == "true"
 	withInUse := cmd.Flag("show-in-use").Changed && cmd.Flag("show-in-use").Value.String() == "true"
@@ -128,7 +128,7 @@ func Print(cmd *cobra.Command, items []TicketSecret) error {
 }
 
 // generateTable generates a table from the secrets containing MapR tickets
-func generateTable(items []TicketSecret) *metaV1.Table {
+func generateTable(items []util.TicketSecret) *metaV1.Table {
 	rows := generateRows(items)
 
 	return &metaV1.Table{
@@ -139,7 +139,7 @@ func generateTable(items []TicketSecret) *metaV1.Table {
 
 // generateRows generates the rows for the table from the secrets containing
 // MapR tickets
-func generateRows(items []TicketSecret) []metaV1.TableRow {
+func generateRows(items []util.TicketSecret) []metaV1.TableRow {
 	rows := make([]metaV1.TableRow, 0, len(items))
 
 	for _, item := range items {
@@ -151,7 +151,7 @@ func generateRows(items []TicketSecret) []metaV1.TableRow {
 
 // generateRow generates a row for the table from the secret containing a MapR
 // ticket
-func generateRow(item *TicketSecret) *metaV1.TableRow {
+func generateRow(item *util.TicketSecret) *metaV1.TableRow {
 	row := &metaV1.TableRow{
 		Object: runtime.RawExtension{
 			Object: item.Secret,
@@ -165,7 +165,7 @@ func generateRow(item *TicketSecret) *metaV1.TableRow {
 		item.Ticket.UserCreds.GetUid(),
 		item.Ticket.UserCreds.GetGids(),
 		item.Ticket.ExpirationTime().Format(ticket.DefaultTimeFormat),
-		getStatus(item.Ticket),
+		GetStatus(item.Ticket),
 		util.ShortHumanDuration(item.Ticket.ExpirationTime().Sub(item.Ticket.CreationTime())),
 		item.Ticket.CreationTime().Format(ticket.DefaultTimeFormat),
 		util.ShortHumanDurationUntilNow(item.Ticket.CreationTime()),
@@ -176,7 +176,7 @@ func generateRow(item *TicketSecret) *metaV1.TableRow {
 
 // enrichTableWithInUse enriches the table with a column indicating whether the
 // ticket is in use by a persistent volume or not
-func enrichTableWithInUse(table *metaV1.Table, items []TicketSecret) {
+func enrichTableWithInUse(table *metaV1.Table, items []util.TicketSecret) {
 	insertPos := len(tableColumns) - 1
 
 	table.ColumnDefinitions = append(
@@ -194,7 +194,7 @@ func enrichTableWithInUse(table *metaV1.Table, items []TicketSecret) {
 	}
 }
 
-func printEncoded(items []TicketSecret, format string, stream io.Writer) error {
+func printEncoded(items []util.TicketSecret, format string, stream io.Writer) error {
 	bytesBuffer := bytes.NewBuffer([]byte{})
 
 	if len(items) == 1 {
@@ -220,7 +220,7 @@ func printEncoded(items []TicketSecret, format string, stream io.Writer) error {
 	return nil
 }
 
-func encodeItems(items []TicketSecret, format string) []byte {
+func encodeItems(items []util.TicketSecret, format string) []byte {
 	switch format {
 	case "json":
 		encoded, err := json.MarshalIndent(items, "", "  ")
@@ -241,7 +241,7 @@ func encodeItems(items []TicketSecret, format string) []byte {
 	return nil
 }
 
-func encodeItem(item *TicketSecret, format string) []byte {
+func encodeItem(item *util.TicketSecret, format string) []byte {
 	switch format {
 	case "json":
 		encoded, err := json.MarshalIndent(item, "", "  ")
@@ -262,7 +262,11 @@ func encodeItem(item *TicketSecret, format string) []byte {
 	return nil
 }
 
-func getStatus(ticket *ticket.Ticket) string {
+func GetStatus(ticket *ticket.Ticket) string {
+	if ticket == nil {
+		return "Invalid"
+	}
+
 	if ticket.IsExpired() {
 		return fmt.Sprintf("Expired (%s ago)", util.ShortHumanDurationComparedToNow(ticket.ExpirationTime()))
 	}

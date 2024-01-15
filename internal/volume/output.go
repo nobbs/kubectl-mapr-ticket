@@ -3,6 +3,7 @@ package volume
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/nobbs/kubectl-mapr-ticket/internal/secret"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 
 	coreV1 "k8s.io/api/core/v1"
@@ -57,6 +58,12 @@ var (
 			Priority:    1,
 		},
 		{
+			Name:        "Ticket Status",
+			Type:        "string",
+			Description: "Status of the MapR ticket",
+			Priority:    0,
+		},
+		{
 			Name:        "Age",
 			Type:        "string",
 			Format:      "date-time",
@@ -66,7 +73,7 @@ var (
 	}
 )
 
-func Print(cmd *cobra.Command, volumes []coreV1.PersistentVolume) error {
+func Print(cmd *cobra.Command, volumes []util.Volume) error {
 	format := cmd.Flag("output").Value.String()
 
 	// generate the table
@@ -85,7 +92,7 @@ func Print(cmd *cobra.Command, volumes []coreV1.PersistentVolume) error {
 	return nil
 }
 
-func generableTable(pvs []coreV1.PersistentVolume) *metaV1.Table {
+func generableTable(pvs []util.Volume) *metaV1.Table {
 	rows := generateRows(pvs)
 
 	return &metaV1.Table{
@@ -94,7 +101,7 @@ func generableTable(pvs []coreV1.PersistentVolume) *metaV1.Table {
 	}
 }
 
-func generateRows(pvs []coreV1.PersistentVolume) []metaV1.TableRow {
+func generateRows(pvs []util.Volume) []metaV1.TableRow {
 	rows := make([]metaV1.TableRow, 0, len(pvs))
 
 	for _, pv := range pvs {
@@ -104,22 +111,23 @@ func generateRows(pvs []coreV1.PersistentVolume) []metaV1.TableRow {
 	return rows
 }
 
-func generateRow(pv *coreV1.PersistentVolume) *metaV1.TableRow {
+func generateRow(pv *util.Volume) *metaV1.TableRow {
 	row := &metaV1.TableRow{
 		Object: runtime.RawExtension{
-			Object: pv,
+			Object: pv.PV,
 		},
 	}
 
 	row.Cells = []any{
-		pv.Name,
-		getNodePublishSecretRefNamespace(pv),
-		getNodePublishSecretRefName(pv),
-		getClaimNamespace(pv),
-		getClaimName(pv),
-		pv.Spec.CSI.VolumeAttributes["volumePath"],
-		pv.Spec.CSI.VolumeHandle,
-		util.HumanDurationUntilNow(pv.CreationTimestamp.Time),
+		pv.PV.Name,
+		getNodePublishSecretRefNamespace(pv.PV),
+		getNodePublishSecretRefName(pv.PV),
+		getClaimNamespace(pv.PV),
+		getClaimName(pv.PV),
+		getVolumePath(pv.PV),
+		getVolumeHandle(pv.PV),
+		secret.GetStatus(pv.Ticket),
+		util.HumanDurationUntilNow(pv.PV.CreationTimestamp.Time),
 	}
 
 	return row
@@ -146,12 +154,28 @@ func getClaimName(pv *coreV1.PersistentVolume) string {
 		return pv.Spec.ClaimRef.Name
 	}
 
-	return ""
+	return "<none>"
 }
 
 func getClaimNamespace(pv *coreV1.PersistentVolume) string {
 	if pv.Spec.ClaimRef != nil {
 		return pv.Spec.ClaimRef.Namespace
+	}
+
+	return "<none>"
+}
+
+func getVolumePath(pv *coreV1.PersistentVolume) string {
+	if pv.Spec.CSI != nil {
+		return pv.Spec.CSI.VolumeAttributes["volumePath"]
+	}
+
+	return ""
+}
+
+func getVolumeHandle(pv *coreV1.PersistentVolume) string {
+	if pv.Spec.CSI != nil {
+		return pv.Spec.CSI.VolumeHandle
 	}
 
 	return ""

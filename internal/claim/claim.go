@@ -3,6 +3,7 @@ package claim
 import (
 	"context"
 
+	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/volume"
 
 	coreV1 "k8s.io/api/core/v1"
@@ -10,16 +11,11 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-type VolumeClaim struct {
-	pvc *coreV1.PersistentVolumeClaim
-	pv  *coreV1.PersistentVolume
-}
-
 type Lister struct {
 	client    kubernetes.Interface
 	namespace string
 
-	volumeClaims []VolumeClaim
+	volumeClaims []util.VolumeClaim
 }
 
 func NewLister(client kubernetes.Interface, namespace string) *Lister {
@@ -31,7 +27,7 @@ func NewLister(client kubernetes.Interface, namespace string) *Lister {
 	return l
 }
 
-func (l *Lister) List() ([]VolumeClaim, error) {
+func (l *Lister) List() ([]util.VolumeClaim, error) {
 	// Get all PVCs in the namespace
 	if err := l.getClaims(); err != nil {
 		return nil, err
@@ -50,11 +46,11 @@ func (l *Lister) getClaims() error {
 		return err
 	}
 
-	volumeClaims := make([]VolumeClaim, 0, len(claims.Items))
+	volumeClaims := make([]util.VolumeClaim, 0, len(claims.Items))
 
 	for i := range claims.Items {
-		volumeClaims = append(volumeClaims, VolumeClaim{
-			pvc: &claims.Items[i],
+		volumeClaims = append(volumeClaims, util.VolumeClaim{
+			PVC: &claims.Items[i],
 		})
 	}
 
@@ -64,10 +60,10 @@ func (l *Lister) getClaims() error {
 }
 
 func (l *Lister) filterClaimsBoundOnly() *Lister {
-	filtered := make([]VolumeClaim, 0, len(l.volumeClaims))
+	filtered := make([]util.VolumeClaim, 0, len(l.volumeClaims))
 
 	for _, volumeClaim := range l.volumeClaims {
-		if volumeClaim.pvc.Status.Phase == coreV1.ClaimBound {
+		if volumeClaim.PVC.Status.Phase == coreV1.ClaimBound {
 			filtered = append(filtered, volumeClaim)
 		}
 	}
@@ -94,9 +90,9 @@ func (l *Lister) filterClaimsMaprCSI() *Lister {
 		return nil
 	}
 
-	filtered := make([]VolumeClaim, 0, len(l.volumeClaims))
+	filtered := make([]util.VolumeClaim, 0, len(l.volumeClaims))
 	for _, volumeClaim := range l.volumeClaims {
-		pv := lookupPV(volumeClaim.pvc)
+		pv := lookupPV(volumeClaim.PVC)
 		if pv == nil {
 			continue
 		}
@@ -105,7 +101,7 @@ func (l *Lister) filterClaimsMaprCSI() *Lister {
 			continue
 		}
 
-		volumeClaim.pv = pv
+		volumeClaim.PV = pv
 
 		filtered = append(filtered, volumeClaim)
 	}
