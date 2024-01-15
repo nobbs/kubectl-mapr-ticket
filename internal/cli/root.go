@@ -66,6 +66,7 @@ func NewRootCmd(flags *genericclioptions.ConfigFlags, streams genericiooptions.I
 
 	// add subcommands
 	rootCmd.AddCommand(
+		newClaimCmd(o),
 		newSecretCmd(o),
 		newVersionCmd(o),
 		newVolumeCmd(o),

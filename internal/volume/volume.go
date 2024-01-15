@@ -65,7 +65,7 @@ func (l *Lister) filterVolumesToMaprCSI() *Lister {
 	var filtered []coreV1.PersistentVolume
 
 	for _, volume := range l.volumes {
-		if isMaprCSIBased(&volume) {
+		if IsMaprCSIBased(&volume) {
 			filtered = append(filtered, volume)
 		}
 	}
@@ -126,7 +126,7 @@ func TicketUsesSecret(volume *coreV1.PersistentVolume, secretRef *coreV1.SecretR
 	return true
 }
 
-func isMaprCSIBased(volume *coreV1.PersistentVolume) bool {
+func IsMaprCSIBased(volume *coreV1.PersistentVolume) bool {
 	// Check if the volume is MapR CSI-based
 	if volume.Spec.CSI == nil {
 		return false
