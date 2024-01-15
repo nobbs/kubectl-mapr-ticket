@@ -43,9 +43,13 @@ func newClaimCmd(rootOpts *rootCmdOptions) *cobra.Command {
 	o := NewClaimOptions(rootOpts)
 
 	cmd := &cobra.Command{
-		Use:   claimUse,
-		Short: claimShort,
-		Long:  util.CliLongDesc(claimLong),
+		Aliases: []string{"pvc"},
+		Use:     claimUse,
+		Short:   claimShort,
+		Long:    util.CliLongDesc(claimLong),
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := o.Complete(cmd, args); err != nil {
 				return err
