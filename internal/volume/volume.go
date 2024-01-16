@@ -11,6 +11,8 @@ import (
 )
 
 const (
+	// SecretAll is a special value that can be used to specify that all secrets from the specified
+	// namespace should be used.
 	SecretAll = "<all>"
 )
 
@@ -28,28 +30,39 @@ type secretLister interface {
 }
 
 type Lister struct {
-	client     kubernetes.Interface
-	secretName string
-	namespace  string
-
+	client       kubernetes.Interface
 	secretLister secretLister
-
-	volumes []util.Volume
+	secretName   string
+	namespace    string
+	sortBy       []SortOptions
+	volumes      []util.Volume
 }
 
 type ListerOption func(*Lister)
 
+// WithSortBy sets the sort order used by the Lister for output
+func WithSortBy(sortBy []SortOptions) ListerOption {
+	return func(l *Lister) {
+		l.sortBy = sortBy
+	}
+}
+
+// WithSecretLister sets the secret lister used by the Lister to collect secrets and tickets
+// referenced by the volumes
 func WithSecretLister(secretLister secretLister) ListerOption {
 	return func(l *Lister) {
 		l.secretLister = secretLister
 	}
 }
 
+// NewLister returns a new volume lister that lists volumes that are provisioned by one of the
+// MapR CSI provisioners and that use the specified secret.
 func NewLister(client kubernetes.Interface, secretName string, namespace string, opts ...ListerOption) *Lister {
 	l := &Lister{
 		client:     client,
 		secretName: secretName,
 		namespace:  namespace,
+		sortBy:     DefaultSortBy,
 	}
 
 	for _, opt := range opts {
@@ -59,6 +72,7 @@ func NewLister(client kubernetes.Interface, secretName string, namespace string,
 	return l
 }
 
+// List returns a list of volumes using the MapR CSI provisioners and the specified secret.
 func (l *Lister) List() ([]util.Volume, error) {
 	if err := l.getVolumes(); err != nil {
 		return nil, err
@@ -66,61 +80,16 @@ func (l *Lister) List() ([]util.Volume, error) {
 
 	l.filterVolumesToMaprCSI().
 		filterVolumeUsesTicket().
-		collectSecrets()
+		collectSecrets().
+		sort()
 
 	return l.volumes, nil
 }
 
-func (l *Lister) getVolumes() error {
-	pvs, err := l.client.CoreV1().PersistentVolumes().List(context.TODO(), metaV1.ListOptions{})
-	if err != nil {
-		return err
-	}
-
-	volumes := make([]util.Volume, 0, len(pvs.Items))
-
-	for i := range pvs.Items {
-		volumes = append(volumes, util.Volume{
-			PV: &pvs.Items[i],
-		})
-	}
-
-	l.volumes = volumes
-
-	return nil
-}
-
-func (l *Lister) filterVolumesToMaprCSI() *Lister {
-	var filtered []util.Volume
-
-	for _, volume := range l.volumes {
-		if IsMaprCSIBased(volume.PV) {
-			filtered = append(filtered, volume)
-		}
-	}
-
-	l.volumes = filtered
-
-	return l
-}
-
-func (l *Lister) filterVolumeUsesTicket() *Lister {
-	var filtered []util.Volume
-
-	for _, volume := range l.volumes {
-		if l.TicketUsesSecret(volume.PV, &coreV1.SecretReference{
-			Name:      l.secretName,
-			Namespace: l.namespace,
-		}) {
-			filtered = append(filtered, volume)
-		}
-	}
-
-	l.volumes = filtered
-
-	return l
-}
-
+// TicketUsesSecret returns true if the volume uses the specified secret and false otherwise. If the
+// secret name is equal to the value of SecretAll, all volumes that use a secret from the specified
+// namespace are returned. If the secret namespace is equal to the value of NamespaceAll, basically
+// all volumes that any secret in any namespace will evaluate to true.
 func (l *Lister) TicketUsesSecret(volume *coreV1.PersistentVolume, secretRef *coreV1.SecretReference) bool {
 	// Check if the volume uses a CSI driver
 	if volume.Spec.CSI == nil {
@@ -133,7 +102,7 @@ func (l *Lister) TicketUsesSecret(volume *coreV1.PersistentVolume, secretRef *co
 	}
 
 	// Check if we want secrets from all namespaces
-	if secretRef.Namespace == metaV1.NamespaceAll {
+	if secretRef.Namespace == util.NamespaceAll {
 		return true
 	}
 
@@ -155,22 +124,62 @@ func (l *Lister) TicketUsesSecret(volume *coreV1.PersistentVolume, secretRef *co
 	return true
 }
 
-func IsMaprCSIBased(volume *coreV1.PersistentVolume) bool {
-	// Check if the volume is MapR CSI-based
-	if volume.Spec.CSI == nil {
-		return false
+// getVolumes gets all persistent volumes in the cluster.
+func (l *Lister) getVolumes() error {
+	pvs, err := l.client.CoreV1().PersistentVolumes().List(context.TODO(), metaV1.ListOptions{})
+	if err != nil {
+		return err
 	}
 
-	// Check if the volume is provisioned by one of the MapR CSI provisioners
-	for _, provisioner := range maprCSIProvisioners {
-		if volume.Spec.CSI.Driver == provisioner {
-			return true
+	l.volumes = make([]util.Volume, 0, len(pvs.Items))
+
+	for i := range pvs.Items {
+		l.volumes = append(l.volumes, util.Volume{
+			PV: &pvs.Items[i],
+		})
+	}
+
+	return nil
+}
+
+// filterVolumesToMaprCSI filters volumes to those that are provisioned by one of the MapR CSI
+// provisioners.
+func (l *Lister) filterVolumesToMaprCSI() *Lister {
+	var filtered []util.Volume
+
+	for _, volume := range l.volumes {
+		if IsMaprCSIBased(volume.PV) {
+			filtered = append(filtered, volume)
 		}
 	}
 
-	return false
+	l.volumes = filtered
+
+	return l
 }
 
+// filterVolumeUsesTicket filters volumes that use the specified ticket secret. If the secret name
+// is equal to the value of SecretAll, all volumes that use a secret from the specified namespace
+// are returned.
+func (l *Lister) filterVolumeUsesTicket() *Lister {
+	var filtered []util.Volume
+
+	for _, volume := range l.volumes {
+		if l.TicketUsesSecret(volume.PV, &coreV1.SecretReference{
+			Name:      l.secretName,
+			Namespace: l.namespace,
+		}) {
+			filtered = append(filtered, volume)
+		}
+	}
+
+	l.volumes = filtered
+
+	return l
+}
+
+// collectSecrets collects secrets and tickets referenced by the volumes, if a secret lister was
+// provided to the Lister.
 func (l *Lister) collectSecrets() *Lister {
 	// check if we have a secret lister, if not, return early
 	if l.secretLister == nil {
@@ -186,11 +195,30 @@ func (l *Lister) collectSecrets() *Lister {
 	// add secrets to volumes
 	for i := range l.volumes {
 		for j := range secrets {
-			if l.volumes[i].PV.Spec.CSI.NodePublishSecretRef.Name == secrets[j].Secret.Name {
-				l.volumes[i].Ticket = secrets[j].Ticket
+			if l.volumes[i].PV.Spec.CSI.NodePublishSecretRef.Name == secrets[j].Secret.Name &&
+				l.volumes[i].PV.Spec.CSI.NodePublishSecretRef.Namespace == secrets[j].Secret.Namespace {
+				l.volumes[i].Ticket = &secrets[j]
 			}
 		}
 	}
 
 	return l
+}
+
+// IsMaprCSIBased returns true if the volume is provisioned by one of the MapR CSI provisioners and
+// false otherwise.
+func IsMaprCSIBased(volume *coreV1.PersistentVolume) bool {
+	// Check if the volume is MapR CSI-based
+	if volume.Spec.CSI == nil {
+		return false
+	}
+
+	// Check if the volume is provisioned by one of the MapR CSI provisioners
+	for _, provisioner := range maprCSIProvisioners {
+		if volume.Spec.CSI.Driver == provisioner {
+			return true
+		}
+	}
+
+	return false
 }
