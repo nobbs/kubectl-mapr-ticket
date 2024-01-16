@@ -126,11 +126,19 @@ func generateRow(pv *util.Volume) *metaV1.TableRow {
 		getClaimName(pv.PV),
 		getVolumePath(pv.PV),
 		getVolumeHandle(pv.PV),
-		secret.GetStatus(pv.Ticket),
+		getTicketStatus(pv.Ticket),
 		util.HumanDurationUntilNow(pv.PV.CreationTimestamp.Time),
 	}
 
 	return row
+}
+
+func getTicketStatus(t *util.TicketSecret) string {
+	if t == nil {
+		return "Invalid"
+	}
+
+	return secret.GetStatus(t.Ticket)
 }
 
 func getNodePublishSecretRefName(pv *coreV1.PersistentVolume) string {

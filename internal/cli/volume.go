@@ -10,8 +10,6 @@ import (
 	"github.com/nobbs/kubectl-mapr-ticket/internal/secret"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/util"
 	"github.com/nobbs/kubectl-mapr-ticket/internal/volume"
-
-	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -30,6 +28,9 @@ const (
 
 		# List all persistent volumes that use any MapR ticket secret in all namespaces
 		%[1]s volume --all-namespaces
+
+		# List all persistent volumes that use any MapR ticket secret in all namespaces, sorted by expiration date
+		%[1]s volume --all-namespaces --sort-by expiryTime
 		`
 )
 
@@ -52,6 +53,9 @@ type VolumeOptions struct {
 
 	// OutputFormat is the format to use for output
 	OutputFormat string
+
+	// SortBy is the list of fields to sort by
+	SortBy []string
 }
 
 func NewVolumeOptions(rootOpts *rootCmdOptions) *VolumeOptions {
@@ -113,6 +117,7 @@ func newVolumeCmd(rootOpts *rootCmdOptions) *cobra.Command {
 	// add flags
 	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", fmt.Sprintf("Output format. One of (%s)", util.StringSliceToFlagOptions(volumeValidOutputFormats)))
 	cmd.Flags().BoolVarP(&o.AllNamespaces, "all-namespaces", "A", false, "List persistent volumes for all MapR ticket secrets in all namespaces")
+	cmd.Flags().StringSliceVar(&o.SortBy, "sort-by", []string{}, fmt.Sprintf("Sort list of persistent volumes by the specified fields. One or more of (%s)", util.StringSliceToFlagOptions(volume.SortOptionsList)))
 
 	// register completions for flags
 	if err := o.registerCompletions(cmd); err != nil {
@@ -149,6 +154,11 @@ func (o *VolumeOptions) Validate() error {
 		return fmt.Errorf("output format %s is not valid", o.OutputFormat)
 	}
 
+	// ensure that the sort options are valid
+	if err := volume.ValidateSortOptions(o.SortBy); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -161,15 +171,30 @@ func (o *VolumeOptions) Run(cmd *cobra.Command, args []string) error {
 	// create secret lister
 	secretLister := secret.NewLister(
 		client,
-		metaV1.NamespaceAll,
+		util.NamespaceAll,
 	)
+
+	// create list options and pass them to the lister
+	opts := []volume.ListerOption{
+		volume.WithSecretLister(secretLister),
+	}
+
+	if cmd.Flags().Changed("sort-by") && o.SortBy != nil {
+		// convert sort options to SortOptions
+		sortOptions := make([]volume.SortOptions, 0, len(o.SortBy))
+		for _, sortBy := range o.SortBy {
+			sortOptions = append(sortOptions, volume.SortOptions(sortBy))
+		}
+
+		opts = append(opts, volume.WithSortBy(sortOptions))
+	}
 
 	// create lister
 	lister := volume.NewLister(
 		client,
 		o.SecretName,
 		*o.kubernetesConfigFlags.Namespace,
-		volume.WithSecretLister(secretLister),
+		opts...,
 	)
 
 	// run the lister
@@ -189,6 +214,13 @@ func (o *VolumeOptions) Run(cmd *cobra.Command, args []string) error {
 func (o *VolumeOptions) registerCompletions(cmd *cobra.Command) error {
 	err := cmd.RegisterFlagCompletionFunc("output", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return util.CompleteStringValues(volumeValidOutputFormats, toComplete)
+	})
+	if err != nil {
+		return err
+	}
+
+	err = cmd.RegisterFlagCompletionFunc("sort-by", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return util.CompleteStringValues(secret.SortOptionsList, toComplete)
 	})
 	if err != nil {
 		return err

@@ -6,6 +6,12 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+const (
+	// NamespaceAll is a special value that can be used to specify that all secrets from all
+	// namespaces should be used.
+	NamespaceAll = apiV1.NamespaceAll
+)
+
 // ClientFromFlags creates a Kubernetes client from the flags passed to the
 // CLI.
 func ClientFromFlags(flags *genericclioptions.ConfigFlags) (kubernetes.Interface, error) {
@@ -31,7 +37,7 @@ func GetNamespace(flags *genericclioptions.ConfigFlags, allNamespaces bool) stri
 
 	// if allNamespaces is set, override the namespace with metaV1.NamespaceAll
 	if allNamespaces {
-		namespace = apiV1.NamespaceAll
+		namespace = NamespaceAll
 	}
 
 	return namespace

@@ -19,7 +19,7 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 )
 
-func TestLister_List(t *testing.T) {
+func TestLister_Default(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -123,7 +123,7 @@ func TestLister_List(t *testing.T) {
 	}
 }
 
-func TestLister_ListWithFilterByMaprCluster(t *testing.T) {
+func TestLister_WithFilterByMaprCluster(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -236,7 +236,7 @@ func TestLister_ListWithFilterByMaprCluster(t *testing.T) {
 	}
 }
 
-func TestLister_ListWithFilterByMaprUser(t *testing.T) {
+func TestLister_WithFilterByMaprUser(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -349,7 +349,7 @@ func TestLister_ListWithFilterByMaprUser(t *testing.T) {
 	}
 }
 
-func TestLister_ListWithFilterByUID(t *testing.T) {
+func TestLister_WithFilterByUID(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -410,7 +410,7 @@ func TestLister_ListWithFilterByUID(t *testing.T) {
 	}
 }
 
-func TestLister_ListWithFilterByGID(t *testing.T) {
+func TestLister_WithFilterByGID(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -499,7 +499,7 @@ func TestLister_ListWithFilterByGID(t *testing.T) {
 	}
 }
 
-func TestLister_ListWithFilterOnlyExpired(t *testing.T) {
+func TestLister_WithFilterOnlyExpired(t *testing.T) {
 	ticketWithExpiryTime := func(t *testing.T, expiryTime time.Time) []byte {
 		unix := uint64(expiryTime.Unix())
 		return []byte(fmt.Sprintf(`{"ticket":{"expiryTime":%d}}`, unix))
@@ -592,7 +592,7 @@ func TestLister_ListWithFilterOnlyExpired(t *testing.T) {
 	}
 }
 
-func TestLister_ListWithFilterOnlyUnexpired(t *testing.T) {
+func TestLister_WithFilterOnlyUnexpired(t *testing.T) {
 	ticketWithExpiryTime := func(t *testing.T, expiryTime time.Time) []byte {
 		unix := uint64(expiryTime.Unix())
 		return []byte(fmt.Sprintf(`{"ticket":{"expiryTime":%d}}`, unix))
@@ -685,7 +685,7 @@ func TestLister_ListWithFilterOnlyUnexpired(t *testing.T) {
 	}
 }
 
-func TestLister_ListWithFilterExpiresBefore(t *testing.T) {
+func TestLister_WithFilterExpiresBefore(t *testing.T) {
 	ticketWithExpiryTime := func(t *testing.T, expiryTime time.Time) []byte {
 		unix := uint64(expiryTime.Unix())
 		return []byte(fmt.Sprintf(`{"ticket":{"expiryTime":%d}}`, unix))
@@ -778,7 +778,7 @@ func TestLister_ListWithFilterExpiresBefore(t *testing.T) {
 	}
 }
 
-func TestList_WithMultipleFilters(t *testing.T) {
+func TestLister_WithMultipleFilters(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -897,7 +897,7 @@ func TestList_WithMultipleFilters(t *testing.T) {
 	}
 }
 
-func TestList_WithSortByName(t *testing.T) {
+func TestLister_WithSortByName(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -981,7 +981,7 @@ func TestList_WithSortByName(t *testing.T) {
 	}
 }
 
-func TestList_WithSortByNamespace(t *testing.T) {
+func TestLister_WithSortByNamespace(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -1065,7 +1065,7 @@ func TestList_WithSortByNamespace(t *testing.T) {
 	}
 }
 
-func TestList_WithSortByMaprCluster(t *testing.T) {
+func TestLister_WithSortByMaprCluster(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -1149,7 +1149,7 @@ func TestList_WithSortByMaprCluster(t *testing.T) {
 	}
 }
 
-func TestList_WithSortByMaprUser(t *testing.T) {
+func TestLister_WithSortByMaprUser(t *testing.T) {
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -1233,7 +1233,7 @@ func TestList_WithSortByMaprUser(t *testing.T) {
 	}
 }
 
-func TestList_WithSortByCreationTime(t *testing.T) {
+func TestLister_WithSortByCreationTime(t *testing.T) {
 	ticketWithCreationTime := func(t *testing.T, creationTime time.Time) []byte {
 		unix := uint64(creationTime.Unix())
 		return []byte(fmt.Sprintf(`{"ticket":{"creationTimeSec":%d}}`, unix))
@@ -1323,7 +1323,7 @@ func TestList_WithSortByCreationTime(t *testing.T) {
 	}
 }
 
-func TestList_WithSortByExpiryTime(t *testing.T) {
+func TestLister_WithSortByExpiryTime(t *testing.T) {
 	ticketWithExpiryTime := func(t *testing.T, expiryTime time.Time) []byte {
 		unix := uint64(expiryTime.Unix())
 		return []byte(fmt.Sprintf(`{"ticket":{"expiryTime":%d}}`, unix))
