@@ -1,7 +1,7 @@
 # docs: <https://golangci-lint.run/usage/configuration/>
 
 run:
-  timeout: "1m"
+  timeout: "5m"
 
 linters:
   enable:
