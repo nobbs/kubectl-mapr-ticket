@@ -220,7 +220,7 @@ func (o *VolumeOptions) registerCompletions(cmd *cobra.Command) error {
 	}
 
 	err = cmd.RegisterFlagCompletionFunc("sort-by", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return util.CompleteStringValues(secret.SortOptionsList, toComplete)
+		return util.CompleteStringValues(volume.SortOptionsList, toComplete)
 	})
 	if err != nil {
 		return err
