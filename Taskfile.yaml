@@ -1,0 +1,32 @@
+version: "3"
+
+env:
+  CGO_ENABLED: 0
+
+tasks:
+  build:
+    desc: Build the binary
+    cmds:
+      - go build -buildvcs=true -o {{.BIN}} ./cmd/
+    sources:
+      - ./**/*.go
+
+  test:
+    desc: Run tests
+    cmds:
+      - go test -coverprofile=coverage.txt -covermode=atomic ./...
+
+  lint:
+    desc: Run linter
+    cmds:
+      - golangci-lint run
+
+  lint:fix:
+    desc: Run linter with auto-fix enabled
+    cmds:
+      - golangci-lint run --fix
+
+  pre-commit:
+    desc: Run pre-commit checks
+    cmds:
+      - pre-commit run --all-files

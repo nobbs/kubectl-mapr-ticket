@@ -79,7 +79,7 @@ jobs:
           go-version-file: ./go.mod
 
       - name: Build
-        run: go build -buildvcs=true -o ./bin/${{ matrix.goarch }}/${{ matrix.goos }}/kubectl-mapr-ticket ./cmd
+        run: go build -buildvcs=true -o ./bin/${{ matrix.goarch }}/${{ matrix.goos }}/kubectl-mapr-ticket ./
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
