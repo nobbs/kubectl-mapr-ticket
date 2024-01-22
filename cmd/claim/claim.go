@@ -7,6 +7,7 @@ import (
 
 	"github.com/nobbs/kubectl-mapr-ticket/cmd/common"
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/claim"
+	"github.com/nobbs/kubectl-mapr-ticket/pkg/secret"
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/util"
 )
 
@@ -108,8 +109,23 @@ func (o *options) Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// create secret lister
+	secretLister := secret.NewLister(
+		client,
+		util.NamespaceAll,
+	)
+
+	// create list options and pass them to the lister
+	opts := []claim.ListerOption{
+		claim.WithSecretLister(secretLister),
+	}
+
 	// create lister
-	lister := claim.NewLister(client, *o.KubernetesConfigFlags.Namespace)
+	lister := claim.NewLister(
+		client,
+		*o.KubernetesConfigFlags.Namespace,
+		opts...,
+	)
 
 	// run lister
 	volumeClaims, err := lister.List()

@@ -7,9 +7,11 @@ tasks:
   build:
     desc: Build the binary
     cmds:
-      - go build -buildvcs=true -o {{.BIN}} ./cmd/
+      - go build -buildvcs=true -o bin/kubectl-mapr_ticket ./
     sources:
       - ./**/*.go
+    generates:
+      - bin/kubectl-mapr_ticket
 
   test:
     desc: Run tests
