@@ -230,7 +230,7 @@ func (o *options) Run(cmd *cobra.Command, args []string) error {
 		opts = append(opts, secret.WithFilterByInUse())
 
 		// add volume lister, since we need to know which secrets are in use
-		volumeLister := volume.NewLister(client, volume.SecretAll, metaV1.NamespaceAll)
+		volumeLister := volume.NewLister(client, util.SecretAll, metaV1.NamespaceAll)
 		opts = append(opts, secret.WithVolumeLister(volumeLister))
 	}
 
@@ -242,7 +242,7 @@ func (o *options) Run(cmd *cobra.Command, args []string) error {
 		opts = append(opts, secret.WithShowInUse())
 
 		// add volume lister, since we need to know which secrets are in use
-		volumeLister := volume.NewLister(client, volume.SecretAll, metaV1.NamespaceAll)
+		volumeLister := volume.NewLister(client, util.SecretAll, metaV1.NamespaceAll)
 		opts = append(opts, secret.WithVolumeLister(volumeLister))
 	}
 

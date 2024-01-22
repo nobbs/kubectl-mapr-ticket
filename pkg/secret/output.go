@@ -7,10 +7,11 @@ import (
 
 	"github.com/spf13/cobra"
 
-	apiSecret "github.com/nobbs/kubectl-mapr-ticket/pkg/api/secret"
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/ticket"
+	"github.com/nobbs/kubectl-mapr-ticket/pkg/types"
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/util"
 
+	coreV1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/cli-runtime/pkg/printers"
@@ -92,7 +93,7 @@ var (
 	}
 )
 
-func Print(cmd *cobra.Command, secrets []apiSecret.TicketSecret) error {
+func Print(cmd *cobra.Command, secrets []types.TicketSecret) error {
 	format := cmd.Flag("output").Value.String()
 	allNamespaces := cmd.Flag("all-namespaces").Changed && cmd.Flag("all-namespaces").Value.String() == "true"
 	withInUse := cmd.Flag("show-in-use").Changed && cmd.Flag("show-in-use").Value.String() == "true"
@@ -128,7 +129,7 @@ func Print(cmd *cobra.Command, secrets []apiSecret.TicketSecret) error {
 }
 
 // generateTable generates a table from the secrets containing MapR tickets
-func generateTable(secrets []apiSecret.TicketSecret) *metaV1.Table {
+func generateTable(secrets []types.TicketSecret) *metaV1.Table {
 	rows := generateRows(secrets)
 
 	return &metaV1.Table{
@@ -139,7 +140,7 @@ func generateTable(secrets []apiSecret.TicketSecret) *metaV1.Table {
 
 // generateRows generates the rows for the table from the secrets containing
 // MapR tickets
-func generateRows(secrets []apiSecret.TicketSecret) []metaV1.TableRow {
+func generateRows(secrets []types.TicketSecret) []metaV1.TableRow {
 	rows := make([]metaV1.TableRow, 0, len(secrets))
 
 	for _, item := range secrets {
@@ -151,10 +152,10 @@ func generateRows(secrets []apiSecret.TicketSecret) []metaV1.TableRow {
 
 // generateRow generates a row for the table from the secret containing a MapR
 // ticket
-func generateRow(secrets *apiSecret.TicketSecret) *metaV1.TableRow {
+func generateRow(secrets *types.TicketSecret) *metaV1.TableRow {
 	row := &metaV1.TableRow{
 		Object: runtime.RawExtension{
-			Object: secrets.Secret,
+			Object: (*coreV1.Secret)(secrets.Secret),
 		},
 	}
 
@@ -165,7 +166,7 @@ func generateRow(secrets *apiSecret.TicketSecret) *metaV1.TableRow {
 		secrets.Ticket.UserCreds.GetUid(),
 		secrets.Ticket.UserCreds.GetGids(),
 		secrets.Ticket.ExpirationTime().Format(ticket.DefaultTimeFormat),
-		secrets.GetStatus(),
+		secrets.GetStatusString(),
 		util.ShortHumanDuration(secrets.Ticket.ExpirationTime().Sub(secrets.Ticket.CreationTime())),
 		secrets.Ticket.CreationTime().Format(ticket.DefaultTimeFormat),
 		util.ShortHumanDurationUntilNow(secrets.Ticket.CreationTime()),
@@ -176,7 +177,7 @@ func generateRow(secrets *apiSecret.TicketSecret) *metaV1.TableRow {
 
 // enrichTableWithInUse enriches the table with a column indicating whether the
 // ticket is in use by a persistent volume or not
-func enrichTableWithInUse(table *metaV1.Table, secrets []apiSecret.TicketSecret) {
+func enrichTableWithInUse(table *metaV1.Table, secrets []types.TicketSecret) {
 	insertPos := len(tableColumns) - 1
 
 	table.ColumnDefinitions = append(
@@ -194,7 +195,7 @@ func enrichTableWithInUse(table *metaV1.Table, secrets []apiSecret.TicketSecret)
 	}
 }
 
-func printEncoded(secrets []apiSecret.TicketSecret, format string, stream io.Writer) error {
+func printEncoded(secrets []types.TicketSecret, format string, stream io.Writer) error {
 	bytesBuffer := bytes.NewBuffer([]byte{})
 
 	if len(secrets) == 1 {
@@ -220,7 +221,7 @@ func printEncoded(secrets []apiSecret.TicketSecret, format string, stream io.Wri
 	return nil
 }
 
-func encodeItems(secrets []apiSecret.TicketSecret, format string) []byte {
+func encodeItems(secrets []types.TicketSecret, format string) []byte {
 	switch format {
 	case "json":
 		encoded, err := json.MarshalIndent(secrets, "", "  ")
@@ -241,7 +242,7 @@ func encodeItems(secrets []apiSecret.TicketSecret, format string) []byte {
 	return nil
 }
 
-func encodeItem(secret *apiSecret.TicketSecret, format string) []byte {
+func encodeItem(secret *types.TicketSecret, format string) []byte {
 	switch format {
 	case "json":
 		encoded, err := json.MarshalIndent(secret, "", "  ")

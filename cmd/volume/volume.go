@@ -135,7 +135,7 @@ func (o *options) Complete(cmd *cobra.Command, args []string) error {
 	// set secret name based on args
 	switch len(args) {
 	case 0:
-		o.SecretName = volume.SecretAll
+		o.SecretName = util.SecretAll
 	case 1:
 		o.SecretName = args[0]
 	default:

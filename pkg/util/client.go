@@ -10,6 +10,10 @@ const (
 	// NamespaceAll is a special value that can be used to specify that all secrets from all
 	// namespaces should be used.
 	NamespaceAll = apiV1.NamespaceAll
+
+	// SecretAll is a special value that can be used to specify that all secrets from the specified
+	// namespace should be used.
+	SecretAll = "<all>"
 )
 
 // ClientFromFlags creates a Kubernetes client from the flags passed to the
