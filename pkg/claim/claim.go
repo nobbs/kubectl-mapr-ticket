@@ -5,6 +5,7 @@ import (
 
 	apiClaim "github.com/nobbs/kubectl-mapr-ticket/pkg/api/claim"
 	apiSecret "github.com/nobbs/kubectl-mapr-ticket/pkg/api/secret"
+	apiVolume "github.com/nobbs/kubectl-mapr-ticket/pkg/api/volume"
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/volume"
 
 	coreV1 "k8s.io/api/core/v1"
@@ -158,9 +159,11 @@ func (l *Lister) collectTickets() *Lister {
 
 	// lookup the ticket for each volume claim
 	lookupTicket := func(volumeClaim *apiClaim.VolumeClaim) *apiSecret.TicketSecret {
+		volume := apiVolume.NewVolume(volumeClaim.Volume)
+
 		for _, ticket := range tickets {
-			if ticket.Secret.Namespace == volumeClaim.Claim.Namespace &&
-				ticket.Secret.Name == volumeClaim.Claim.Name {
+			if ticket.Secret.Namespace == volume.SecretNamespace() &&
+				ticket.Secret.Name == volume.SecretName() {
 				return &ticket
 			}
 		}
