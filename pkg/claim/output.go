@@ -3,10 +3,10 @@ package claim
 import (
 	"github.com/spf13/cobra"
 
-	apiClaim "github.com/nobbs/kubectl-mapr-ticket/pkg/api/claim"
-	apiVolume "github.com/nobbs/kubectl-mapr-ticket/pkg/api/volume"
+	"github.com/nobbs/kubectl-mapr-ticket/pkg/types"
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/util"
 
+	coreV1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/cli-runtime/pkg/printers"
@@ -67,7 +67,7 @@ var (
 	}
 )
 
-func Print(cmd *cobra.Command, volumeClaims []apiClaim.VolumeClaim) error {
+func Print(cmd *cobra.Command, volumeClaims []types.VolumeClaim) error {
 	format := cmd.Flag("output").Value.String()
 
 	// generate the table
@@ -86,7 +86,7 @@ func Print(cmd *cobra.Command, volumeClaims []apiClaim.VolumeClaim) error {
 	return nil
 }
 
-func generableTable(volumeClaims []apiClaim.VolumeClaim) *metaV1.Table {
+func generableTable(volumeClaims []types.VolumeClaim) *metaV1.Table {
 	rows := generateRows(volumeClaims)
 
 	return &metaV1.Table{
@@ -95,7 +95,7 @@ func generableTable(volumeClaims []apiClaim.VolumeClaim) *metaV1.Table {
 	}
 }
 
-func generateRows(volumeClaims []apiClaim.VolumeClaim) []metaV1.TableRow {
+func generateRows(volumeClaims []types.VolumeClaim) []metaV1.TableRow {
 	rows := make([]metaV1.TableRow, 0, len(volumeClaims))
 
 	for _, pv := range volumeClaims {
@@ -105,23 +105,21 @@ func generateRows(volumeClaims []apiClaim.VolumeClaim) []metaV1.TableRow {
 	return rows
 }
 
-func generateRow(volumeClaim *apiClaim.VolumeClaim) *metaV1.TableRow {
+func generateRow(volumeClaim *types.VolumeClaim) *metaV1.TableRow {
 	row := &metaV1.TableRow{
 		Object: runtime.RawExtension{
-			Object: volumeClaim.Claim,
+			Object: (*coreV1.PersistentVolumeClaim)(volumeClaim.Claim),
 		},
 	}
 
-	volume := apiVolume.NewVolume(volumeClaim.Volume)
-
 	row.Cells = []any{
 		volumeClaim.Claim.Name,
-		volume.SecretNamespace(),
-		volume.SecretName(),
-		volume.Name(),
-		volume.VolumePath(),
-		volume.VolumeHandle(),
-		volumeClaim.Ticket.GetStatus(),
+		volumeClaim.Volume.GetSecretNamespace(),
+		volumeClaim.Volume.GetSecretName(),
+		volumeClaim.Volume.GetName(),
+		volumeClaim.Volume.GetVolumePath(),
+		volumeClaim.Volume.GetVolumeHandle(),
+		volumeClaim.Ticket.GetStatusString(),
 		util.HumanDurationUntilNow(volumeClaim.Claim.CreationTimestamp.Time),
 	}
 

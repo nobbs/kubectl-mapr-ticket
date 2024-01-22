@@ -8,9 +8,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	apiVolume "github.com/nobbs/kubectl-mapr-ticket/pkg/api/volume"
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/secret"
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/ticket"
+	"github.com/nobbs/kubectl-mapr-ticket/pkg/types"
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/util"
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/volume"
 	. "github.com/nobbs/kubectl-mapr-ticket/pkg/volume"
@@ -140,7 +140,7 @@ func TestLister_WithAllSecrets(t *testing.T) {
 			name: "no volumes",
 			fields: listerFields{
 				client:     fake.NewSimpleClientset(),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  "mapr",
 			},
 			want:    []expectedVolume{},
@@ -152,7 +152,7 @@ func TestLister_WithAllSecrets(t *testing.T) {
 				client: fake.NewSimpleClientset(
 					newCSIVolume("csi-volume", CSIProvisionerMapr, withSecretRef("mapr", "mapr-secret")),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  "mapr",
 			},
 			want: []expectedVolume{
@@ -166,7 +166,7 @@ func TestLister_WithAllSecrets(t *testing.T) {
 				client: fake.NewSimpleClientset(
 					newCSIVolume("csi-volume", "some-other-csi-driver", withSecretRef("mapr", "mapr-secret")),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  "mapr",
 			},
 			want:    []expectedVolume{},
@@ -179,7 +179,7 @@ func TestLister_WithAllSecrets(t *testing.T) {
 					newCSIVolume("csi-volume-1", CSIProvisionerMapr, withSecretRef("mapr", "mapr-secret")),
 					newCSIVolume("csi-volume-2", CSIProvisionerMapr, withSecretRef("mapr", "mapr-secret")),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  "mapr",
 			},
 			want: []expectedVolume{
@@ -196,7 +196,7 @@ func TestLister_WithAllSecrets(t *testing.T) {
 					newCSIVolume("csi-volume-2", CSIProvisionerMapr, withSecretRef("mapr", "mapr-secret-2")),
 					newCSIVolume("csi-volume-3", CSIProvisionerMaprNFS, withSecretRef("mapr", "mapr-secret-2")),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  "mapr",
 			},
 			want: []expectedVolume{
@@ -212,7 +212,7 @@ func TestLister_WithAllSecrets(t *testing.T) {
 				client: fake.NewSimpleClientset(
 					newCSIVolume("csi-volume", CSIProvisionerMapr, withSecretRef("mapr", "mapr-secret")),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  "mapr-2",
 			},
 			want:    []expectedVolume{},
@@ -269,7 +269,7 @@ func TestLister_WithAllNamespaces(t *testing.T) {
 				client: fake.NewSimpleClientset(
 					newCSIVolume("csi-volume", "some-other-csi-driver", withSecretRef("mapr", "mapr-secret")),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  util.NamespaceAll,
 			},
 			want:    []expectedVolume{},
@@ -338,7 +338,7 @@ func TestLister_WithSortByName(t *testing.T) {
 			name: "no volumes",
 			fields: listerFields{
 				client:     fake.NewSimpleClientset(),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  util.NamespaceAll,
 				opts:       opts,
 			},
@@ -353,7 +353,7 @@ func TestLister_WithSortByName(t *testing.T) {
 					newCSIVolume("csi-volume-1", CSIProvisionerMapr, withSecretRef("default", "mapr-secret-1")),
 					newCSIVolume("csi-volume-2", CSIProvisionerMapr, withSecretRef("kube-public", "mapr-secret-2")),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  util.NamespaceAll,
 				opts:       opts,
 			},
@@ -411,7 +411,7 @@ func TestLister_WithSortBySecretNamespace(t *testing.T) {
 			name: "no volumes",
 			fields: listerFields{
 				client:     fake.NewSimpleClientset(),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  util.NamespaceAll,
 				opts:       opts,
 			},
@@ -426,7 +426,7 @@ func TestLister_WithSortBySecretNamespace(t *testing.T) {
 					newCSIVolume("csi-volume-1", CSIProvisionerMapr, withSecretRef("default", "mapr-secret-1")),
 					newCSIVolume("csi-volume-2", CSIProvisionerMapr, withSecretRef("kube-public", "mapr-secret-2")),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  util.NamespaceAll,
 				opts:       opts,
 			},
@@ -445,7 +445,7 @@ func TestLister_WithSortBySecretNamespace(t *testing.T) {
 					newCSIVolume("csi-volume-1", CSIProvisionerMapr, withSecretRef("default", "mapr-secret-1")),
 					newCSIVolume("csi-volume-2", CSIProvisionerMapr, withSecretRef("kube-public", "mapr-secret-2")),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  "kube-public",
 				opts:       opts,
 			},
@@ -484,7 +484,7 @@ func TestLister_WithSortBySecretName(t *testing.T) {
 			name: "no volumes",
 			fields: listerFields{
 				client:     fake.NewSimpleClientset(),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  util.NamespaceAll,
 				opts:       opts,
 			},
@@ -499,7 +499,7 @@ func TestLister_WithSortBySecretName(t *testing.T) {
 					newCSIVolume("csi-volume-2", CSIProvisionerMapr, withSecretRef("kube-public", "mapr-secret-2")),
 					newCSIVolume("csi-volume-1", CSIProvisionerMapr, withSecretRef("default", "mapr-secret-1")),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  util.NamespaceAll,
 				opts:       opts,
 			},
@@ -518,7 +518,7 @@ func TestLister_WithSortBySecretName(t *testing.T) {
 					newCSIVolume("csi-volume-3", CSIProvisionerMaprNFS, withSecretRef("kube-public", "mapr-secret-3")),
 					newCSIVolume("csi-volume-2", CSIProvisionerMapr, withSecretRef("kube-public", "mapr-secret-2")),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  "kube-public",
 				opts:       opts,
 			},
@@ -557,7 +557,7 @@ func TestLister_WithSortByClaimNamespace(t *testing.T) {
 			name: "no volumes",
 			fields: listerFields{
 				client:     fake.NewSimpleClientset(),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  util.NamespaceAll,
 				opts:       opts,
 			},
@@ -584,7 +584,7 @@ func TestLister_WithSortByClaimNamespace(t *testing.T) {
 						withClaimRef("kube-public", "mapr-claim-2"),
 					),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  util.NamespaceAll,
 				opts:       opts,
 			},
@@ -615,7 +615,7 @@ func TestLister_WithSortByClaimNamespace(t *testing.T) {
 						withClaimRef("kube-public", "mapr-claim-2"),
 					),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  "kube-public",
 				opts:       opts,
 			},
@@ -654,7 +654,7 @@ func TestLister_WithSortByClaimName(t *testing.T) {
 			name: "no volumes",
 			fields: listerFields{
 				client:     fake.NewSimpleClientset(),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  util.NamespaceAll,
 				opts:       opts,
 			},
@@ -681,7 +681,7 @@ func TestLister_WithSortByClaimName(t *testing.T) {
 						withClaimRef("kube-public", "mapr-claim-2"),
 					),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  util.NamespaceAll,
 				opts:       opts,
 			},
@@ -712,7 +712,7 @@ func TestLister_WithSortByClaimName(t *testing.T) {
 						withClaimRef("kube-public", "mapr-claim-2"),
 					),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  "kube-public",
 				opts:       opts,
 			},
@@ -751,7 +751,7 @@ func TestLister_WithSortByVolumePath(t *testing.T) {
 			name: "no volumes",
 			fields: listerFields{
 				client:     fake.NewSimpleClientset(),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  util.NamespaceAll,
 				opts:       opts,
 			},
@@ -778,7 +778,7 @@ func TestLister_WithSortByVolumePath(t *testing.T) {
 						withSecretRef("default", "mapr-secret-1"),
 					),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  util.NamespaceAll,
 				opts:       opts,
 			},
@@ -809,7 +809,7 @@ func TestLister_WithSortByVolumePath(t *testing.T) {
 						withSecretRef("kube-public", "mapr-secret-2"),
 					),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  "kube-public",
 				opts:       opts,
 			},
@@ -848,7 +848,7 @@ func TestLister_WithSortByVolumeHandle(t *testing.T) {
 			name: "no volumes",
 			fields: listerFields{
 				client:     fake.NewSimpleClientset(),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  util.NamespaceAll,
 				opts:       opts,
 			},
@@ -875,7 +875,7 @@ func TestLister_WithSortByVolumeHandle(t *testing.T) {
 						withSecretRef("default", "mapr-secret-1"),
 					),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  util.NamespaceAll,
 				opts:       opts,
 			},
@@ -906,7 +906,7 @@ func TestLister_WithSortByVolumeHandle(t *testing.T) {
 						withSecretRef("kube-public", "mapr-secret-2"),
 					),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  "kube-public",
 				opts:       opts,
 			},
@@ -945,7 +945,7 @@ func TestLister_WithSortByExpiryTime(t *testing.T) {
 			name: "no volumes",
 			fields: listerFields{
 				client:     fake.NewSimpleClientset(),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  util.NamespaceAll,
 				opts:       opts,
 			},
@@ -987,7 +987,7 @@ func TestLister_WithSortByExpiryTime(t *testing.T) {
 						ticketWithExpiryTime(t, time.Now().Add(-1*time.Hour)),
 					),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  util.NamespaceAll,
 				opts:       opts,
 			},
@@ -1030,7 +1030,7 @@ func TestLister_WithSortByAge(t *testing.T) {
 			name: "no volumes",
 			fields: listerFields{
 				client:     fake.NewSimpleClientset(),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  util.NamespaceAll,
 				opts:       opts,
 			},
@@ -1057,7 +1057,7 @@ func TestLister_WithSortByAge(t *testing.T) {
 						withCreateTimeRelative(1*time.Hour),
 					),
 				),
-				secretName: SecretAll,
+				secretName: util.SecretAll,
 				namespace:  util.NamespaceAll,
 				opts:       opts,
 			},
@@ -1103,7 +1103,7 @@ func expectVolume(name string) expectedVolume {
 	}
 }
 
-func assertVolumes(t *testing.T, expected []expectedVolume, actual []apiVolume.Volume) {
+func assertVolumes(t *testing.T, expected []expectedVolume, actual []types.Volume) {
 	t.Helper()
 
 	assert := assert.New(t)

@@ -1,4 +1,4 @@
-package secret
+package types
 
 import (
 	"fmt"
@@ -9,13 +9,15 @@ import (
 	coreV1 "k8s.io/api/core/v1"
 )
 
+type Secret coreV1.Secret
+
 type TicketSecret struct {
-	Secret *coreV1.Secret `json:"originalSecret"`
+	Secret *Secret        `json:"originalSecret"`
 	Ticket *ticket.Ticket `json:"parsedTicket"`
 	NumPVC uint32         `json:"numPVC"`
 }
 
-func (t *TicketSecret) GetStatus() string {
+func (t *TicketSecret) GetStatusString() string {
 	if t == nil || t.Ticket == nil {
 		return "Invalid"
 	}

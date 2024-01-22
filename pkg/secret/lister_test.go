@@ -8,9 +8,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	apiSecret "github.com/nobbs/kubectl-mapr-ticket/pkg/api/secret"
 	. "github.com/nobbs/kubectl-mapr-ticket/pkg/secret"
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/ticket"
+	"github.com/nobbs/kubectl-mapr-ticket/pkg/types"
 	"github.com/nobbs/mapr-ticket-parser/pkg/parse"
 
 	coreV1 "k8s.io/api/core/v1"
@@ -1430,7 +1430,7 @@ func newExpectedSecret(namespace, name string) expectedSecret {
 	}
 }
 
-func assertTicketSecret(t *testing.T, secrets []apiSecret.TicketSecret, expected []expectedSecret) {
+func assertTicketSecret(t *testing.T, secrets []types.TicketSecret, expected []expectedSecret) {
 	t.Helper()
 
 	assert := assert.New(t)

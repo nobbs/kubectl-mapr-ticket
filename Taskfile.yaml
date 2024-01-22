@@ -16,7 +16,7 @@ tasks:
   test:
     desc: Run tests
     cmds:
-      - go test -coverprofile=coverage.txt -covermode=atomic ./...
+      - go test -covermode=atomic ./...
 
   lint:
     desc: Run linter

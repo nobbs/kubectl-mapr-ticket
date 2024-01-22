@@ -3,9 +3,10 @@ package volume
 import (
 	"github.com/spf13/cobra"
 
-	apiVolume "github.com/nobbs/kubectl-mapr-ticket/pkg/api/volume"
+	"github.com/nobbs/kubectl-mapr-ticket/pkg/types"
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/util"
 
+	coreV1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/cli-runtime/pkg/printers"
@@ -72,7 +73,7 @@ var (
 	}
 )
 
-func Print(cmd *cobra.Command, volumes []apiVolume.Volume) error {
+func Print(cmd *cobra.Command, volumes []types.Volume) error {
 	format := cmd.Flag("output").Value.String()
 
 	// generate the table
@@ -91,7 +92,7 @@ func Print(cmd *cobra.Command, volumes []apiVolume.Volume) error {
 	return nil
 }
 
-func generableTable(volumes []apiVolume.Volume) *metaV1.Table {
+func generableTable(volumes []types.Volume) *metaV1.Table {
 	rows := generateRows(volumes)
 
 	return &metaV1.Table{
@@ -100,7 +101,7 @@ func generableTable(volumes []apiVolume.Volume) *metaV1.Table {
 	}
 }
 
-func generateRows(volumes []apiVolume.Volume) []metaV1.TableRow {
+func generateRows(volumes []types.Volume) []metaV1.TableRow {
 	rows := make([]metaV1.TableRow, 0, len(volumes))
 
 	for _, pv := range volumes {
@@ -110,22 +111,22 @@ func generateRows(volumes []apiVolume.Volume) []metaV1.TableRow {
 	return rows
 }
 
-func generateRow(volume *apiVolume.Volume) *metaV1.TableRow {
+func generateRow(volume *types.Volume) *metaV1.TableRow {
 	row := &metaV1.TableRow{
 		Object: runtime.RawExtension{
-			Object: volume.Volume,
+			Object: (*coreV1.PersistentVolume)(volume.Volume),
 		},
 	}
 
 	row.Cells = []any{
-		volume.Volume.Name,
-		volume.SecretNamespace(),
-		volume.SecretName(),
-		volume.ClaimNamespace(),
-		volume.ClaimName(),
-		volume.VolumePath(),
-		volume.VolumeHandle(),
-		volume.Ticket.GetStatus(),
+		volume.Volume.GetName(),
+		volume.Volume.GetSecretNamespace(),
+		volume.Volume.GetSecretName(),
+		volume.Volume.GetClaimNamespace(),
+		volume.Volume.GetClaimName(),
+		volume.Volume.GetVolumePath(),
+		volume.Volume.GetVolumeHandle(),
+		volume.Ticket.GetStatusString(),
 		util.HumanDurationUntilNow(volume.Volume.CreationTimestamp.Time),
 	}
 

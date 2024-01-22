@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	apiVolume "github.com/nobbs/kubectl-mapr-ticket/pkg/api/volume"
+	"github.com/nobbs/kubectl-mapr-ticket/pkg/types"
 )
 
 type SortOptions string
@@ -66,49 +66,49 @@ func ValidateSortOptions(sortOptions []string) error {
 	return nil
 }
 
-func sortByName(volumes []apiVolume.Volume) {
+func sortByName(volumes []types.Volume) {
 	sort.Slice(volumes, func(i, j int) bool {
-		return volumes[i].Name() < volumes[j].Name()
+		return volumes[i].Volume.GetName() < volumes[j].Volume.GetName()
 	})
 }
 
-func sortBySecretNamespace(volumes []apiVolume.Volume) {
+func sortBySecretNamespace(volumes []types.Volume) {
 	sort.Slice(volumes, func(i, j int) bool {
-		return volumes[i].SecretNamespace() < volumes[j].SecretNamespace()
+		return volumes[i].Volume.GetSecretNamespace() < volumes[j].Volume.GetSecretNamespace()
 	})
 }
 
-func sortBySecretName(volumes []apiVolume.Volume) {
+func sortBySecretName(volumes []types.Volume) {
 	sort.Slice(volumes, func(i, j int) bool {
-		return volumes[i].SecretName() < volumes[j].SecretName()
+		return volumes[i].Volume.GetSecretName() < volumes[j].Volume.GetSecretName()
 	})
 }
 
-func sortByClaimNamespace(volumes []apiVolume.Volume) {
+func sortByClaimNamespace(volumes []types.Volume) {
 	sort.Slice(volumes, func(i, j int) bool {
-		return volumes[i].ClaimNamespace() < volumes[j].ClaimNamespace()
+		return volumes[i].Volume.GetClaimNamespace() < volumes[j].Volume.GetClaimNamespace()
 	})
 }
 
-func sortByClaimName(volumes []apiVolume.Volume) {
+func sortByClaimName(volumes []types.Volume) {
 	sort.Slice(volumes, func(i, j int) bool {
-		return volumes[i].ClaimName() < volumes[j].ClaimName()
+		return volumes[i].Volume.GetClaimName() < volumes[j].Volume.GetClaimName()
 	})
 }
 
-func sortByVolumePath(volumes []apiVolume.Volume) {
+func sortByVolumePath(volumes []types.Volume) {
 	sort.Slice(volumes, func(i, j int) bool {
-		return volumes[i].VolumePath() < volumes[j].VolumePath()
+		return volumes[i].Volume.GetVolumePath() < volumes[j].Volume.GetVolumePath()
 	})
 }
 
-func sortByVolumeHandle(volumes []apiVolume.Volume) {
+func sortByVolumeHandle(volumes []types.Volume) {
 	sort.Slice(volumes, func(i, j int) bool {
-		return volumes[i].VolumeHandle() < volumes[j].VolumeHandle()
+		return volumes[i].Volume.GetVolumeHandle() < volumes[j].Volume.GetVolumeHandle()
 	})
 }
 
-func sortByExpiryTime(volumes []apiVolume.Volume) {
+func sortByExpiryTime(volumes []types.Volume) {
 	sort.Slice(volumes, func(i, j int) bool {
 		if volumes[i].Ticket == nil {
 			return true
@@ -120,7 +120,7 @@ func sortByExpiryTime(volumes []apiVolume.Volume) {
 	})
 }
 
-func sortByAge(volumes []apiVolume.Volume) {
+func sortByAge(volumes []types.Volume) {
 	sort.Slice(volumes, func(i, j int) bool {
 		return volumes[i].Volume.CreationTimestamp.Time.Before(volumes[j].Volume.CreationTimestamp.Time)
 	})

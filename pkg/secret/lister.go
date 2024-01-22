@@ -4,20 +4,23 @@ import (
 	"context"
 	"time"
 
-	apiSecret "github.com/nobbs/kubectl-mapr-ticket/pkg/api/secret"
-	apiVolume "github.com/nobbs/kubectl-mapr-ticket/pkg/api/volume"
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/ticket"
+	"github.com/nobbs/kubectl-mapr-ticket/pkg/types"
 
 	coreV1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
-type Lister struct {
-	client    kubernetes.Interface
-	namespace string
+type volumeLister interface {
+	List() ([]types.Volume, error)
+}
 
-	sortBy              []SortOptions
+type Lister struct {
+	client       kubernetes.Interface
+	volumeLister volumeLister
+
+	namespace           string
 	filterOnlyExpired   bool
 	filterOnlyUnexpired bool
 	filterByMaprCluster *string
@@ -27,15 +30,9 @@ type Lister struct {
 	filterByInUse       bool
 	filterExpiresBefore time.Duration
 	showInUse           bool
+	sortBy              []SortOptions
 
-	volumeLister volumeLister
-
-	tickets []apiSecret.TicketSecret
-}
-
-type volumeLister interface {
-	List() ([]apiVolume.Volume, error)
-	TicketUsesSecret(pv *coreV1.PersistentVolume, secret *coreV1.SecretReference) bool
+	tickets []types.TicketSecret
 }
 
 // NewLister creates a new Lister
@@ -60,75 +57,7 @@ func NewLister(client kubernetes.Interface, namespace string, opts ...ListerOpti
 	return l
 }
 
-type ListerOption func(*Lister)
-
-func WithSortBy(sortBy []SortOptions) ListerOption {
-	return func(l *Lister) {
-		l.sortBy = sortBy
-	}
-}
-
-func WithFilterByMaprCluster(cluster string) ListerOption {
-	return func(l *Lister) {
-		l.filterByMaprCluster = &cluster
-	}
-}
-
-func WithFilterByMaprUser(user string) ListerOption {
-	return func(l *Lister) {
-		l.filterByMaprUser = &user
-	}
-}
-
-func WithFilterByUID(uid uint32) ListerOption {
-	return func(l *Lister) {
-		l.filterByUID = &uid
-	}
-}
-
-func WithFilterByGID(gid uint32) ListerOption {
-	return func(l *Lister) {
-		l.filterByGID = &gid
-	}
-}
-
-func WithFilterOnlyExpired() ListerOption {
-	return func(l *Lister) {
-		l.filterOnlyExpired = true
-	}
-}
-
-func WithFilterOnlyUnexpired() ListerOption {
-	return func(l *Lister) {
-		l.filterOnlyUnexpired = true
-	}
-}
-
-func WithFilterByInUse() ListerOption {
-	return func(l *Lister) {
-		l.filterByInUse = true
-	}
-}
-
-func WithFilterExpiresBefore(expiresBefore time.Duration) ListerOption {
-	return func(l *Lister) {
-		l.filterExpiresBefore = expiresBefore
-	}
-}
-
-func WithShowInUse() ListerOption {
-	return func(l *Lister) {
-		l.showInUse = true
-	}
-}
-
-func WithVolumeLister(volumeLister volumeLister) ListerOption {
-	return func(l *Lister) {
-		l.volumeLister = volumeLister
-	}
-}
-
-func (l *Lister) List() ([]apiSecret.TicketSecret, error) {
+func (l *Lister) List() ([]types.TicketSecret, error) {
 	if err := l.getSecretsWithTickets(); err != nil {
 		return nil, err
 	}
@@ -177,8 +106,8 @@ func rejectSecretsWithoutTicket(secrets []coreV1.Secret) []coreV1.Secret {
 }
 
 // parseTicketsFromSecrets parses secrets to items, ignoring secrets that don't contain a MapR ticket
-func parseTicketsFromSecrets(secrets []coreV1.Secret) []apiSecret.TicketSecret {
-	items := make([]apiSecret.TicketSecret, 0, len(secrets))
+func parseTicketsFromSecrets(secrets []coreV1.Secret) []types.TicketSecret {
+	items := make([]types.TicketSecret, 0, len(secrets))
 
 	filtered := rejectSecretsWithoutTicket(secrets)
 
@@ -190,8 +119,8 @@ func parseTicketsFromSecrets(secrets []coreV1.Secret) []apiSecret.TicketSecret {
 			continue
 		}
 
-		items = append(items, apiSecret.TicketSecret{
-			Secret: &s,
+		items = append(items, types.TicketSecret{
+			Secret: (*types.Secret)(&s),
 			Ticket: ticket,
 		})
 	}
@@ -206,7 +135,7 @@ func (l *Lister) filterTicketsOnlyExpired() *Lister {
 		return l
 	}
 
-	var filtered []apiSecret.TicketSecret
+	var filtered []types.TicketSecret
 
 	for _, item := range l.tickets {
 		if item.Ticket.IsExpired() {
@@ -226,7 +155,7 @@ func (l *Lister) filterTicketsOnlyUnexpired() *Lister {
 		return l
 	}
 
-	var filtered []apiSecret.TicketSecret
+	var filtered []types.TicketSecret
 
 	for _, item := range l.tickets {
 		if !item.Ticket.IsExpired() {
@@ -246,7 +175,7 @@ func (l *Lister) filterTicketsByMaprCluster() *Lister {
 		return l
 	}
 
-	var filtered []apiSecret.TicketSecret
+	var filtered []types.TicketSecret
 
 	for _, item := range l.tickets {
 		if item.Ticket.Cluster == *l.filterByMaprCluster {
@@ -266,7 +195,7 @@ func (l *Lister) filterTicketsByMaprUser() *Lister {
 		return l
 	}
 
-	var filtered []apiSecret.TicketSecret
+	var filtered []types.TicketSecret
 
 	for _, item := range l.tickets {
 		if item.Ticket.UserCreds.GetUserName() == *l.filterByMaprUser {
@@ -286,7 +215,7 @@ func (l *Lister) filterTicketsByUID() *Lister {
 		return l
 	}
 
-	var filtered []apiSecret.TicketSecret
+	var filtered []types.TicketSecret
 
 	for _, item := range l.tickets {
 		if *item.Ticket.UserCreds.Uid == *l.filterByUID {
@@ -306,7 +235,7 @@ func (l *Lister) filterTicketsByGID() *Lister {
 		return l
 	}
 
-	var filtered []apiSecret.TicketSecret
+	var filtered []types.TicketSecret
 
 	for _, item := range l.tickets {
 		for _, gid := range item.Ticket.UserCreds.Gids {
@@ -330,7 +259,7 @@ func (l *Lister) filterTicketsExpiresBefore() *Lister {
 		return l
 	}
 
-	var filtered []apiSecret.TicketSecret
+	var filtered []types.TicketSecret
 
 	for _, item := range l.tickets {
 		if item.Ticket.ExpiresBefore(l.filterExpiresBefore) {
@@ -350,7 +279,7 @@ func (l *Lister) filterTicketsInUse() *Lister {
 		return l
 	}
 
-	var filtered []apiSecret.TicketSecret
+	var filtered []types.TicketSecret
 
 	for _, item := range l.tickets {
 		if item.NumPVC > 0 {
@@ -384,10 +313,7 @@ func (l *Lister) collectPVsUsingTickets() *Lister {
 	// check for each ticket if it is in use by a persistent volume
 	for i := range l.tickets {
 		for _, volume := range pvs {
-			if l.volumeLister.TicketUsesSecret(volume.Volume, &coreV1.SecretReference{
-				Name:      l.tickets[i].Secret.Name,
-				Namespace: l.tickets[i].Secret.Namespace,
-			}) {
+			if volume.Volume.UsesSecret(l.tickets[i].Secret.Namespace, l.tickets[i].Secret.Name) {
 				l.tickets[i].NumPVC++
 			}
 		}
