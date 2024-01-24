@@ -64,42 +64,42 @@ func ValidateSortOptions(sortOptions []string) error {
 // sortByName sorts the items by secret name
 func sortByName(items []types.TicketSecret) {
 	sort.Slice(items, func(i, j int) bool {
-		return items[i].Secret.Name < items[j].Secret.Name
+		return items[i].GetName() < items[j].GetName()
 	})
 }
 
 // sortByNamespace sorts the items by secret namespace
 func sortByNamespace(items []types.TicketSecret) {
 	sort.Slice(items, func(i, j int) bool {
-		return items[i].Secret.Namespace < items[j].Secret.Namespace
+		return items[i].GetNamespace() < items[j].GetNamespace()
 	})
 }
 
 // sortByMaprCluster sorts the items by MapR cluster that the ticket is for
 func sortByMaprCluster(items []types.TicketSecret) {
 	sort.Slice(items, func(i, j int) bool {
-		return items[i].Ticket.Cluster < items[j].Ticket.Cluster
+		return items[i].GetCluster() < items[j].GetCluster()
 	})
 }
 
 // sortByMaprUser sorts the items by MapR user that the ticket is for
 func sortByMaprUser(items []types.TicketSecret) {
 	sort.Slice(items, func(i, j int) bool {
-		return items[i].Ticket.UserCreds.GetUserName() < items[j].Ticket.UserCreds.GetUserName()
+		return items[i].GetUser() < items[j].GetUser()
 	})
 }
 
 // sortByCreationTimestamp sorts the items by creation timestamp of the ticket
 func sortByCreationTimestamp(items []types.TicketSecret) {
 	sort.Slice(items, func(i, j int) bool {
-		return items[i].Ticket.CreationTime().Before(items[j].Ticket.CreationTime())
+		return items[i].GetCreationTime().Before(items[j].GetCreationTime())
 	})
 }
 
 // sortByExpiryTime sorts the items by expiry time of the ticket
 func sortByExpiryTime(items []types.TicketSecret) {
 	sort.Slice(items, func(i, j int) bool {
-		return items[i].Ticket.ExpirationTime().Before(items[j].Ticket.ExpirationTime())
+		return items[i].GetExpirationTime().Before(items[j].GetExpirationTime())
 	})
 }
 

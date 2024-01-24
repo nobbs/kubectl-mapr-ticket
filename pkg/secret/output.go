@@ -160,7 +160,7 @@ func generateRow(secrets *types.TicketSecret) *metaV1.TableRow {
 	}
 
 	row.Cells = []any{
-		secrets.Secret.Name,
+		secrets.Secret.GetName(),
 		secrets.Ticket.Cluster,
 		secrets.Ticket.UserCreds.GetUserName(),
 		secrets.Ticket.UserCreds.GetUid(),

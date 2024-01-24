@@ -31,3 +31,4 @@ issues:
       linters:
         - funlen
         - dupl
+        - unused

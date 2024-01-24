@@ -7,3 +7,9 @@ func WithSecretLister(secretLister secretLister) ListerOption {
 		l.secretLister = secretLister
 	}
 }
+
+func WithSortBy(sortBy []SortOptions) ListerOption {
+	return func(l *Lister) {
+		l.sortBy = sortBy
+	}
+}

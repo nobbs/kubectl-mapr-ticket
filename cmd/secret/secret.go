@@ -2,8 +2,6 @@ package secret
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
 
@@ -110,7 +108,7 @@ func NewCmd(opts *common.Options) *cobra.Command {
 		Use:     secretUse,
 		Short:   secretShort,
 		Long:    common.CliLongDesc(secretLong),
-		Example: common.CliExample(secretExample, filepath.Base(os.Args[0])),
+		Example: common.CliExample(secretExample, common.CliBinName),
 		Args:    cobra.NoArgs,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp

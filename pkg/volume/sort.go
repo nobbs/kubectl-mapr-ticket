@@ -116,13 +116,13 @@ func sortByExpiryTime(volumes []types.Volume) {
 			return false
 		}
 
-		return volumes[i].Ticket.Ticket.ExpirationTime().Before(volumes[j].Ticket.Ticket.ExpirationTime())
+		return volumes[i].Ticket.GetExpirationTime().Before(volumes[j].Ticket.GetExpirationTime())
 	})
 }
 
 func sortByAge(volumes []types.Volume) {
 	sort.Slice(volumes, func(i, j int) bool {
-		return volumes[i].Volume.CreationTimestamp.Time.Before(volumes[j].Volume.CreationTimestamp.Time)
+		return volumes[i].Volume.CreationTimestamp.Before(&volumes[j].Volume.CreationTimestamp)
 	})
 }
 

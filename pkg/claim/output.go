@@ -55,7 +55,7 @@ var (
 			Name:        "Ticket Status",
 			Type:        "string",
 			Description: "Status of the MapR ticket",
-			Priority:    1,
+			Priority:    0,
 		},
 		{
 			Name:        "Age",
@@ -69,13 +69,15 @@ var (
 
 func Print(cmd *cobra.Command, volumeClaims []types.VolumeClaim) error {
 	format := cmd.Flag("output").Value.String()
+	allNamespaces := cmd.Flag("all-namespaces").Changed && cmd.Flag("all-namespaces").Value.String() == "true"
 
 	// generate the table
 	table := generableTable(volumeClaims)
 
 	// print the table
 	printer := printers.NewTablePrinter(printers.PrintOptions{
-		Wide: format == "wide",
+		WithNamespace: allNamespaces,
+		Wide:          format == "wide",
 	})
 
 	err := printer.PrintObj(table, cmd.OutOrStdout())
@@ -113,14 +115,14 @@ func generateRow(volumeClaim *types.VolumeClaim) *metaV1.TableRow {
 	}
 
 	row.Cells = []any{
-		volumeClaim.Claim.Name,
+		volumeClaim.Claim.GetName(),
 		volumeClaim.Volume.GetSecretNamespace(),
 		volumeClaim.Volume.GetSecretName(),
 		volumeClaim.Volume.GetName(),
 		volumeClaim.Volume.GetVolumePath(),
 		volumeClaim.Volume.GetVolumeHandle(),
 		volumeClaim.Ticket.GetStatusString(),
-		util.HumanDurationUntilNow(volumeClaim.Claim.CreationTimestamp.Time),
+		util.ShortHumanDurationUntilNow(volumeClaim.Claim.CreationTimestamp.Time),
 	}
 
 	return row

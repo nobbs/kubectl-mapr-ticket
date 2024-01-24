@@ -2,8 +2,6 @@ package volume
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
 
@@ -73,7 +71,7 @@ func NewCmd(opts *common.Options) *cobra.Command {
 		Use:     volumeUse,
 		Short:   volumeShort,
 		Long:    common.CliLongDesc(volumeLong),
-		Example: common.CliExample(volumeExample, filepath.Base(os.Args[0])),
+		Example: common.CliExample(volumeExample, common.CliBinName),
 		Args:    cobra.MaximumNArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			// we only want one argument, so don't complete once we have one

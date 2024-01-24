@@ -2,8 +2,6 @@ package root
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
 
@@ -35,7 +33,7 @@ func NewCmd(flags *genericclioptions.ConfigFlags, streams genericiooptions.IOStr
 	)
 
 	rootCmd := &cobra.Command{
-		Use:   fmt.Sprintf(rootUse, filepath.Base(os.Args[0])),
+		Use:   fmt.Sprintf(rootUse, common.CliBinName),
 		Short: rootShort,
 		Long:  common.CliLongDesc(rootLong),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {

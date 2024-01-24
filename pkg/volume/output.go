@@ -127,7 +127,7 @@ func generateRow(volume *types.Volume) *metaV1.TableRow {
 		volume.Volume.GetVolumePath(),
 		volume.Volume.GetVolumeHandle(),
 		volume.Ticket.GetStatusString(),
-		util.HumanDurationUntilNow(volume.Volume.CreationTimestamp.Time),
+		util.ShortHumanDurationUntilNow(volume.Volume.CreationTimestamp.Time),
 	}
 
 	return row

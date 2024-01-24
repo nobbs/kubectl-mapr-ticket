@@ -19,6 +19,7 @@ type Lister struct {
 	secretLister secretLister
 
 	namespace string
+	sortBy    []SortOptions
 
 	volumeClaims []types.VolumeClaim
 }
@@ -27,6 +28,7 @@ func NewLister(client kubernetes.Interface, namespace string, opts ...ListerOpti
 	l := &Lister{
 		client:    client,
 		namespace: namespace,
+		sortBy:    DefaultSortBy,
 	}
 
 	for _, opt := range opts {
@@ -45,7 +47,8 @@ func (l *Lister) List() ([]types.VolumeClaim, error) {
 	l.filterClaimsBoundOnly().
 		collectVolumes().
 		filterClaimsMaprCSI().
-		collectTickets()
+		collectTickets().
+		sort()
 
 	return l.volumeClaims, nil
 }
