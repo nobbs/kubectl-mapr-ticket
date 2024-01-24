@@ -17,7 +17,7 @@ const (
 	claimLong  = `
 		List all persistent volumes claims that use a MapR ticket in the current namespace.
 
-		By default, this command lists all persistent volumes claims that use a MapR ticket in the current namespace.
+		By default, this command lists all persistent volume claims that use a MapR ticket in the current namespace.
 		`
 	claimExample = `
 		# List all persistent volumes claims in the current namespace that use a MapR ticket

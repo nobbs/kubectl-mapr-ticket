@@ -5,8 +5,6 @@
 [![Codecov](https://img.shields.io/codecov/c/github/nobbs/kubectl-mapr-ticket)](https://app.codecov.io/gh/nobbs/kubectl-mapr-ticket)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/nobbs/kubectl-mapr-ticket)
 
-
-
 `kubectl-mapr-ticket` is a `kubectl` plugin that allows you to list and inspect MapR tickets deployed as Kubernetes secrets in a cluster.
 
 MapR tickets are used by the [MapR CSI driver](https://github.com/mapr/mapr-csi) to authenticate and authorize access to Persistent Volumes backed by MapR storage.
@@ -53,15 +51,16 @@ $ kubectl mapr-ticket --help
 
 The plugin can be invoked using the `kubectl mapr-ticket` command. The plugin supports the following subcommands:
 
-- `list` - List all MapR tickets deployed in the current namespace.
-- `used-by` - List all Persistent Volumes that are using a specific MapR ticket.
+- `secret`, alias `s` - List all secrets containing MapR tickets in the current namespace and print some information about them.
+- `volume`, alias `pv` - List all persistent volumes that use the specified MapR ticket secret and print some information about them.
+- `claim`, alias `pvc` - List all persistent volume claims that use a MapR ticket in the current namespace.
 
-### List
+### Secrets
 
-The `list` subcommand will list all MapR tickets deployed in the current namespace. The output by default will be a table with the following columns. Additional flags can be used to customize the output, see `kubectl mapr-ticket list --help` for more details.
+The `secret` subcommand will list all MapR tickets deployed as `Secrets` in the current namespace. The output by default will be a table that can be extended with the `--output wide` flag. Additional flags can be used to customize the output, see `kubectl mapr-ticket secret --help` for more details.
 
 ```console
-$ kubectl mapr-ticket list
+$ kubectl mapr-ticket secret
 NAME                      MAPR CLUSTER         USER     STATUS              AGE
 mapr-dev-ticket-user-a    demo.dev.mapr.com    user_a   Valid (4y left)     75d
 mapr-dev-ticket-user-b    demo.dev.mapr.com    user_b   Valid (4y left)     75d
@@ -71,14 +70,28 @@ mapr-prod-ticket-user-b   demo.prod.mapr.com   user_b   Expired (43d ago)   73d
 mapr-prod-ticket-user-c   demo.prod.mapr.com   user_c   Expired (43d ago)   73d
 ```
 
-### Used By
+### Volumes
 
-The `used-by` subcommand will list all Persistent Volumes that are using a specific MapR ticket or any ticket in the current namespace if `--all` is specified. The output by default will be a table with the following columns. Additional flags can be used to customize the output, see `kubectl mapr-ticket used-by --help` for more details.
+The `volume` subcommand will list all Persistent Volumes that are using a specific MapR ticket if a secret name is specified, or any ticket in the current namespace if no argument is provided. The output by default will be a table with the following columns. Additional flags can be used to customize the output, see `kubectl mapr-ticket volume --help` for more details.
 
 ```console
 $ kubectl mapr-ticket mapr-ticket-secret -n test-csi
-NAME             SECRET NAMESPACE   SECRET               CLAIM NAMESPACE   CLAIM   AGE
-test-static-pv   test-csi           mapr-ticket-secret                             13h
+NAME             SECRET NAMESPACE   SECRET               CLAIM NAMESPACE   CLAIM        TICKET STATUS         AGE
+test-static-pv   test-csi           mapr-ticket-secret   default           test-claim   Not found / Invalid   13h
+var-lib-mapr     test-csi           mapr-ticket-secret   default           test-var     Valid (4y left)       12d
+expired-pv       test-csi           mapr-ticket-secret   default           test-exp     Expired (43d ago)     12d
+```
+
+### Claims
+
+The `claim` subcommand will list all Persistent Volume Claims in the current namespace that are using a MapR ticket. The output by default will be a table with the following columns. Additional flags can be used to customize the output, see `kubectl mapr-ticket claim --help` for more details.
+
+```console
+$ kubectl mapr-ticket claim -n default
+NAME         SECRET NAMESPACE   SECRET               VOLUME NAME      TICKET STATUS         AGE
+test-claim   test-csi           mapr-ticket-secret   test-static-pv   Not found / Invalid   13h
+test-var     test-csi           mapr-ticket-secret   var-lib-mapr     Valid (4y left)       12d
+test-exp     test-csi           mapr-ticket-secret   expired-pv       Expired (43d ago)     12d
 ```
 
 ### Shell Completion
