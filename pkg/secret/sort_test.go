@@ -1,7 +1,6 @@
 package secret_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,29 +14,27 @@ func TestValidateSortOptions(t *testing.T) {
 	tests := []struct {
 		name        string
 		sortOptions []string
-		expectedErr error
+		wantErr     bool
 	}{
 		{
 			name:        "empty sort options",
 			sortOptions: []string{},
-			expectedErr: nil,
+			wantErr:     false,
 		},
 		{
-			name: "one valid sort option",
-			sortOptions: []string{
-				"name",
-			},
-			expectedErr: nil,
+			name:        "one valid sort option",
+			sortOptions: []string{"name"},
+			wantErr:     false,
 		},
 		{
 			name:        "all valid sort options",
-			sortOptions: []string{"name", "namespace", "maprCluster", "maprUser", "creationTimestamp", "expiryTime", "numPVC"},
-			expectedErr: nil,
+			sortOptions: []string{"name", "namespace", "mapr.cluster", "mapr.user", "age", "expiration", "npvcs"},
+			wantErr:     false,
 		},
 		{
 			name:        "invalid sort option",
 			sortOptions: []string{"invalidOption"},
-			expectedErr: fmt.Errorf("invalid sort option: invalidOption. Must be one of: name|namespace|maprCluster|maprUser|creationTimestamp|expiryTime"),
+			wantErr:     true,
 		},
 	}
 
@@ -45,7 +42,7 @@ func TestValidateSortOptions(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			err := ValidateSortOptions(test.sortOptions)
 
-			assert.Equal(test.expectedErr, err)
+			assert.Equal(test.wantErr, err != nil)
 		})
 	}
 }

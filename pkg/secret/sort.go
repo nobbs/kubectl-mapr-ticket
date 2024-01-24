@@ -2,21 +2,23 @@ package secret
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/types"
+	"github.com/nobbs/kubectl-mapr-ticket/pkg/util"
 )
 
-type SortOptions string
+type SortOption string
 
 const (
-	SortByName              SortOptions = "name"
-	SortByNamespace         SortOptions = "namespace"
-	SortByMaprCluster       SortOptions = "maprCluster"
-	SortByMaprUser          SortOptions = "maprUser"
-	SortByCreationTimestamp SortOptions = "creationTimestamp"
-	SortByExpiryTime        SortOptions = "expiryTime"
-	SortByNumPVC            SortOptions = "numPVC"
+	SortByName        SortOption = "name"
+	SortByNamespace   SortOption = "namespace"
+	SortByMaprCluster SortOption = "mapr.cluster"
+	SortByMaprUser    SortOption = "mapr.user"
+	SortByAge         SortOption = "age"
+	SortByExpiration  SortOption = "expiration"
+	SortByNumPVCs     SortOption = "npvcs"
 )
 
 var (
@@ -26,35 +28,27 @@ var (
 		SortByNamespace.String(),
 		SortByMaprCluster.String(),
 		SortByMaprUser.String(),
-		SortByCreationTimestamp.String(),
-		SortByExpiryTime.String(),
-		SortByNumPVC.String(),
+		SortByAge.String(),
+		SortByExpiration.String(),
+		SortByNumPVCs.String(),
 	}
 
 	// DefaultSortBy is the default sort order
-	DefaultSortBy = []SortOptions{
+	DefaultSortBy = []SortOption{
 		SortByNamespace,
 		SortByName,
 	}
 )
 
-func (s SortOptions) String() string {
+func (s SortOption) String() string {
 	return string(s)
 }
 
 // ValidateSortOptions validates the specified sort options
 func ValidateSortOptions(sortOptions []string) error {
 	for _, sortOption := range sortOptions {
-		switch sortOption {
-		case SortByName.String():
-		case SortByNamespace.String():
-		case SortByMaprCluster.String():
-		case SortByMaprUser.String():
-		case SortByCreationTimestamp.String():
-		case SortByExpiryTime.String():
-		case SortByNumPVC.String():
-		default:
-			return fmt.Errorf("invalid sort option: %s. Must be one of: name|namespace|maprCluster|maprUser|creationTimestamp|expiryTime", sortOption)
+		if !slices.Contains(SortOptionsList, sortOption) {
+			return fmt.Errorf("invalid sort option: %s. Must be one of: (%s)", sortOption, util.StringSliceToCommaSeparatedString(SortOptionsList))
 		}
 	}
 
@@ -89,23 +83,23 @@ func sortByMaprUser(items []types.TicketSecret) {
 	})
 }
 
-// sortByCreationTimestamp sorts the items by creation timestamp of the ticket
-func sortByCreationTimestamp(items []types.TicketSecret) {
+// sortByAge sorts the items by creation timestamp of the ticket
+func sortByAge(items []types.TicketSecret) {
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].GetCreationTime().Before(items[j].GetCreationTime())
 	})
 }
 
-// sortByExpiryTime sorts the items by expiry time of the ticket
-func sortByExpiryTime(items []types.TicketSecret) {
+// sortByExpiration sorts the items by expiry time of the ticket
+func sortByExpiration(items []types.TicketSecret) {
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].GetExpirationTime().Before(items[j].GetExpirationTime())
 	})
 }
 
-// sortByNumPVC sorts the items by the number of persistent volumes that are
+// sortByNumPVCs sorts the items by the number of persistent volumes that are
 // using the secret
-func sortByNumPVC(items []types.TicketSecret) {
+func sortByNumPVCs(items []types.TicketSecret) {
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].NumPVC < items[j].NumPVC
 	})
@@ -116,7 +110,7 @@ func sortByNumPVC(items []types.TicketSecret) {
 // when using multiple sort options.
 func (l *Lister) Sort() *Lister {
 	// reverse the order of the sort options
-	order := make([]SortOptions, len(l.sortBy))
+	order := make([]SortOption, len(l.sortBy))
 	for i, j := 0, len(l.sortBy)-1; i < len(l.sortBy); i, j = i+1, j-1 {
 		order[i] = l.sortBy[j]
 	}
@@ -132,12 +126,12 @@ func (l *Lister) Sort() *Lister {
 			sortByMaprCluster(l.tickets)
 		case SortByMaprUser:
 			sortByMaprUser(l.tickets)
-		case SortByCreationTimestamp:
-			sortByCreationTimestamp(l.tickets)
-		case SortByExpiryTime:
-			sortByExpiryTime(l.tickets)
-		case SortByNumPVC:
-			sortByNumPVC(l.tickets)
+		case SortByAge:
+			sortByAge(l.tickets)
+		case SortByExpiration:
+			sortByExpiration(l.tickets)
+		case SortByNumPVCs:
+			sortByNumPVCs(l.tickets)
 		}
 	}
 

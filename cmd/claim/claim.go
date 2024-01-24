@@ -115,6 +115,11 @@ func (o *options) Validate() error {
 		return fmt.Errorf("invalid output format %q. Must be one of (%s)", o.OutputFormat, common.StringSliceToFlagOptions(claimValidOutputFormats))
 	}
 
+	// ensure that the sort options are valid
+	if err := claim.ValidateSortOptions(o.SortBy); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -137,9 +142,9 @@ func (o *options) Run(cmd *cobra.Command, args []string) error {
 
 	// set sort options
 	if cmd.Flags().Changed("sort-by") && o.SortBy != nil {
-		sortOptions := make([]claim.SortOptions, 0, len(o.SortBy))
+		sortOptions := make([]claim.SortOption, 0, len(o.SortBy))
 		for _, sortBy := range o.SortBy {
-			sortOptions = append(sortOptions, claim.SortOptions(sortBy))
+			sortOptions = append(sortOptions, claim.SortOption(sortBy))
 		}
 
 		opts = append(opts, claim.WithSortBy(sortOptions))

@@ -3,7 +3,7 @@ package volume
 type ListerOption func(*Lister)
 
 // WithSortBy sets the sort order used by the Lister for output
-func WithSortBy(sortBy []SortOptions) ListerOption {
+func WithSortBy(sortBy []SortOption) ListerOption {
 	return func(l *Lister) {
 		l.sortBy = sortBy
 	}

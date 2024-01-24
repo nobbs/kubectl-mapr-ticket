@@ -325,7 +325,7 @@ func TestLister_WithAllNamespaces(t *testing.T) {
 
 func TestLister_WithSortByName(t *testing.T) {
 	opts := []ListerOption{
-		volume.WithSortBy([]SortOptions{SortByName}),
+		volume.WithSortBy([]SortOption{SortByName}),
 	}
 
 	tests := []struct {
@@ -398,7 +398,7 @@ func TestLister_WithSortByName(t *testing.T) {
 
 func TestLister_WithSortBySecretNamespace(t *testing.T) {
 	opts := []ListerOption{
-		volume.WithSortBy([]SortOptions{SortBySecretNamespace}),
+		volume.WithSortBy([]SortOption{SortBySecretNamespace}),
 	}
 
 	tests := []struct {
@@ -471,7 +471,7 @@ func TestLister_WithSortBySecretNamespace(t *testing.T) {
 
 func TestLister_WithSortBySecretName(t *testing.T) {
 	opts := []ListerOption{
-		volume.WithSortBy([]SortOptions{SortBySecretName}),
+		volume.WithSortBy([]SortOption{SortBySecretName}),
 	}
 
 	tests := []struct {
@@ -544,7 +544,7 @@ func TestLister_WithSortBySecretName(t *testing.T) {
 
 func TestLister_WithSortByClaimNamespace(t *testing.T) {
 	opts := []ListerOption{
-		volume.WithSortBy([]SortOptions{SortByClaimNamespace}),
+		volume.WithSortBy([]SortOption{SortByClaimNamespace}),
 	}
 
 	tests := []struct {
@@ -641,7 +641,7 @@ func TestLister_WithSortByClaimNamespace(t *testing.T) {
 
 func TestLister_WithSortByClaimName(t *testing.T) {
 	opts := []ListerOption{
-		volume.WithSortBy([]SortOptions{SortByClaimName}),
+		volume.WithSortBy([]SortOption{SortByClaimName}),
 	}
 
 	tests := []struct {
@@ -738,7 +738,7 @@ func TestLister_WithSortByClaimName(t *testing.T) {
 
 func TestLister_WithSortByVolumePath(t *testing.T) {
 	opts := []ListerOption{
-		volume.WithSortBy([]SortOptions{SortByVolumePath}),
+		volume.WithSortBy([]SortOption{SortByVolumePath}),
 	}
 
 	tests := []struct {
@@ -835,7 +835,7 @@ func TestLister_WithSortByVolumePath(t *testing.T) {
 
 func TestLister_WithSortByVolumeHandle(t *testing.T) {
 	opts := []ListerOption{
-		volume.WithSortBy([]SortOptions{SortByVolumeHandle}),
+		volume.WithSortBy([]SortOption{SortByVolumeHandle}),
 	}
 
 	tests := []struct {
@@ -932,7 +932,7 @@ func TestLister_WithSortByVolumeHandle(t *testing.T) {
 
 func TestLister_WithSortByExpiryTime(t *testing.T) {
 	opts := []ListerOption{
-		volume.WithSortBy([]SortOptions{SortByExpiryTime}),
+		volume.WithSortBy([]SortOption{SortByExpiration}),
 	}
 
 	tests := []struct {
@@ -1017,7 +1017,7 @@ func TestLister_WithSortByExpiryTime(t *testing.T) {
 
 func TestLister_WithSortByAge(t *testing.T) {
 	opts := []ListerOption{
-		volume.WithSortBy([]SortOptions{SortByAge}),
+		volume.WithSortBy([]SortOption{SortByAge}),
 	}
 
 	tests := []struct {

@@ -192,9 +192,9 @@ func (o *options) Run(cmd *cobra.Command, args []string) error {
 
 	if cmd.Flags().Changed("sort-by") && o.SortBy != nil {
 		// convert sort options to SortOptions
-		sortOptions := make([]secret.SortOptions, 0, len(o.SortBy))
+		sortOptions := make([]secret.SortOption, 0, len(o.SortBy))
 		for _, sortBy := range o.SortBy {
-			sortOptions = append(sortOptions, secret.SortOptions(sortBy))
+			sortOptions = append(sortOptions, secret.SortOption(sortBy))
 		}
 
 		opts = append(opts, secret.WithSortBy(sortOptions))

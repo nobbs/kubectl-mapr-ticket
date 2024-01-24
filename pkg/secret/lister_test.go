@@ -923,7 +923,7 @@ func TestLister_WithSortByName(t *testing.T) {
 				),
 				namespace: "kube-system",
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByName}),
+					WithSortBy([]SortOption{SortByName}),
 				},
 			},
 			want: []expectedSecret{
@@ -957,7 +957,7 @@ func TestLister_WithSortByName(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByName}),
+					WithSortBy([]SortOption{SortByName}),
 				},
 			},
 			want: []expectedSecret{
@@ -1007,7 +1007,7 @@ func TestLister_WithSortByNamespace(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByNamespace}),
+					WithSortBy([]SortOption{SortByNamespace}),
 				},
 			},
 			want: []expectedSecret{
@@ -1041,7 +1041,7 @@ func TestLister_WithSortByNamespace(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByNamespace}),
+					WithSortBy([]SortOption{SortByNamespace}),
 				},
 			},
 			want: []expectedSecret{
@@ -1091,7 +1091,7 @@ func TestLister_WithSortByMaprCluster(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByMaprCluster}),
+					WithSortBy([]SortOption{SortByMaprCluster}),
 				},
 			},
 			want: []expectedSecret{
@@ -1125,7 +1125,7 @@ func TestLister_WithSortByMaprCluster(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByMaprCluster}),
+					WithSortBy([]SortOption{SortByMaprCluster}),
 				},
 			},
 			want: []expectedSecret{
@@ -1175,7 +1175,7 @@ func TestLister_WithSortByMaprUser(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByMaprUser}),
+					WithSortBy([]SortOption{SortByMaprUser}),
 				},
 			},
 			want: []expectedSecret{
@@ -1209,7 +1209,7 @@ func TestLister_WithSortByMaprUser(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByMaprUser}),
+					WithSortBy([]SortOption{SortByMaprUser}),
 				},
 			},
 			want: []expectedSecret{
@@ -1265,7 +1265,7 @@ func TestLister_WithSortByCreationTime(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByCreationTimestamp}),
+					WithSortBy([]SortOption{SortByAge}),
 				},
 			},
 			want: []expectedSecret{
@@ -1299,7 +1299,7 @@ func TestLister_WithSortByCreationTime(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByCreationTimestamp}),
+					WithSortBy([]SortOption{SortByAge}),
 				},
 			},
 			want: []expectedSecret{
@@ -1354,7 +1354,7 @@ func TestLister_WithSortByExpiryTime(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByExpiryTime}),
+					WithSortBy([]SortOption{SortByExpiration}),
 				},
 			},
 			want: []expectedSecret{
@@ -1388,7 +1388,7 @@ func TestLister_WithSortByExpiryTime(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByExpiryTime}),
+					WithSortBy([]SortOption{SortByExpiration}),
 				},
 			},
 			want: []expectedSecret{

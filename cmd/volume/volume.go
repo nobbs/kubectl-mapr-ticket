@@ -180,9 +180,9 @@ func (o *options) Run(cmd *cobra.Command, args []string) error {
 
 	if cmd.Flags().Changed("sort-by") && o.SortBy != nil {
 		// convert sort options to SortOptions
-		sortOptions := make([]volume.SortOptions, 0, len(o.SortBy))
+		sortOptions := make([]volume.SortOption, 0, len(o.SortBy))
 		for _, sortBy := range o.SortBy {
-			sortOptions = append(sortOptions, volume.SortOptions(sortBy))
+			sortOptions = append(sortOptions, volume.SortOption(sortBy))
 		}
 
 		opts = append(opts, volume.WithSortBy(sortOptions))

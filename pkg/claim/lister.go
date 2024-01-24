@@ -19,7 +19,7 @@ type Lister struct {
 	secretLister secretLister
 
 	namespace string
-	sortBy    []SortOptions
+	sortBy    []SortOption
 
 	volumeClaims []types.VolumeClaim
 }

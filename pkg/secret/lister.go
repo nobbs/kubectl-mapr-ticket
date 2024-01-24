@@ -30,7 +30,7 @@ type Lister struct {
 	filterByInUse       bool
 	filterExpiresBefore time.Duration
 	showInUse           bool
-	sortBy              []SortOptions
+	sortBy              []SortOption
 
 	tickets []types.TicketSecret
 }
