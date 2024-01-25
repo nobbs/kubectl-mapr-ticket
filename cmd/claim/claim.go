@@ -180,7 +180,7 @@ func (o *options) registerCompletions(cmd *cobra.Command) error {
 	}
 
 	err = cmd.RegisterFlagCompletionFunc("sort-by", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return common.CompleteStringValues(claim.SortOptionsList, toComplete)
+		return common.CompleteStringSliceValues(claim.SortOptionsList, toComplete)
 	})
 	if err != nil {
 		return err

@@ -104,6 +104,128 @@ func TestCompleteStringValues(t *testing.T) {
 	}
 }
 
+func TestCompleteStringSliceValues(t *testing.T) {
+	t.Parallel()
+
+	type args struct {
+		values     []string
+		toComplete string
+	}
+
+	type expected struct {
+		suggestions []string
+		directive   cobra.ShellCompDirective
+	}
+
+	tests := []struct {
+		name string
+		args args
+		want expected
+	}{
+		{
+			name: "EmptyValues",
+			args: args{
+				values:     []string{},
+				toComplete: "",
+			},
+			want: expected{
+				suggestions: nil,
+				directive:   cobra.ShellCompDirectiveNoFileComp,
+			},
+		},
+		{
+			name: "EmptyToComplete",
+			args: args{
+				values:     []string{"apple", "banana", "cherry"},
+				toComplete: "",
+			},
+			want: expected{
+				suggestions: []string{"apple", "banana", "cherry"},
+				directive:   cobra.ShellCompDirectiveNoFileComp,
+			},
+		},
+		{
+			name: "SingleValue",
+			args: args{
+				values:     []string{"apple"},
+				toComplete: "a",
+			},
+			want: expected{
+				suggestions: []string{"apple"},
+				directive:   cobra.ShellCompDirectiveNoFileComp,
+			},
+		},
+		{
+			name: "MultipleValues",
+			args: args{
+				values:     []string{"apple", "banana", "cherry"},
+				toComplete: "b",
+			},
+			want: expected{
+				suggestions: []string{"banana"},
+				directive:   cobra.ShellCompDirectiveNoFileComp,
+			},
+		},
+		{
+			name: "MultipleValuesMultipleMatches",
+			args: args{
+				values:     []string{"apple", "banana", "blueberry", "cherry"},
+				toComplete: "b",
+			},
+			want: expected{
+				suggestions: []string{"banana", "blueberry"},
+				directive:   cobra.ShellCompDirectiveNoFileComp,
+			},
+		},
+		{
+			name: "EmptyToCompleteWithCompletedValues",
+			args: args{
+				values:     []string{"apple", "banana", "cherry"},
+				toComplete: "apple,",
+			},
+			want: expected{
+				suggestions: []string{"banana", "cherry"},
+				directive:   cobra.ShellCompDirectiveNoFileComp,
+			},
+		},
+		{
+			name: "SingleValueWithCompletedValues",
+			args: args{
+				values:     []string{"apple", "banana", "cherry"},
+				toComplete: "apple,b",
+			},
+			want: expected{
+				suggestions: []string{"banana"},
+				directive:   cobra.ShellCompDirectiveNoFileComp,
+			},
+		},
+		{
+			name: "MultipleValuesWithCompletedValues",
+			args: args{
+				values:     []string{"apple", "banana", "cherry", "blueberry", "blackberry", "raspberry"},
+				toComplete: "apple,blueberry,",
+			},
+			want: expected{
+				suggestions: []string{"banana", "blackberry", "cherry", "raspberry"},
+				directive:   cobra.ShellCompDirectiveNoFileComp,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			suggestions, directive := CompleteStringSliceValues(test.args.values, test.args.toComplete)
+
+			assert.Len(t, suggestions, len(test.want.suggestions))
+			assert.ElementsMatch(t, test.want.suggestions, suggestions)
+			assert.Equal(t, test.want.directive, directive)
+		})
+	}
+}
+
 func TestCompleteNamespaceNames(t *testing.T) {
 	t.Parallel()
 

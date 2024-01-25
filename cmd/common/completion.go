@@ -26,6 +26,42 @@ func CompleteStringValues(values []string, toComplete string) ([]string, cobra.S
 	return suggestions, cobra.ShellCompDirectiveNoFileComp
 }
 
+// CompleteStringSliceValues returns a list of suggestions for the given
+// available values and the toComplete string. If toComplete is empty, all
+// values are returned. Otherwise, only values that start the the substring
+// of toComplete starting at the last comma are returned.
+func CompleteStringSliceValues(values []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	var suggestions []string
+
+	// if toComplete is empty, return all values early
+	if toComplete == "" {
+		suggestions = values
+		return suggestions, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	// split toComplete into tokens
+	tokens := strings.Split(toComplete, ",")
+	completeTokens := tokens[:len(tokens)-1]
+	currentToken := tokens[len(tokens)-1]
+
+	// filter values to remove already completed values
+	filteredValues := []string{}
+
+	for _, v := range values {
+		if !contains(completeTokens, v) {
+			filteredValues = append(filteredValues, v)
+		}
+	}
+
+	for _, v := range filteredValues {
+		if currentToken == "" || strings.HasPrefix(v, currentToken) {
+			suggestions = append(suggestions, v)
+		}
+	}
+
+	return suggestions, cobra.ShellCompDirectiveNoFileComp
+}
+
 // CompleteNamespaceNames returns a list of suggestions for the given available
 // namespaces and the toComplete string. If toComplete is empty, all namespaces
 // are returned. Otherwise, only namespaces that start with toComplete are
