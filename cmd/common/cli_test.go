@@ -9,6 +9,8 @@ import (
 )
 
 func TestStringSliceToFlagOptions(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		slice    []string
@@ -32,7 +34,9 @@ func TestStringSliceToFlagOptions(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 			result := StringSliceToFlagOptions(test.slice)
 			assert.Equal(t, test.expected, result)
 		})
@@ -40,6 +44,8 @@ func TestStringSliceToFlagOptions(t *testing.T) {
 }
 
 func TestCliLongDesc(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		desc     string
@@ -83,7 +89,9 @@ func TestCliLongDesc(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 			result := CliLongDesc(test.desc, test.args...)
 			assert.Equal(t, test.expected, result)
 		})
@@ -91,6 +99,8 @@ func TestCliLongDesc(t *testing.T) {
 }
 
 func TestCliExample(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		example  string
@@ -134,7 +144,9 @@ func TestCliExample(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 			result := CliExample(test.example, test.args...)
 			assert.Equal(t, test.expected, result)
 		})

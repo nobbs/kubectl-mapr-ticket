@@ -4,7 +4,7 @@ import "time"
 
 type ListerOption func(*Lister)
 
-func WithSortBy(sortBy []SortOptions) ListerOption {
+func WithSortBy(sortBy []SortOption) ListerOption {
 	return func(l *Lister) {
 		l.sortBy = sortBy
 	}

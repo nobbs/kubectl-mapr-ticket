@@ -9,6 +9,8 @@ import (
 )
 
 func TestVersionString(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		version Version
@@ -52,11 +54,14 @@ func TestVersionString(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.version.String()
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Equal(t, tt.want, got)
+			got := test.version.String()
+
+			assert.Equal(t, test.want, got)
 		})
 	}
 }

@@ -2,11 +2,17 @@ package common
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 )
 
 const (
 	indend = `  `
+)
+
+var (
+	CliBinName = filepath.Base(os.Args[0])
 )
 
 type stringNormalizer struct {

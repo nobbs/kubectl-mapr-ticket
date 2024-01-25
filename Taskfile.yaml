@@ -16,7 +16,7 @@ tasks:
   test:
     desc: Run tests
     cmds:
-      - go test -covermode=atomic ./...
+      - go test -covermode=atomic ./... {{.CLI_ARGS}}
 
   lint:
     desc: Run linter

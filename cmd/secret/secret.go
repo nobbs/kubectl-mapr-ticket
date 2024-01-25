@@ -2,8 +2,6 @@ package secret
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
 
@@ -110,7 +108,7 @@ func NewCmd(opts *common.Options) *cobra.Command {
 		Use:     secretUse,
 		Short:   secretShort,
 		Long:    common.CliLongDesc(secretLong),
-		Example: common.CliExample(secretExample, filepath.Base(os.Args[0])),
+		Example: common.CliExample(secretExample, common.CliBinName),
 		Args:    cobra.NoArgs,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
@@ -194,9 +192,9 @@ func (o *options) Run(cmd *cobra.Command, args []string) error {
 
 	if cmd.Flags().Changed("sort-by") && o.SortBy != nil {
 		// convert sort options to SortOptions
-		sortOptions := make([]secret.SortOptions, 0, len(o.SortBy))
+		sortOptions := make([]secret.SortOption, 0, len(o.SortBy))
 		for _, sortBy := range o.SortBy {
-			sortOptions = append(sortOptions, secret.SortOptions(sortBy))
+			sortOptions = append(sortOptions, secret.SortOption(sortBy))
 		}
 
 		opts = append(opts, secret.WithSortBy(sortOptions))

@@ -11,6 +11,8 @@ import (
 )
 
 func TestDurationValue_Set(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name        string
 		input       string
@@ -50,9 +52,11 @@ func TestDurationValue_Set(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
-			d := new(DurationValue)
+			t.Parallel()
 
+			d := new(DurationValue)
 			err := d.Set(test.input)
 
 			assert.Equal(t, test.expectedVal, *d)
@@ -67,6 +71,7 @@ func TestDurationValue_Set(t *testing.T) {
 	}
 }
 
+// nolint:paralleltest
 func TestDurationValue_Type(t *testing.T) {
 	d := new(DurationValue)
 
@@ -74,6 +79,8 @@ func TestDurationValue_Type(t *testing.T) {
 }
 
 func TestDurationValueFlag(t *testing.T) {
+	t.Parallel()
+
 	var testDuration DurationValue
 
 	testCmd := &cobra.Command{
@@ -109,8 +116,10 @@ func TestDurationValueFlag(t *testing.T) {
 		},
 	}
 
+	// nolint:paralleltest
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+
 			err := testCmd.ParseFlags(test.args)
 
 			assert.Equal(t, test.expectedVal, testDuration.Duration())

@@ -13,7 +13,7 @@ import (
 )
 
 type volumeLister interface {
-	List() ([]types.Volume, error)
+	List() ([]types.MaprVolume, error)
 }
 
 type Lister struct {
@@ -30,9 +30,9 @@ type Lister struct {
 	filterByInUse       bool
 	filterExpiresBefore time.Duration
 	showInUse           bool
-	sortBy              []SortOptions
+	sortBy              []SortOption
 
-	tickets []types.TicketSecret
+	tickets []types.MaprSecret
 }
 
 // NewLister creates a new Lister
@@ -57,7 +57,7 @@ func NewLister(client kubernetes.Interface, namespace string, opts ...ListerOpti
 	return l
 }
 
-func (l *Lister) List() ([]types.TicketSecret, error) {
+func (l *Lister) List() ([]types.MaprSecret, error) {
 	if err := l.getSecretsWithTickets(); err != nil {
 		return nil, err
 	}
@@ -106,8 +106,8 @@ func rejectSecretsWithoutTicket(secrets []coreV1.Secret) []coreV1.Secret {
 }
 
 // parseTicketsFromSecrets parses secrets to items, ignoring secrets that don't contain a MapR ticket
-func parseTicketsFromSecrets(secrets []coreV1.Secret) []types.TicketSecret {
-	items := make([]types.TicketSecret, 0, len(secrets))
+func parseTicketsFromSecrets(secrets []coreV1.Secret) []types.MaprSecret {
+	items := make([]types.MaprSecret, 0, len(secrets))
 
 	filtered := rejectSecretsWithoutTicket(secrets)
 
@@ -119,7 +119,7 @@ func parseTicketsFromSecrets(secrets []coreV1.Secret) []types.TicketSecret {
 			continue
 		}
 
-		items = append(items, types.TicketSecret{
+		items = append(items, types.MaprSecret{
 			Secret: (*types.Secret)(&s),
 			Ticket: ticket,
 		})
@@ -135,7 +135,7 @@ func (l *Lister) filterTicketsOnlyExpired() *Lister {
 		return l
 	}
 
-	var filtered []types.TicketSecret
+	var filtered []types.MaprSecret
 
 	for _, item := range l.tickets {
 		if item.Ticket.IsExpired() {
@@ -155,7 +155,7 @@ func (l *Lister) filterTicketsOnlyUnexpired() *Lister {
 		return l
 	}
 
-	var filtered []types.TicketSecret
+	var filtered []types.MaprSecret
 
 	for _, item := range l.tickets {
 		if !item.Ticket.IsExpired() {
@@ -175,7 +175,7 @@ func (l *Lister) filterTicketsByMaprCluster() *Lister {
 		return l
 	}
 
-	var filtered []types.TicketSecret
+	var filtered []types.MaprSecret
 
 	for _, item := range l.tickets {
 		if item.Ticket.Cluster == *l.filterByMaprCluster {
@@ -195,7 +195,7 @@ func (l *Lister) filterTicketsByMaprUser() *Lister {
 		return l
 	}
 
-	var filtered []types.TicketSecret
+	var filtered []types.MaprSecret
 
 	for _, item := range l.tickets {
 		if item.Ticket.UserCreds.GetUserName() == *l.filterByMaprUser {
@@ -215,7 +215,7 @@ func (l *Lister) filterTicketsByUID() *Lister {
 		return l
 	}
 
-	var filtered []types.TicketSecret
+	var filtered []types.MaprSecret
 
 	for _, item := range l.tickets {
 		if *item.Ticket.UserCreds.Uid == *l.filterByUID {
@@ -235,7 +235,7 @@ func (l *Lister) filterTicketsByGID() *Lister {
 		return l
 	}
 
-	var filtered []types.TicketSecret
+	var filtered []types.MaprSecret
 
 	for _, item := range l.tickets {
 		for _, gid := range item.Ticket.UserCreds.Gids {
@@ -259,7 +259,7 @@ func (l *Lister) filterTicketsExpiresBefore() *Lister {
 		return l
 	}
 
-	var filtered []types.TicketSecret
+	var filtered []types.MaprSecret
 
 	for _, item := range l.tickets {
 		if item.Ticket.ExpiresBefore(l.filterExpiresBefore) {
@@ -279,7 +279,7 @@ func (l *Lister) filterTicketsInUse() *Lister {
 		return l
 	}
 
-	var filtered []types.TicketSecret
+	var filtered []types.MaprSecret
 
 	for _, item := range l.tickets {
 		if item.NumPVC > 0 {

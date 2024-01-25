@@ -70,6 +70,24 @@ func NewMaprTicketFromSecret(secret *coreV1.Secret) (*Ticket, error) {
 	return (*Ticket)(ticket), nil
 }
 
+// GetCluster returns the cluster that the ticket is for
+func (ticket *Ticket) GetCluster() string {
+	if ticket == nil {
+		return ""
+	}
+
+	return ticket.Cluster
+}
+
+// GetUser returns the user that the ticket is for
+func (ticket *Ticket) GetUser() string {
+	if ticket == nil || ticket.UserCreds == nil || ticket.UserCreds.UserName == nil {
+		return ""
+	}
+
+	return *ticket.UserCreds.UserName
+}
+
 // isExpired returns true if the ticket is expired
 func (ticket *Ticket) IsExpired() bool {
 	return time.Now().After(ticket.ExpirationTime())

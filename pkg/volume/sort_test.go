@@ -1,7 +1,6 @@
 package volume_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,42 +9,45 @@ import (
 )
 
 func TestValidateSortOptions(t *testing.T) {
-	assert := assert.New(t)
+	t.Parallel()
 
 	tests := []struct {
 		name        string
 		sortOptions []string
-		expectedErr error
+		wantErr     bool
 	}{
 		{
 			name:        "empty sort options",
 			sortOptions: []string{},
-			expectedErr: nil,
+			wantErr:     false,
 		},
 		{
 			name: "one valid sort option",
 			sortOptions: []string{
 				"name",
 			},
-			expectedErr: nil,
+			wantErr: false,
 		},
 		{
 			name:        "all valid sort options",
-			sortOptions: []string{"name", "secretNamespace", "secretName", "claimNamespace", "claimName", "volumePath", "volumeHandle", "expiryTime", "age"},
-			expectedErr: nil,
+			sortOptions: []string{"name", "secret.namespace", "secret.name", "claim.namespace", "claim.name", "volume.path", "volume.handle", "expiration", "age"},
+			wantErr:     false,
 		},
 		{
 			name:        "invalid sort option",
 			sortOptions: []string{"invalidOption"},
-			expectedErr: fmt.Errorf("invalid sort option: invalidOption. Must be one of: name|secretNamespace|secretName|claimNamespace|claimName|volumePath|volumeHandle|expiryTime|age"),
+			wantErr:     true,
 		},
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			err := ValidateSortOptions(test.sortOptions)
 
-			assert.Equal(test.expectedErr, err)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }

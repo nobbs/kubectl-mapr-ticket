@@ -2,23 +2,25 @@ package volume
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/types"
+	"github.com/nobbs/kubectl-mapr-ticket/pkg/util"
 )
 
-type SortOptions string
+type SortOption string
 
 const (
-	SortByName            SortOptions = "name"
-	SortBySecretNamespace SortOptions = "secretNamespace"
-	SortBySecretName      SortOptions = "secretName"
-	SortByClaimNamespace  SortOptions = "claimNamespace"
-	SortByClaimName       SortOptions = "claimName"
-	SortByVolumePath      SortOptions = "volumePath"
-	SortByVolumeHandle    SortOptions = "volumeHandle"
-	SortByExpiryTime      SortOptions = "expiryTime"
-	SortByAge             SortOptions = "age"
+	SortByName            SortOption = "name"
+	SortBySecretNamespace SortOption = "secret.namespace"
+	SortBySecretName      SortOption = "secret.name"
+	SortByClaimNamespace  SortOption = "claim.namespace"
+	SortByClaimName       SortOption = "claim.name"
+	SortByVolumePath      SortOption = "volume.path"
+	SortByVolumeHandle    SortOption = "volume.handle"
+	SortByExpiration      SortOption = "expiration"
+	SortByAge             SortOption = "age"
 )
 
 var (
@@ -31,84 +33,74 @@ var (
 		SortByClaimName.String(),
 		SortByVolumePath.String(),
 		SortByVolumeHandle.String(),
-		SortByExpiryTime.String(),
+		SortByExpiration.String(),
 		SortByAge.String(),
 	}
 
 	// DefaultSortBy is the default sort order
-	DefaultSortBy = []SortOptions{
-		SortBySecretNamespace,
-		SortBySecretName,
+	DefaultSortBy = []SortOption{
+		SortByName,
 	}
 )
 
-func (s SortOptions) String() string {
+func (s SortOption) String() string {
 	return string(s)
 }
 
 // ValidateSortOptions validates the specified sort options
 func ValidateSortOptions(sortOptions []string) error {
 	for _, sortOption := range sortOptions {
-		switch sortOption {
-		case SortByName.String():
-		case SortBySecretNamespace.String():
-		case SortBySecretName.String():
-		case SortByClaimNamespace.String():
-		case SortByClaimName.String():
-		case SortByVolumePath.String():
-		case SortByVolumeHandle.String():
-		case SortByExpiryTime.String():
-		case SortByAge.String():
-		default:
-			return fmt.Errorf("invalid sort option: %s. Must be one of: name|secretNamespace|secretName|claimNamespace|claimName|volumePath|volumeHandle|expiryTime|age", sortOption)
+		if !slices.Contains(SortOptionsList, sortOption) {
+			return fmt.Errorf("invalid sort option: %s. Must be one of: (%s)", sortOption, util.StringSliceToCommaSeparatedString(SortOptionsList))
 		}
 	}
+
 	return nil
 }
 
-func sortByName(volumes []types.Volume) {
+func sortByName(volumes []types.MaprVolume) {
 	sort.Slice(volumes, func(i, j int) bool {
 		return volumes[i].Volume.GetName() < volumes[j].Volume.GetName()
 	})
 }
 
-func sortBySecretNamespace(volumes []types.Volume) {
+func sortBySecretNamespace(volumes []types.MaprVolume) {
 	sort.Slice(volumes, func(i, j int) bool {
 		return volumes[i].Volume.GetSecretNamespace() < volumes[j].Volume.GetSecretNamespace()
 	})
 }
 
-func sortBySecretName(volumes []types.Volume) {
+func sortBySecretName(volumes []types.MaprVolume) {
 	sort.Slice(volumes, func(i, j int) bool {
 		return volumes[i].Volume.GetSecretName() < volumes[j].Volume.GetSecretName()
 	})
 }
 
-func sortByClaimNamespace(volumes []types.Volume) {
+func sortByClaimNamespace(volumes []types.MaprVolume) {
 	sort.Slice(volumes, func(i, j int) bool {
 		return volumes[i].Volume.GetClaimNamespace() < volumes[j].Volume.GetClaimNamespace()
 	})
 }
 
-func sortByClaimName(volumes []types.Volume) {
+func sortByClaimName(volumes []types.MaprVolume) {
 	sort.Slice(volumes, func(i, j int) bool {
 		return volumes[i].Volume.GetClaimName() < volumes[j].Volume.GetClaimName()
 	})
 }
 
-func sortByVolumePath(volumes []types.Volume) {
+func sortByVolumePath(volumes []types.MaprVolume) {
 	sort.Slice(volumes, func(i, j int) bool {
 		return volumes[i].Volume.GetVolumePath() < volumes[j].Volume.GetVolumePath()
 	})
 }
 
-func sortByVolumeHandle(volumes []types.Volume) {
+func sortByVolumeHandle(volumes []types.MaprVolume) {
 	sort.Slice(volumes, func(i, j int) bool {
 		return volumes[i].Volume.GetVolumeHandle() < volumes[j].Volume.GetVolumeHandle()
 	})
 }
 
-func sortByExpiryTime(volumes []types.Volume) {
+func sortByExpiration(volumes []types.MaprVolume) {
 	sort.Slice(volumes, func(i, j int) bool {
 		if volumes[i].Ticket == nil {
 			return true
@@ -116,13 +108,13 @@ func sortByExpiryTime(volumes []types.Volume) {
 			return false
 		}
 
-		return volumes[i].Ticket.Ticket.ExpirationTime().Before(volumes[j].Ticket.Ticket.ExpirationTime())
+		return volumes[i].Ticket.GetExpirationTime().Before(volumes[j].Ticket.GetExpirationTime())
 	})
 }
 
-func sortByAge(volumes []types.Volume) {
+func sortByAge(volumes []types.MaprVolume) {
 	sort.Slice(volumes, func(i, j int) bool {
-		return volumes[i].Volume.CreationTimestamp.Time.Before(volumes[j].Volume.CreationTimestamp.Time)
+		return volumes[i].Volume.CreationTimestamp.Before(&volumes[j].Volume.CreationTimestamp)
 	})
 }
 
@@ -131,7 +123,7 @@ func sortByAge(volumes []types.Volume) {
 // when using multiple sort options.
 func (l *Lister) sort() *Lister {
 	// reverse the order of the sort options
-	order := make([]SortOptions, len(l.sortBy))
+	order := make([]SortOption, len(l.sortBy))
 	for i, j := 0, len(l.sortBy)-1; i < len(l.sortBy); i, j = i+1, j-1 {
 		order[i] = l.sortBy[j]
 	}
@@ -153,8 +145,8 @@ func (l *Lister) sort() *Lister {
 			sortByVolumePath(l.volumes)
 		case SortByVolumeHandle:
 			sortByVolumeHandle(l.volumes)
-		case SortByExpiryTime:
-			sortByExpiryTime(l.volumes)
+		case SortByExpiration:
+			sortByExpiration(l.volumes)
 		case SortByAge:
 			sortByAge(l.volumes)
 		}

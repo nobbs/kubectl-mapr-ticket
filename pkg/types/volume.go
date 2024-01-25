@@ -6,25 +6,42 @@ import (
 	coreV1 "k8s.io/api/core/v1"
 )
 
+const (
+	MaprCSIProvisionerKDF    = "com.mapr.csi-kdf"
+	MaprCSIProvisionerNFSKDF = "com.mapr.csi-nfskdf"
+)
+
 var (
-	// maprCSIProvisioners is a list of the default MapR CSI provisioners
+	// MaprCSIProvisioners is a list of the default MapR CSI provisioners
 	// that we support.
-	maprCSIProvisioners = []string{
-		"com.mapr.csi-kdf",
-		"com.mapr.csi-nfskdf",
+	MaprCSIProvisioners = []string{
+		MaprCSIProvisionerKDF,
+		MaprCSIProvisionerNFSKDF,
 	}
 )
 
+// PersistentVolume is a wrapper around coreV1.PersistentVolume that provides additional
+// functionality.
 type PersistentVolume coreV1.PersistentVolume
 
-type Volume struct {
+// MaprVolume is a wrapper around a PersistentVolume that provides additional functionality.
+type MaprVolume struct {
 	Volume *PersistentVolume
-	Ticket *TicketSecret
+	Ticket *MaprSecret
+}
+
+// GetName returns the name of the volume
+func (v *PersistentVolume) GetName() string {
+	if v == nil {
+		return ""
+	}
+
+	return v.Name
 }
 
 // GetClaimName returns the name of the PVC that is bound to the volume
 func (v *PersistentVolume) GetClaimName() string {
-	if v.Spec.ClaimRef == nil {
+	if v == nil || v.Spec.ClaimRef == nil {
 		return ""
 	}
 
@@ -33,7 +50,7 @@ func (v *PersistentVolume) GetClaimName() string {
 
 // GetClaimNamespace returns the namespace of the PVC that is bound to the volume
 func (v *PersistentVolume) GetClaimNamespace() string {
-	if v.Spec.ClaimRef == nil {
+	if v == nil || v.Spec.ClaimRef == nil {
 		return ""
 	}
 
@@ -42,11 +59,7 @@ func (v *PersistentVolume) GetClaimNamespace() string {
 
 // ClaimUID returns the volume path of the volume
 func (v *PersistentVolume) GetVolumePath() string {
-	if v.Spec.CSI == nil {
-		return ""
-	}
-
-	if v.Spec.CSI.VolumeAttributes == nil {
+	if v == nil || v.Spec.CSI == nil || v.Spec.CSI.VolumeAttributes == nil {
 		return ""
 	}
 
@@ -60,7 +73,7 @@ func (v *PersistentVolume) GetVolumePath() string {
 
 // GetVolumeHandle returns the volume handle of the volume
 func (v *PersistentVolume) GetVolumeHandle() string {
-	if v.Spec.CSI == nil {
+	if v == nil || v.Spec.CSI == nil {
 		return ""
 	}
 
@@ -69,7 +82,7 @@ func (v *PersistentVolume) GetVolumeHandle() string {
 
 // GetSecretName returns the name of the NodePublishSecretRef of the volume
 func (v *PersistentVolume) GetSecretName() string {
-	if v.Spec.CSI == nil {
+	if v == nil || v.Spec.CSI == nil {
 		return ""
 	}
 
@@ -82,11 +95,7 @@ func (v *PersistentVolume) GetSecretName() string {
 
 // GetSecretNamespace returns the namespace of the NodePublishSecretRef of the volume
 func (v *PersistentVolume) GetSecretNamespace() string {
-	if v.Spec.CSI == nil {
-		return ""
-	}
-
-	if v.Spec.CSI.NodePublishSecretRef == nil {
+	if v == nil || v.Spec.CSI == nil || v.Spec.CSI.NodePublishSecretRef == nil {
 		return ""
 	}
 
@@ -96,13 +105,12 @@ func (v *PersistentVolume) GetSecretNamespace() string {
 // IsMaprCSIBased returns true if the volume is provisioned by one of the MapR CSI provisioners and
 // false otherwise.
 func (v *PersistentVolume) IsMaprCSIBased() bool {
-	// Check if the volume is MapR CSI-based
-	if v.Spec.CSI == nil {
+	if v == nil || v.Spec.CSI == nil {
 		return false
 	}
 
 	// Check if the volume is provisioned by one of the MapR CSI provisioners
-	for _, provisioner := range maprCSIProvisioners {
+	for _, provisioner := range MaprCSIProvisioners {
 		if v.Spec.CSI.Driver == provisioner {
 			return true
 		}
@@ -116,13 +124,7 @@ func (v *PersistentVolume) IsMaprCSIBased() bool {
 // namespace are returned. If the secret namespace is equal to the value of NamespaceAll, basically
 // all volumes that any secret in any namespace will evaluate to true.
 func (volume *PersistentVolume) UsesSecret(namespace, name string) bool {
-	// Check if the volume uses a CSI driver
-	if volume.Spec.CSI == nil {
-		return false
-	}
-
-	// Check if the volume uses a NodePublishSecretRef
-	if volume.Spec.CSI.NodePublishSecretRef == nil {
+	if volume == nil || volume.Spec.CSI == nil || volume.Spec.CSI.NodePublishSecretRef == nil {
 		return false
 	}
 

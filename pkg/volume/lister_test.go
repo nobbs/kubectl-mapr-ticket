@@ -28,6 +28,8 @@ const (
 )
 
 func TestLister_Default(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -117,19 +119,24 @@ func TestLister_Default(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.secretName, tt.fields.namespace)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.secretName, test.fields.namespace)
 
 			got, err := l.List()
 
-			assertVolumes(t, tt.want, got)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertVolumes(t, test.want, got)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithAllSecrets(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -220,19 +227,24 @@ func TestLister_WithAllSecrets(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.secretName, tt.fields.namespace)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.secretName, test.fields.namespace)
 
 			got, err := l.List()
 
-			assertVolumes(t, tt.want, got)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertVolumes(t, test.want, got)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithAllNamespaces(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -311,22 +323,27 @@ func TestLister_WithAllNamespaces(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.secretName, tt.fields.namespace)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.secretName, test.fields.namespace)
 
 			got, err := l.List()
 
-			assertVolumes(t, tt.want, got)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertVolumes(t, test.want, got)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithSortByName(t *testing.T) {
 	opts := []ListerOption{
-		volume.WithSortBy([]SortOptions{SortByName}),
+		volume.WithSortBy([]SortOption{SortByName}),
 	}
+
+	t.Parallel()
 
 	tests := []struct {
 		name    string
@@ -384,22 +401,27 @@ func TestLister_WithSortByName(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.secretName, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.secretName, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertVolumes(t, tt.want, got)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertVolumes(t, test.want, got)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithSortBySecretNamespace(t *testing.T) {
 	opts := []ListerOption{
-		volume.WithSortBy([]SortOptions{SortBySecretNamespace}),
+		volume.WithSortBy([]SortOption{SortBySecretNamespace}),
 	}
+
+	t.Parallel()
 
 	tests := []struct {
 		name    string
@@ -457,22 +479,27 @@ func TestLister_WithSortBySecretNamespace(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.secretName, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.secretName, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertVolumes(t, tt.want, got)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertVolumes(t, test.want, got)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithSortBySecretName(t *testing.T) {
 	opts := []ListerOption{
-		volume.WithSortBy([]SortOptions{SortBySecretName}),
+		volume.WithSortBy([]SortOption{SortBySecretName}),
 	}
+
+	t.Parallel()
 
 	tests := []struct {
 		name    string
@@ -530,22 +557,27 @@ func TestLister_WithSortBySecretName(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.secretName, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.secretName, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertVolumes(t, tt.want, got)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertVolumes(t, test.want, got)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithSortByClaimNamespace(t *testing.T) {
 	opts := []ListerOption{
-		volume.WithSortBy([]SortOptions{SortByClaimNamespace}),
+		volume.WithSortBy([]SortOption{SortByClaimNamespace}),
 	}
+
+	t.Parallel()
 
 	tests := []struct {
 		name    string
@@ -627,22 +659,27 @@ func TestLister_WithSortByClaimNamespace(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.secretName, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.secretName, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertVolumes(t, tt.want, got)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertVolumes(t, test.want, got)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithSortByClaimName(t *testing.T) {
 	opts := []ListerOption{
-		volume.WithSortBy([]SortOptions{SortByClaimName}),
+		volume.WithSortBy([]SortOption{SortByClaimName}),
 	}
+
+	t.Parallel()
 
 	tests := []struct {
 		name    string
@@ -724,22 +761,27 @@ func TestLister_WithSortByClaimName(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.secretName, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.secretName, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertVolumes(t, tt.want, got)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertVolumes(t, test.want, got)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithSortByVolumePath(t *testing.T) {
 	opts := []ListerOption{
-		volume.WithSortBy([]SortOptions{SortByVolumePath}),
+		volume.WithSortBy([]SortOption{SortByVolumePath}),
 	}
+
+	t.Parallel()
 
 	tests := []struct {
 		name    string
@@ -821,22 +863,27 @@ func TestLister_WithSortByVolumePath(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.secretName, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.secretName, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertVolumes(t, tt.want, got)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertVolumes(t, test.want, got)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithSortByVolumeHandle(t *testing.T) {
 	opts := []ListerOption{
-		volume.WithSortBy([]SortOptions{SortByVolumeHandle}),
+		volume.WithSortBy([]SortOption{SortByVolumeHandle}),
 	}
+
+	t.Parallel()
 
 	tests := []struct {
 		name    string
@@ -918,22 +965,27 @@ func TestLister_WithSortByVolumeHandle(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.secretName, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.secretName, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertVolumes(t, tt.want, got)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertVolumes(t, test.want, got)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithSortByExpiryTime(t *testing.T) {
 	opts := []ListerOption{
-		volume.WithSortBy([]SortOptions{SortByExpiryTime}),
+		volume.WithSortBy([]SortOption{SortByExpiration}),
 	}
+
+	t.Parallel()
 
 	tests := []struct {
 		name    string
@@ -1000,25 +1052,30 @@ func TestLister_WithSortByExpiryTime(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.secretName, tt.fields.namespace, append(
-				tt.fields.opts,
-				WithSecretLister(secret.NewLister(tt.fields.client, util.NamespaceAll)),
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.secretName, test.fields.namespace, append(
+				test.fields.opts,
+				WithSecretLister(secret.NewLister(test.fields.client, util.NamespaceAll)),
 			)...)
 
 			got, err := l.List()
 
-			assertVolumes(t, tt.want, got)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertVolumes(t, test.want, got)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithSortByAge(t *testing.T) {
 	opts := []ListerOption{
-		volume.WithSortBy([]SortOptions{SortByAge}),
+		volume.WithSortBy([]SortOption{SortByAge}),
 	}
+
+	t.Parallel()
 
 	tests := []struct {
 		name    string
@@ -1070,18 +1127,20 @@ func TestLister_WithSortByAge(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			l := NewLister(tt.fields.client, tt.fields.secretName, tt.fields.namespace, append(
-				tt.fields.opts,
-				WithSecretLister(secret.NewLister(tt.fields.client, util.NamespaceAll)),
+			l := NewLister(test.fields.client, test.fields.secretName, test.fields.namespace, append(
+				test.fields.opts,
+				WithSecretLister(secret.NewLister(test.fields.client, util.NamespaceAll)),
 			)...)
 
 			got, err := l.List()
 
-			assertVolumes(t, tt.want, got)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertVolumes(t, test.want, got)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
@@ -1103,15 +1162,13 @@ func expectVolume(name string) expectedVolume {
 	}
 }
 
-func assertVolumes(t *testing.T, expected []expectedVolume, actual []types.Volume) {
+func assertVolumes(t *testing.T, expected []expectedVolume, actual []types.MaprVolume) {
 	t.Helper()
 
-	assert := assert.New(t)
-
-	assert.Len(actual, len(expected))
+	assert.Len(t, actual, len(expected))
 
 	for i, e := range expected {
-		assert.Equal(e.name, actual[i].Volume.Name)
+		assert.Equal(t, e.name, actual[i].Volume.Name)
 	}
 }
 

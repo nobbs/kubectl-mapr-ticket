@@ -20,6 +20,8 @@ import (
 )
 
 func TestLister_Default(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -111,19 +113,24 @@ func TestLister_Default(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertTicketSecret(t, got, tt.want)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertTicketSecret(t, got, test.want)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithFilterByMaprCluster(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -224,19 +231,24 @@ func TestLister_WithFilterByMaprCluster(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertTicketSecret(t, got, tt.want)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertTicketSecret(t, got, test.want)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithFilterByMaprUser(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -337,19 +349,24 @@ func TestLister_WithFilterByMaprUser(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertTicketSecret(t, got, tt.want)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertTicketSecret(t, got, test.want)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithFilterByUID(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -398,19 +415,24 @@ func TestLister_WithFilterByUID(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertTicketSecret(t, got, tt.want)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertTicketSecret(t, got, test.want)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithFilterByGID(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -487,14 +509,17 @@ func TestLister_WithFilterByGID(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertTicketSecret(t, got, tt.want)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertTicketSecret(t, got, test.want)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
@@ -505,6 +530,8 @@ func TestLister_WithFilterOnlyExpired(t *testing.T) {
 		return []byte(fmt.Sprintf(`{"ticket":{"expiryTime":%d}}`, unix))
 	}
 
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -580,14 +607,17 @@ func TestLister_WithFilterOnlyExpired(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertTicketSecret(t, got, tt.want)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertTicketSecret(t, got, test.want)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
@@ -598,6 +628,8 @@ func TestLister_WithFilterOnlyUnexpired(t *testing.T) {
 		return []byte(fmt.Sprintf(`{"ticket":{"expiryTime":%d}}`, unix))
 	}
 
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -673,14 +705,17 @@ func TestLister_WithFilterOnlyUnexpired(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertTicketSecret(t, got, tt.want)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertTicketSecret(t, got, test.want)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
@@ -690,6 +725,8 @@ func TestLister_WithFilterExpiresBefore(t *testing.T) {
 		unix := uint64(expiryTime.Unix())
 		return []byte(fmt.Sprintf(`{"ticket":{"expiryTime":%d}}`, unix))
 	}
+
+	t.Parallel()
 
 	tests := []struct {
 		name    string
@@ -766,19 +803,24 @@ func TestLister_WithFilterExpiresBefore(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertTicketSecret(t, got, tt.want)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertTicketSecret(t, got, test.want)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithMultipleFilters(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -885,19 +927,24 @@ func TestLister_WithMultipleFilters(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertTicketSecret(t, got, tt.want)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertTicketSecret(t, got, test.want)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithSortByName(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -923,7 +970,7 @@ func TestLister_WithSortByName(t *testing.T) {
 				),
 				namespace: "kube-system",
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByName}),
+					WithSortBy([]SortOption{SortByName}),
 				},
 			},
 			want: []expectedSecret{
@@ -957,7 +1004,7 @@ func TestLister_WithSortByName(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByName}),
+					WithSortBy([]SortOption{SortByName}),
 				},
 			},
 			want: []expectedSecret{
@@ -969,19 +1016,24 @@ func TestLister_WithSortByName(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertTicketSecret(t, got, tt.want)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertTicketSecret(t, got, test.want)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithSortByNamespace(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -1007,7 +1059,7 @@ func TestLister_WithSortByNamespace(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByNamespace}),
+					WithSortBy([]SortOption{SortByNamespace}),
 				},
 			},
 			want: []expectedSecret{
@@ -1041,7 +1093,7 @@ func TestLister_WithSortByNamespace(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByNamespace}),
+					WithSortBy([]SortOption{SortByNamespace}),
 				},
 			},
 			want: []expectedSecret{
@@ -1053,19 +1105,24 @@ func TestLister_WithSortByNamespace(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertTicketSecret(t, got, tt.want)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertTicketSecret(t, got, test.want)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithSortByMaprCluster(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -1091,7 +1148,7 @@ func TestLister_WithSortByMaprCluster(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByMaprCluster}),
+					WithSortBy([]SortOption{SortByMaprCluster}),
 				},
 			},
 			want: []expectedSecret{
@@ -1125,7 +1182,7 @@ func TestLister_WithSortByMaprCluster(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByMaprCluster}),
+					WithSortBy([]SortOption{SortByMaprCluster}),
 				},
 			},
 			want: []expectedSecret{
@@ -1137,19 +1194,24 @@ func TestLister_WithSortByMaprCluster(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertTicketSecret(t, got, tt.want)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertTicketSecret(t, got, test.want)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
 
 func TestLister_WithSortByMaprUser(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		fields  listerFields
@@ -1175,7 +1237,7 @@ func TestLister_WithSortByMaprUser(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByMaprUser}),
+					WithSortBy([]SortOption{SortByMaprUser}),
 				},
 			},
 			want: []expectedSecret{
@@ -1209,7 +1271,7 @@ func TestLister_WithSortByMaprUser(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByMaprUser}),
+					WithSortBy([]SortOption{SortByMaprUser}),
 				},
 			},
 			want: []expectedSecret{
@@ -1221,14 +1283,17 @@ func TestLister_WithSortByMaprUser(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertTicketSecret(t, got, tt.want)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertTicketSecret(t, got, test.want)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
@@ -1238,6 +1303,8 @@ func TestLister_WithSortByCreationTime(t *testing.T) {
 		unix := uint64(creationTime.Unix())
 		return []byte(fmt.Sprintf(`{"ticket":{"creationTimeSec":%d}}`, unix))
 	}
+
+	t.Parallel()
 
 	tests := []struct {
 		name    string
@@ -1265,7 +1332,7 @@ func TestLister_WithSortByCreationTime(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByCreationTimestamp}),
+					WithSortBy([]SortOption{SortByAge}),
 				},
 			},
 			want: []expectedSecret{
@@ -1299,7 +1366,7 @@ func TestLister_WithSortByCreationTime(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByCreationTimestamp}),
+					WithSortBy([]SortOption{SortByAge}),
 				},
 			},
 			want: []expectedSecret{
@@ -1311,14 +1378,17 @@ func TestLister_WithSortByCreationTime(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertTicketSecret(t, got, tt.want)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertTicketSecret(t, got, test.want)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
@@ -1328,6 +1398,8 @@ func TestLister_WithSortByExpiryTime(t *testing.T) {
 		unix := uint64(expiryTime.Unix())
 		return []byte(fmt.Sprintf(`{"ticket":{"expiryTime":%d}}`, unix))
 	}
+
+	t.Parallel()
 
 	tests := []struct {
 		name    string
@@ -1354,7 +1426,7 @@ func TestLister_WithSortByExpiryTime(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByExpiryTime}),
+					WithSortBy([]SortOption{SortByExpiration}),
 				},
 			},
 			want: []expectedSecret{
@@ -1388,7 +1460,7 @@ func TestLister_WithSortByExpiryTime(t *testing.T) {
 				),
 				namespace: metaV1.NamespaceAll,
 				opts: []ListerOption{
-					WithSortBy([]SortOptions{SortByExpiryTime}),
+					WithSortBy([]SortOption{SortByExpiration}),
 				},
 			},
 			want: []expectedSecret{
@@ -1400,14 +1472,17 @@ func TestLister_WithSortByExpiryTime(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			l := NewLister(tt.fields.client, tt.fields.namespace, tt.fields.opts...)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			l := NewLister(test.fields.client, test.fields.namespace, test.fields.opts...)
 
 			got, err := l.List()
 
-			assertTicketSecret(t, got, tt.want)
-			assert.Equal(t, tt.wantErr, err != nil)
+			assertTicketSecret(t, got, test.want)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }
@@ -1430,16 +1505,14 @@ func newExpectedSecret(namespace, name string) expectedSecret {
 	}
 }
 
-func assertTicketSecret(t *testing.T, secrets []types.TicketSecret, expected []expectedSecret) {
+func assertTicketSecret(t *testing.T, secrets []types.MaprSecret, expected []expectedSecret) {
 	t.Helper()
 
-	assert := assert.New(t)
-
-	assert.Len(secrets, len(expected))
+	assert.Len(t, secrets, len(expected))
 
 	for i := range secrets {
-		assert.Equal(expected[i].name, secrets[i].Secret.Name)
-		assert.Equal(expected[i].namespace, secrets[i].Secret.Namespace)
+		assert.Equal(t, expected[i].name, secrets[i].Secret.Name)
+		assert.Equal(t, expected[i].namespace, secrets[i].Secret.Namespace)
 	}
 }
 

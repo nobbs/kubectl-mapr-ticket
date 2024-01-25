@@ -16,6 +16,8 @@ import (
 )
 
 func TestCompleteStringValues(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		values     []string
 		toComplete string
@@ -89,7 +91,10 @@ func TestCompleteStringValues(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			suggestions, directive := CompleteStringValues(test.args.values, test.args.toComplete)
 
 			assert.Len(t, suggestions, len(test.want.suggestions))
@@ -100,6 +105,8 @@ func TestCompleteStringValues(t *testing.T) {
 }
 
 func TestCompleteNamespaceNames(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		client     kubernetes.Interface
 		toComplete string
@@ -172,7 +179,10 @@ func TestCompleteNamespaceNames(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			suggestions, directive := CompleteNamespaceNames(test.args.client, test.args.toComplete)
 
 			assert.Len(t, suggestions, len(test.want.suggestions))
@@ -183,6 +193,8 @@ func TestCompleteNamespaceNames(t *testing.T) {
 }
 
 func TestCompleteTicketNames(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		client     kubernetes.Interface
 		namespace  string
@@ -299,7 +311,10 @@ func TestCompleteTicketNames(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			suggestions, directive := CompleteTicketNames(test.args.client, test.args.namespace, test.args.args, test.args.toComplete)
 
 			assert.Len(t, suggestions, len(test.want.suggestions))

@@ -17,7 +17,17 @@ const (
 	claimLong  = `
 		List all persistent volumes claims that use a MapR ticket in the current namespace.
 
-		By default, this command lists all persistent volumes claims that use a MapR ticket in the current namespace.
+		By default, this command lists all persistent volume claims that use a MapR ticket in the current namespace.
+		`
+	claimExample = `
+		# List all persistent volumes claims in the current namespace that use a MapR ticket
+		%[1]s claim
+
+		# List all persistent volumes claims in all namespaces that use a MapR ticket
+		%[1]s claim --all-namespaces
+
+		# List all persistent volumes claims in all namespaces that use a MapR ticket, sorted by expiration date
+		%[1]s claim --all-namespaces --sort-by expiryTime
 		`
 )
 
@@ -33,6 +43,9 @@ type options struct {
 
 	// AllNamespaces indicates whether to list secrets in all namespaces
 	AllNamespaces bool
+
+	// SortBy is the list of fields to sort by
+	SortBy []string
 }
 
 func newOptions(opts *common.Options) *options {
@@ -49,6 +62,7 @@ func NewCmd(opts *common.Options) *cobra.Command {
 		Use:     claimUse,
 		Short:   claimShort,
 		Long:    common.CliLongDesc(claimLong),
+		Example: common.CliExample(claimExample, common.CliBinName),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
@@ -77,6 +91,7 @@ func NewCmd(opts *common.Options) *cobra.Command {
 	// add flags
 	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "table", fmt.Sprintf("Output format. One of (%s)", common.StringSliceToFlagOptions(claimValidOutputFormats)))
 	cmd.Flags().BoolVarP(&o.AllNamespaces, "all-namespaces", "A", false, "List persistent volumes claims that use a MapR ticket in all namespaces")
+	cmd.Flags().StringSliceVar(&o.SortBy, "sort-by", []string{}, fmt.Sprintf("Sort list of persistent volumes claims by the specified fields. One or more of (%s)", common.StringSliceToFlagOptions(claim.SortOptionsList)))
 
 	// register completions for flags
 	if err := o.registerCompletions(cmd); err != nil {
@@ -100,6 +115,11 @@ func (o *options) Validate() error {
 		return fmt.Errorf("invalid output format %q. Must be one of (%s)", o.OutputFormat, common.StringSliceToFlagOptions(claimValidOutputFormats))
 	}
 
+	// ensure that the sort options are valid
+	if err := claim.ValidateSortOptions(o.SortBy); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -118,6 +138,16 @@ func (o *options) Run(cmd *cobra.Command, args []string) error {
 	// create list options and pass them to the lister
 	opts := []claim.ListerOption{
 		claim.WithSecretLister(secretLister),
+	}
+
+	// set sort options
+	if cmd.Flags().Changed("sort-by") && o.SortBy != nil {
+		sortOptions := make([]claim.SortOption, 0, len(o.SortBy))
+		for _, sortBy := range o.SortBy {
+			sortOptions = append(sortOptions, claim.SortOption(sortBy))
+		}
+
+		opts = append(opts, claim.WithSortBy(sortOptions))
 	}
 
 	// create lister
@@ -144,6 +174,13 @@ func (o *options) Run(cmd *cobra.Command, args []string) error {
 func (o *options) registerCompletions(cmd *cobra.Command) error {
 	err := cmd.RegisterFlagCompletionFunc("output", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return common.CompleteStringValues(claimValidOutputFormats, toComplete)
+	})
+	if err != nil {
+		return err
+	}
+
+	err = cmd.RegisterFlagCompletionFunc("sort-by", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return common.CompleteStringValues(claim.SortOptionsList, toComplete)
 	})
 	if err != nil {
 		return err

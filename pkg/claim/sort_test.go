@@ -1,11 +1,11 @@
-package secret_test
+package claim_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	. "github.com/nobbs/kubectl-mapr-ticket/pkg/secret"
+	. "github.com/nobbs/kubectl-mapr-ticket/pkg/claim"
 )
 
 func TestValidateSortOptions(t *testing.T) {
@@ -28,7 +28,7 @@ func TestValidateSortOptions(t *testing.T) {
 		},
 		{
 			name:        "all valid sort options",
-			sortOptions: []string{"name", "namespace", "mapr.cluster", "mapr.user", "age", "expiration", "npvcs"},
+			sortOptions: []string{"namespace", "name", "secret.namespace", "secret.name", "volume.name", "volume.path", "volume.handle", "expiration", "age"},
 			wantErr:     false,
 		},
 		{

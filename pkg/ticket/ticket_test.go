@@ -16,7 +16,7 @@ import (
 )
 
 func TestNewTicketFromSecret(t *testing.T) {
-	assert := assert.New(t)
+	t.Parallel()
 
 	tests := []struct {
 		name   string
@@ -75,20 +75,23 @@ func TestNewTicketFromSecret(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			_, err := NewMaprTicketFromSecret(test.secret)
 
 			if test.err == nil {
-				assert.NoError(err)
+				assert.NoError(t, err)
 			} else {
-				assert.EqualError(err, test.err.Error())
+				assert.EqualError(t, err, test.err.Error())
 			}
 		})
 	}
 }
 
 func TestSecretContainsMaprTicket(t *testing.T) {
-	assert := assert.New(t)
+	t.Parallel()
 
 	tests := []struct {
 		name     string
@@ -117,16 +120,19 @@ func TestSecretContainsMaprTicket(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			result := SecretContainsMaprTicket(test.secret)
 
-			assert.Equal(test.expected, result)
+			assert.Equal(t, test.expected, result)
 		})
 	}
 }
 
 func TestExpirationTime(t *testing.T) {
-	assert := assert.New(t)
+	t.Parallel()
 
 	tests := []struct {
 		name     string
@@ -145,16 +151,19 @@ func TestExpirationTime(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			result := test.ticket.ExpirationTime()
 
-			assert.Equal(test.expected, result)
+			assert.Equal(t, test.expected, result)
 		})
 	}
 }
 
 func TestCreationTime(t *testing.T) {
-	assert := assert.New(t)
+	t.Parallel()
 
 	tests := []struct {
 		name     string
@@ -173,16 +182,19 @@ func TestCreationTime(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			result := test.ticket.CreationTime()
 
-			assert.Equal(test.expected, result)
+			assert.Equal(t, test.expected, result)
 		})
 	}
 }
 
 func TestIsExpired(t *testing.T) {
-	assert := assert.New(t)
+	t.Parallel()
 
 	tests := []struct {
 		name     string
@@ -212,16 +224,19 @@ func TestIsExpired(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			result := test.ticket.IsExpired()
 
-			assert.Equal(test.expected, result)
+			assert.Equal(t, test.expected, result)
 		})
 	}
 }
 
 func TestExpiresBefore(t *testing.T) {
-	assert := assert.New(t)
+	t.Parallel()
 
 	tests := []struct {
 		name     string
@@ -254,16 +269,19 @@ func TestExpiresBefore(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			result := test.ticket.ExpiresBefore(test.time)
 
-			assert.Equal(test.expected, result)
+			assert.Equal(t, test.expected, result)
 		})
 	}
 }
 
 func TestAsMaprTicket(t *testing.T) {
-	assert := assert.New(t)
+	t.Parallel()
 
 	tests := []struct {
 		name     string
@@ -283,10 +301,13 @@ func TestAsMaprTicket(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			result := test.ticket.AsMaprTicket()
 
-			assert.Equal(test.expected, result)
+			assert.Equal(t, test.expected, result)
 		})
 	}
 }

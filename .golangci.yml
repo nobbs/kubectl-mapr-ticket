@@ -9,6 +9,7 @@ linters:
     - gci
     - gocritic
     - gofmt
+    - paralleltest
 
 linters-settings:
   funlen:
@@ -31,3 +32,4 @@ issues:
       linters:
         - funlen
         - dupl
+        - unused
