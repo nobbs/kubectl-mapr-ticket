@@ -26,10 +26,10 @@ You can download the latest release binaries from the [releases page](https://gi
 
 <!-- x-release-please-start-version -->
 
-Example installation of `v0.2.1` for Apple Silicon (ARM64) macOS:
+Example installation of `v0.3.0` for Apple Silicon (ARM64) macOS:
 
 ```console
-$ curl -LO https://github.com/nobbs/kubectl-mapr-ticket/releases/download/v0.2.1/kubectl-mapr-ticket-arm64-darwin.tar.gz
+$ curl -LO https://github.com/nobbs/kubectl-mapr-ticket/releases/download/v0.3.0/kubectl-mapr-ticket-arm64-darwin.tar.gz
 $ tar -xvf kubectl-mapr-ticket-arm64-darwin.tar.gz
 $ mv ./kubectl-mapr-ticket /usr/local/bin
 $ kubectl mapr-ticket --help
