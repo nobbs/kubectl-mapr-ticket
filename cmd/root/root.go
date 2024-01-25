@@ -7,6 +7,7 @@ import (
 
 	"github.com/nobbs/kubectl-mapr-ticket/cmd/claim"
 	"github.com/nobbs/kubectl-mapr-ticket/cmd/common"
+	"github.com/nobbs/kubectl-mapr-ticket/cmd/inspect"
 	"github.com/nobbs/kubectl-mapr-ticket/cmd/secret"
 	"github.com/nobbs/kubectl-mapr-ticket/cmd/version"
 	"github.com/nobbs/kubectl-mapr-ticket/cmd/volume"
@@ -55,6 +56,7 @@ func NewCmd(flags *genericclioptions.ConfigFlags, streams genericiooptions.IOStr
 	// add subcommands
 	rootCmd.AddCommand(
 		claim.NewCmd(o),
+		inspect.NewCmd(o),
 		secret.NewCmd(o),
 		version.NewCmd(o),
 		volume.NewCmd(o),

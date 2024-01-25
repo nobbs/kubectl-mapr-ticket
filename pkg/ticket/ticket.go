@@ -1,12 +1,16 @@
 package ticket
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
+	"github.com/nobbs/kubectl-mapr-ticket/pkg/util"
 	"github.com/nobbs/mapr-ticket-parser/pkg/parse"
 
 	coreV1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/json"
+	"sigs.k8s.io/yaml"
 )
 
 const (
@@ -70,6 +74,24 @@ func NewMaprTicketFromSecret(secret *coreV1.Secret) (*Ticket, error) {
 	return (*Ticket)(ticket), nil
 }
 
+// NewMaprTicketFromBytes parses the ticket from the given bytes and returns it
+func NewMaprTicketFromBytes(ticketBytes []byte) (*Ticket, error) {
+	// try to parse ticket directly
+	ticket, errTicket := parseTicket(ticketBytes)
+	if errTicket == nil {
+		return ticket, nil
+	}
+
+	// try to parse as secret
+	ticket, errSecret := parseSecret(ticketBytes)
+	if errSecret == nil {
+		return ticket, nil
+	}
+
+	// if we get here, we couldn't parse the ticket
+	return nil, errors.Join(errTicket, errSecret)
+}
+
 // GetCluster returns the cluster that the ticket is for
 func (ticket *Ticket) GetCluster() string {
 	if ticket == nil {
@@ -111,4 +133,43 @@ func (ticket *Ticket) ExpiresBefore(duration time.Duration) bool {
 // AsMaprTicket returns the ticket as a parse.MaprTicket object
 func (ticket *Ticket) AsMaprTicket() *parse.MaprTicket {
 	return (*parse.MaprTicket)(ticket)
+}
+
+// String returns a string representation of the ticket
+func parseTicket(ticketBytes []byte) (*Ticket, error) {
+	// try to parse ticket directly
+	ticket, errPlain := parse.Unmarshal(ticketBytes)
+	if errPlain == nil {
+		return (*Ticket)(ticket), nil
+	}
+
+	// try to parse ticket as base64 encoded
+	ticketBytes, errDecode := util.DecodeBase64(string(ticketBytes))
+	ticket, errBase64 := parse.Unmarshal(ticketBytes)
+	if errBase64 == nil {
+		return (*Ticket)(ticket), nil
+	}
+
+	// if we get here, we couldn't parse the ticket
+	return nil, errors.Join(errPlain, errDecode, errBase64)
+}
+
+// parseSecret parses the secret and returns the ticket if it contains one
+func parseSecret(secretBytes []byte) (*Ticket, error) {
+	// try to parse as YAML into a secret
+	var secret coreV1.Secret
+	var errYAML error
+	var errJSON error
+
+	if errYAML = yaml.Unmarshal(secretBytes, &secret); errYAML == nil {
+		return NewMaprTicketFromSecret(&secret)
+	}
+
+	// try to parse as JSON into a secret
+	if errJSON = json.Unmarshal(secretBytes, &secret); errJSON == nil {
+		return NewMaprTicketFromSecret(&secret)
+	}
+
+	// if we get here, we couldn't parse the secret
+	return nil, errors.Join(errYAML, errJSON)
 }

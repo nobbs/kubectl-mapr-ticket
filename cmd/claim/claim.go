@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/exp/slices"
 
 	"github.com/nobbs/kubectl-mapr-ticket/cmd/common"
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/claim"
@@ -111,7 +112,7 @@ func (o *options) Complete(cmd *cobra.Command, args []string) error {
 
 func (o *options) Validate() error {
 	// validate output format
-	if o.OutputFormat != "table" && o.OutputFormat != "wide" {
+	if !slices.Contains(claimValidOutputFormats, o.OutputFormat) {
 		return fmt.Errorf("invalid output format %q. Must be one of (%s)", o.OutputFormat, common.StringSliceToFlagOptions(claimValidOutputFormats))
 	}
 
