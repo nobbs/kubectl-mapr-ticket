@@ -11,7 +11,7 @@
       "draft": false,
       "prerelease": false,
       "extra-files": [
-        "internal/version/version.go",
+        "pkg/version/version.go",
         "README.md"
       ],
       "initial-version": "0.1.0"
