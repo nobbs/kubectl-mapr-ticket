@@ -1,5 +1,71 @@
 # Changelog
 
+## [0.3.0](https://github.com/nobbs/kubectl-mapr-ticket/compare/v0.2.1...v0.3.0) (2024-01-25)
+
+
+### Features
+
+* add --all-namespaces flag to used-by command, also tests ([#40](https://github.com/nobbs/kubectl-mapr-ticket/issues/40)) ([7c1af4c](https://github.com/nobbs/kubectl-mapr-ticket/commit/7c1af4c37e0e9afc9be92d2e4f740a2037fd225d))
+* add claim command to list all PVCs using tickets ([#44](https://github.com/nobbs/kubectl-mapr-ticket/issues/44)) ([0e2eefd](https://github.com/nobbs/kubectl-mapr-ticket/commit/0e2eefd82e3e4b5acee4d8699422ad480ecc39b6))
+* add sort option to `volume` command ([a8f52ee](https://github.com/nobbs/kubectl-mapr-ticket/commit/a8f52eeb252edc6204a54a67278b42a31a4f7b6a))
+* add ticket status to volume command ([07f6ce0](https://github.com/nobbs/kubectl-mapr-ticket/commit/07f6ce057e0cc74cb69988b6475d62dd13f8d98f))
+* implement claim sorting ([#50](https://github.com/nobbs/kubectl-mapr-ticket/issues/50)) ([3499c07](https://github.com/nobbs/kubectl-mapr-ticket/commit/3499c078562bf7b1c5b0aa72f89a078a13c845f5))
+
+
+### Bug Fixes
+
+* add pvc alias to claim command ([cbeb8c9](https://github.com/nobbs/kubectl-mapr-ticket/commit/cbeb8c9fbca3b5a9dc6887f67ca96c920dd13890))
+* **deps:** update kubernetes packages to v0.29.1 ([#46](https://github.com/nobbs/kubectl-mapr-ticket/issues/46)) ([d757733](https://github.com/nobbs/kubectl-mapr-ticket/commit/d757733e1de9a52f114eb40728f4cc117736e640))
+* rename commands, `list` to `secret` and `usedby` to `volume` ([868b96a](https://github.com/nobbs/kubectl-mapr-ticket/commit/868b96a87b1c481e0cc66123cfe19db980ddfbbb))
+* streamline sort options for all commands ([3499c07](https://github.com/nobbs/kubectl-mapr-ticket/commit/3499c078562bf7b1c5b0aa72f89a078a13c845f5))
+* ticket status not properly parsed in `claim` command ([#48](https://github.com/nobbs/kubectl-mapr-ticket/issues/48)) ([901b82a](https://github.com/nobbs/kubectl-mapr-ticket/commit/901b82a10250c9bda945a0e29124b4b3178a7046))
+* volume sort options ([7c0288b](https://github.com/nobbs/kubectl-mapr-ticket/commit/7c0288bee85eba9364aac16849eae5fef0955538))
+
+
+### Tests
+
+* add test for cli completion functions ([7875ffd](https://github.com/nobbs/kubectl-mapr-ticket/commit/7875ffd145ee3ada1a1c9dbc68c779b461680976))
+* add tests for `version.String()` ([5253528](https://github.com/nobbs/kubectl-mapr-ticket/commit/525352894f7da34713bd5734067b894a8cae541c))
+* add tests for duration pflag type ([7875ffd](https://github.com/nobbs/kubectl-mapr-ticket/commit/7875ffd145ee3ada1a1c9dbc68c779b461680976))
+* add tests for types ([3499c07](https://github.com/nobbs/kubectl-mapr-ticket/commit/3499c078562bf7b1c5b0aa72f89a078a13c845f5))
+* add tests for util/cli.go ([7875ffd](https://github.com/nobbs/kubectl-mapr-ticket/commit/7875ffd145ee3ada1a1c9dbc68c779b461680976))
+* run in parallel ([3499c07](https://github.com/nobbs/kubectl-mapr-ticket/commit/3499c078562bf7b1c5b0aa72f89a078a13c845f5))
+
+
+### Continuous Integration
+
+* add pre-commit config ([7875ffd](https://github.com/nobbs/kubectl-mapr-ticket/commit/7875ffd145ee3ada1a1c9dbc68c779b461680976))
+* exclude test files from funlen check ([7875ffd](https://github.com/nobbs/kubectl-mapr-ticket/commit/7875ffd145ee3ada1a1c9dbc68c779b461680976))
+* **lint:** tune golangci-lint, add gci linter ([69d7edd](https://github.com/nobbs/kubectl-mapr-ticket/commit/69d7eddadf334cb0d21eb7d66bf4b5aa3c1c1ce6))
+* only build if test and lint pass ([3499c07](https://github.com/nobbs/kubectl-mapr-ticket/commit/3499c078562bf7b1c5b0aa72f89a078a13c845f5))
+
+
+### Documentation
+
+* add badges to README.md ([fba5b28](https://github.com/nobbs/kubectl-mapr-ticket/commit/fba5b283e6c14c97d56bd03fddd951b0e8815f5f))
+* add documentation for completion functions ([5253528](https://github.com/nobbs/kubectl-mapr-ticket/commit/525352894f7da34713bd5734067b894a8cae541c))
+* update README.md ([3499c07](https://github.com/nobbs/kubectl-mapr-ticket/commit/3499c078562bf7b1c5b0aa72f89a078a13c845f5))
+
+
+### Code Refactoring
+
+* cleaning up the codebase even more ([#49](https://github.com/nobbs/kubectl-mapr-ticket/issues/49)) ([a39fb61](https://github.com/nobbs/kubectl-mapr-ticket/commit/a39fb617a2a4f8b277865f1d01c74c678679e441))
+* major code reorganization ([#47](https://github.com/nobbs/kubectl-mapr-ticket/issues/47)) ([03258b5](https://github.com/nobbs/kubectl-mapr-ticket/commit/03258b5deb7c7506af361594fc7d0891542c891f))
+* move cli to internal package ([5253528](https://github.com/nobbs/kubectl-mapr-ticket/commit/525352894f7da34713bd5734067b894a8cae541c))
+* move duration functions util functions ([7875ffd](https://github.com/nobbs/kubectl-mapr-ticket/commit/7875ffd145ee3ada1a1c9dbc68c779b461680976))
+* remove --all flag from volume command ([04d7a82](https://github.com/nobbs/kubectl-mapr-ticket/commit/04d7a82ba0ea9a5d42e27dfdf2cac3fa60e5208a))
+* remove duplicate util definitions ([7875ffd](https://github.com/nobbs/kubectl-mapr-ticket/commit/7875ffd145ee3ada1a1c9dbc68c779b461680976))
+* rename ListItem to TicketSecret ([5253528](https://github.com/nobbs/kubectl-mapr-ticket/commit/525352894f7da34713bd5734067b894a8cae541c))
+* simplify namespace handling ([5253528](https://github.com/nobbs/kubectl-mapr-ticket/commit/525352894f7da34713bd5734067b894a8cae541c))
+* update secret filter implementation ([5253528](https://github.com/nobbs/kubectl-mapr-ticket/commit/525352894f7da34713bd5734067b894a8cae541c))
+
+
+### Miscellaneous Chores
+
+* major refactoring and test coverage improvements ([#39](https://github.com/nobbs/kubectl-mapr-ticket/issues/39)) ([5253528](https://github.com/nobbs/kubectl-mapr-ticket/commit/525352894f7da34713bd5734067b894a8cae541c))
+* prepare debug logging ([#37](https://github.com/nobbs/kubectl-mapr-ticket/issues/37)) ([7875ffd](https://github.com/nobbs/kubectl-mapr-ticket/commit/7875ffd145ee3ada1a1c9dbc68c779b461680976))
+* use charmbracelet/log for debug logging ([7875ffd](https://github.com/nobbs/kubectl-mapr-ticket/commit/7875ffd145ee3ada1a1c9dbc68c779b461680976))
+
 ## [0.2.1](https://github.com/nobbs/kubectl-mapr-ticket/compare/v0.2.0...v0.2.1) (2024-01-08)
 
 
