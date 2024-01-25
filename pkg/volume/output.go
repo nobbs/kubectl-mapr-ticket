@@ -73,7 +73,7 @@ var (
 	}
 )
 
-func Print(cmd *cobra.Command, volumes []types.Volume) error {
+func Print(cmd *cobra.Command, volumes []types.MaprVolume) error {
 	format := cmd.Flag("output").Value.String()
 
 	// generate the table
@@ -92,7 +92,7 @@ func Print(cmd *cobra.Command, volumes []types.Volume) error {
 	return nil
 }
 
-func generableTable(volumes []types.Volume) *metaV1.Table {
+func generableTable(volumes []types.MaprVolume) *metaV1.Table {
 	rows := generateRows(volumes)
 
 	return &metaV1.Table{
@@ -101,7 +101,7 @@ func generableTable(volumes []types.Volume) *metaV1.Table {
 	}
 }
 
-func generateRows(volumes []types.Volume) []metaV1.TableRow {
+func generateRows(volumes []types.MaprVolume) []metaV1.TableRow {
 	rows := make([]metaV1.TableRow, 0, len(volumes))
 
 	for _, pv := range volumes {
@@ -111,7 +111,7 @@ func generateRows(volumes []types.Volume) []metaV1.TableRow {
 	return rows
 }
 
-func generateRow(volume *types.Volume) *metaV1.TableRow {
+func generateRow(volume *types.MaprVolume) *metaV1.TableRow {
 	row := &metaV1.TableRow{
 		Object: runtime.RawExtension{
 			Object: (*coreV1.PersistentVolume)(volume.Volume),

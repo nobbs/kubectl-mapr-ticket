@@ -1430,7 +1430,7 @@ func newExpectedSecret(namespace, name string) expectedSecret {
 	}
 }
 
-func assertTicketSecret(t *testing.T, secrets []types.TicketSecret, expected []expectedSecret) {
+func assertTicketSecret(t *testing.T, secrets []types.MaprSecret, expected []expectedSecret) {
 	t.Helper()
 
 	assert := assert.New(t)

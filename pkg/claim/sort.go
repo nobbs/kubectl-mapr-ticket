@@ -59,55 +59,55 @@ func ValidateSortOptions(sortOptions []string) error {
 	return nil
 }
 
-func sortByName(claims []types.VolumeClaim) {
+func sortByName(claims []types.MaprVolumeClaim) {
 	sort.Slice(claims, func(i, j int) bool {
 		return claims[i].Claim.GetName() < claims[j].Claim.GetName()
 	})
 }
 
-func sortByNamespace(claims []types.VolumeClaim) {
+func sortByNamespace(claims []types.MaprVolumeClaim) {
 	sort.Slice(claims, func(i, j int) bool {
 		return claims[i].Claim.GetNamespace() < claims[j].Claim.GetNamespace()
 	})
 }
 
-func sortBySecretNamespace(claims []types.VolumeClaim) {
+func sortBySecretNamespace(claims []types.MaprVolumeClaim) {
 	sort.Slice(claims, func(i, j int) bool {
 		return claims[i].Volume.GetSecretNamespace() < claims[j].Volume.GetSecretNamespace()
 	})
 }
 
-func sortBySecretName(claims []types.VolumeClaim) {
+func sortBySecretName(claims []types.MaprVolumeClaim) {
 	sort.Slice(claims, func(i, j int) bool {
 		return claims[i].Volume.GetSecretName() < claims[j].Volume.GetSecretName()
 	})
 }
 
-func sortByVolumeName(claims []types.VolumeClaim) {
+func sortByVolumeName(claims []types.MaprVolumeClaim) {
 	sort.Slice(claims, func(i, j int) bool {
 		return claims[i].Volume.GetName() < claims[j].Volume.GetName()
 	})
 }
 
-func sortByVolumePath(claims []types.VolumeClaim) {
+func sortByVolumePath(claims []types.MaprVolumeClaim) {
 	sort.Slice(claims, func(i, j int) bool {
 		return claims[i].Volume.GetVolumePath() < claims[j].Volume.GetVolumePath()
 	})
 }
 
-func sortByVolumeHandle(claims []types.VolumeClaim) {
+func sortByVolumeHandle(claims []types.MaprVolumeClaim) {
 	sort.Slice(claims, func(i, j int) bool {
 		return claims[i].Volume.GetVolumeHandle() < claims[j].Volume.GetVolumeHandle()
 	})
 }
 
-func sortByExpiration(claims []types.VolumeClaim) {
+func sortByExpiration(claims []types.MaprVolumeClaim) {
 	sort.Slice(claims, func(i, j int) bool {
 		return claims[i].Ticket.GetExpirationTime().Before(claims[j].Ticket.GetExpirationTime())
 	})
 }
 
-func sortByAge(claims []types.VolumeClaim) {
+func sortByAge(claims []types.MaprVolumeClaim) {
 	sort.Slice(claims, func(i, j int) bool {
 		return claims[i].Claim.CreationTimestamp.Before(&claims[j].Claim.CreationTimestamp)
 	})

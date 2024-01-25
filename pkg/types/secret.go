@@ -10,16 +10,38 @@ import (
 	coreV1 "k8s.io/api/core/v1"
 )
 
+// Secret is a wrapper around coreV1.Secret that provides additional functionality.
 type Secret coreV1.Secret
 
-type TicketSecret struct {
-	Secret *Secret        `json:"originalSecret"`
-	Ticket *ticket.Ticket `json:"parsedTicket"`
-	NumPVC uint32         `json:"numPVC"`
+// MaprSecret is used to store a secret and its corresponding ticket parsed from that secret
+type MaprSecret struct {
+	Secret *Secret        `json:"secret"`
+	Ticket *ticket.Ticket `json:"ticket"`
+	NumPVC uint32         `json:"-"`
 }
 
-// GetName returns the name of the secret
-func (t *TicketSecret) GetName() string {
+// NewMaprSecret creates a new MaprSecret from a Secret
+func NewMaprSecret(s *Secret) *MaprSecret {
+	if s == nil {
+		return &MaprSecret{}
+	}
+
+	v := &MaprSecret{
+		Secret: s,
+	}
+
+	ticket, err := ticket.NewMaprTicketFromSecret((*coreV1.Secret)(s))
+	if err != nil {
+		return v
+	}
+
+	v.Ticket = ticket
+
+	return v
+}
+
+// GetSecretName returns the name of the secret
+func (t *MaprSecret) GetSecretName() string {
 	if t == nil || t.Secret == nil {
 		return ""
 	}
@@ -27,8 +49,8 @@ func (t *TicketSecret) GetName() string {
 	return t.Secret.GetName()
 }
 
-// GetNamespace returns the namespace of the secret
-func (t *TicketSecret) GetNamespace() string {
+// GetSecretNamespace returns the namespace of the secret
+func (t *MaprSecret) GetSecretNamespace() string {
 	if t == nil || t.Secret == nil {
 		return ""
 	}
@@ -37,7 +59,7 @@ func (t *TicketSecret) GetNamespace() string {
 }
 
 // GetCluster returns the cluster of the ticket
-func (t *TicketSecret) GetCluster() string {
+func (t *MaprSecret) GetCluster() string {
 	if t == nil || t.Ticket == nil {
 		return ""
 	}
@@ -46,7 +68,7 @@ func (t *TicketSecret) GetCluster() string {
 }
 
 // GetUser returns the user of the ticket
-func (t *TicketSecret) GetUser() string {
+func (t *MaprSecret) GetUser() string {
 	if t == nil || t.Ticket == nil {
 		return ""
 	}
@@ -55,7 +77,7 @@ func (t *TicketSecret) GetUser() string {
 }
 
 // GetExpirationTime returns the expiration time of the ticket
-func (t *TicketSecret) GetExpirationTime() time.Time {
+func (t *MaprSecret) GetExpirationTime() time.Time {
 	if t == nil || t.Ticket == nil {
 		return time.Time{}
 	}
@@ -64,7 +86,7 @@ func (t *TicketSecret) GetExpirationTime() time.Time {
 }
 
 // GetCreationTime returns the creation time of the ticket
-func (t *TicketSecret) GetCreationTime() time.Time {
+func (t *MaprSecret) GetCreationTime() time.Time {
 	if t == nil || t.Ticket == nil {
 		return time.Time{}
 	}
@@ -73,7 +95,7 @@ func (t *TicketSecret) GetCreationTime() time.Time {
 }
 
 // GetStatusString returns a human readable string describing the status of the ticket
-func (t *TicketSecret) GetStatusString() string {
+func (t *MaprSecret) GetStatusString() string {
 	if t == nil {
 		return "Not found / Invalid"
 	}

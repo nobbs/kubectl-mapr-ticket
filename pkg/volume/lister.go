@@ -10,7 +10,7 @@ import (
 )
 
 type secretLister interface {
-	List() ([]types.TicketSecret, error)
+	List() ([]types.MaprSecret, error)
 }
 
 type Lister struct {
@@ -21,7 +21,7 @@ type Lister struct {
 	secretName string
 	sortBy     []SortOption
 
-	volumes []types.Volume
+	volumes []types.MaprVolume
 }
 
 // NewLister returns a new volume lister that lists volumes that are provisioned by one of the
@@ -42,7 +42,7 @@ func NewLister(client kubernetes.Interface, secretName string, namespace string,
 }
 
 // List returns a list of volumes using the MapR CSI provisioners and the specified secret.
-func (l *Lister) List() ([]types.Volume, error) {
+func (l *Lister) List() ([]types.MaprVolume, error) {
 	if err := l.getVolumes(); err != nil {
 		return nil, err
 	}
@@ -62,12 +62,12 @@ func (l *Lister) getVolumes() error {
 		return err
 	}
 
-	l.volumes = make([]types.Volume, 0, len(pvs.Items))
+	l.volumes = make([]types.MaprVolume, 0, len(pvs.Items))
 
 	for i := range pvs.Items {
 		l.volumes = append(
 			l.volumes,
-			types.Volume{
+			types.MaprVolume{
 				Volume: (*types.PersistentVolume)(&pvs.Items[i]),
 			},
 		)
@@ -79,7 +79,7 @@ func (l *Lister) getVolumes() error {
 // filterVolumesToMaprCSI filters volumes to those that are provisioned by one of the MapR CSI
 // provisioners.
 func (l *Lister) filterVolumesToMaprCSI() *Lister {
-	var filtered []types.Volume
+	var filtered []types.MaprVolume
 
 	for _, volume := range l.volumes {
 		if volume.Volume.IsMaprCSIBased() {
@@ -96,7 +96,7 @@ func (l *Lister) filterVolumesToMaprCSI() *Lister {
 // is equal to the value of SecretAll, all volumes that use a secret from the specified namespace
 // are returned.
 func (l *Lister) filterVolumeUsesTicket() *Lister {
-	var filtered []types.Volume
+	var filtered []types.MaprVolume
 
 	for _, volume := range l.volumes {
 		if volume.Volume.UsesSecret(l.namespace, l.secretName) {

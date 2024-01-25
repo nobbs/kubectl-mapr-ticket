@@ -161,7 +161,7 @@ func expectClaim(name, namespace string) expecetedClaim {
 	}
 }
 
-func assertClaims(t *testing.T, expected []expecetedClaim, actual []types.VolumeClaim) {
+func assertClaims(t *testing.T, expected []expecetedClaim, actual []types.MaprVolumeClaim) {
 	t.Helper()
 
 	assert := assert.New(t)

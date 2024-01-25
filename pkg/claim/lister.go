@@ -11,7 +11,7 @@ import (
 )
 
 type secretLister interface {
-	List() ([]types.TicketSecret, error)
+	List() ([]types.MaprSecret, error)
 }
 
 type Lister struct {
@@ -21,7 +21,7 @@ type Lister struct {
 	namespace string
 	sortBy    []SortOption
 
-	volumeClaims []types.VolumeClaim
+	volumeClaims []types.MaprVolumeClaim
 }
 
 func NewLister(client kubernetes.Interface, namespace string, opts ...ListerOption) *Lister {
@@ -39,7 +39,7 @@ func NewLister(client kubernetes.Interface, namespace string, opts ...ListerOpti
 }
 
 // List returns a list of volume claims that are provisioned by one of the MapR CSI provisioners.
-func (l *Lister) List() ([]types.VolumeClaim, error) {
+func (l *Lister) List() ([]types.MaprVolumeClaim, error) {
 	if err := l.getClaims(); err != nil {
 		return nil, err
 	}
@@ -60,12 +60,12 @@ func (l *Lister) getClaims() error {
 		return err
 	}
 
-	volumeClaims := make([]types.VolumeClaim, 0, len(claims.Items))
+	volumeClaims := make([]types.MaprVolumeClaim, 0, len(claims.Items))
 
 	for i := range claims.Items {
 		volumeClaims = append(
 			volumeClaims,
-			types.VolumeClaim{
+			types.MaprVolumeClaim{
 				Claim: (*types.PersistentVolumeClaim)(&claims.Items[i]),
 			},
 		)
@@ -78,7 +78,7 @@ func (l *Lister) getClaims() error {
 
 // filterClaimsBoundOnly filters PVCs to those that are bound.
 func (l *Lister) filterClaimsBoundOnly() *Lister {
-	filtered := make([]types.VolumeClaim, 0, len(l.volumeClaims))
+	filtered := make([]types.MaprVolumeClaim, 0, len(l.volumeClaims))
 
 	for _, volumeClaim := range l.volumeClaims {
 		if volumeClaim.Claim.IsBound() {
@@ -94,7 +94,7 @@ func (l *Lister) filterClaimsBoundOnly() *Lister {
 // filterClaimsMaprCSI filters PVCs to those that are provisioned by one of the MapR CSI
 // provisioners.
 func (l *Lister) filterClaimsMaprCSI() *Lister {
-	filtered := make([]types.VolumeClaim, 0, len(l.volumeClaims))
+	filtered := make([]types.MaprVolumeClaim, 0, len(l.volumeClaims))
 
 	for _, volumeClaim := range l.volumeClaims {
 		if volumeClaim.Volume.IsMaprCSIBased() {
@@ -126,7 +126,7 @@ func (l *Lister) collectVolumes() *Lister {
 		return nil, false
 	}
 
-	filtered := make([]types.VolumeClaim, 0, len(l.volumeClaims))
+	filtered := make([]types.MaprVolumeClaim, 0, len(l.volumeClaims))
 	for _, volumeClaim := range l.volumeClaims {
 		if pv, ok := lookupPV(volumeClaim.Claim); ok {
 			volumeClaim.Volume = (*types.PersistentVolume)(pv)
@@ -157,7 +157,7 @@ func (l *Lister) collectTickets() *Lister {
 	}
 
 	// lookup the ticket for each volume claim
-	lookupTicket := func(volumeClaim *types.VolumeClaim) *types.TicketSecret {
+	lookupTicket := func(volumeClaim *types.MaprVolumeClaim) *types.MaprSecret {
 		for _, ticket := range tickets {
 			if ticket.Secret.Namespace == volumeClaim.Volume.GetSecretNamespace() &&
 				ticket.Secret.Name == volumeClaim.Volume.GetSecretName() {

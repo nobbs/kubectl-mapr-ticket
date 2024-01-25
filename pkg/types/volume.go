@@ -6,20 +6,28 @@ import (
 	coreV1 "k8s.io/api/core/v1"
 )
 
+const (
+	MaprCSIProvisionerKDF    = "com.mapr.csi-kdf"
+	MaprCSIProvisionerNFSKDF = "com.mapr.csi-nfskdf"
+)
+
 var (
-	// maprCSIProvisioners is a list of the default MapR CSI provisioners
+	// MaprCSIProvisioners is a list of the default MapR CSI provisioners
 	// that we support.
-	maprCSIProvisioners = []string{
-		"com.mapr.csi-kdf",
-		"com.mapr.csi-nfskdf",
+	MaprCSIProvisioners = []string{
+		MaprCSIProvisionerKDF,
+		MaprCSIProvisionerNFSKDF,
 	}
 )
 
+// PersistentVolume is a wrapper around coreV1.PersistentVolume that provides additional
+// functionality.
 type PersistentVolume coreV1.PersistentVolume
 
-type Volume struct {
+// MaprVolume is a wrapper around a PersistentVolume that provides additional functionality.
+type MaprVolume struct {
 	Volume *PersistentVolume
-	Ticket *TicketSecret
+	Ticket *MaprSecret
 }
 
 // GetName returns the name of the volume
@@ -102,7 +110,7 @@ func (v *PersistentVolume) IsMaprCSIBased() bool {
 	}
 
 	// Check if the volume is provisioned by one of the MapR CSI provisioners
-	for _, provisioner := range maprCSIProvisioners {
+	for _, provisioner := range MaprCSIProvisioners {
 		if v.Spec.CSI.Driver == provisioner {
 			return true
 		}

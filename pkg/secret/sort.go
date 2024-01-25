@@ -56,42 +56,42 @@ func ValidateSortOptions(sortOptions []string) error {
 }
 
 // sortByName sorts the items by secret name
-func sortByName(items []types.TicketSecret) {
+func sortByName(items []types.MaprSecret) {
 	sort.Slice(items, func(i, j int) bool {
-		return items[i].GetName() < items[j].GetName()
+		return items[i].GetSecretName() < items[j].GetSecretName()
 	})
 }
 
 // sortByNamespace sorts the items by secret namespace
-func sortByNamespace(items []types.TicketSecret) {
+func sortByNamespace(items []types.MaprSecret) {
 	sort.Slice(items, func(i, j int) bool {
-		return items[i].GetNamespace() < items[j].GetNamespace()
+		return items[i].GetSecretNamespace() < items[j].GetSecretNamespace()
 	})
 }
 
 // sortByMaprCluster sorts the items by MapR cluster that the ticket is for
-func sortByMaprCluster(items []types.TicketSecret) {
+func sortByMaprCluster(items []types.MaprSecret) {
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].GetCluster() < items[j].GetCluster()
 	})
 }
 
 // sortByMaprUser sorts the items by MapR user that the ticket is for
-func sortByMaprUser(items []types.TicketSecret) {
+func sortByMaprUser(items []types.MaprSecret) {
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].GetUser() < items[j].GetUser()
 	})
 }
 
 // sortByAge sorts the items by creation timestamp of the ticket
-func sortByAge(items []types.TicketSecret) {
+func sortByAge(items []types.MaprSecret) {
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].GetCreationTime().Before(items[j].GetCreationTime())
 	})
 }
 
 // sortByExpiration sorts the items by expiry time of the ticket
-func sortByExpiration(items []types.TicketSecret) {
+func sortByExpiration(items []types.MaprSecret) {
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].GetExpirationTime().Before(items[j].GetExpirationTime())
 	})
@@ -99,7 +99,7 @@ func sortByExpiration(items []types.TicketSecret) {
 
 // sortByNumPVCs sorts the items by the number of persistent volumes that are
 // using the secret
-func sortByNumPVCs(items []types.TicketSecret) {
+func sortByNumPVCs(items []types.MaprSecret) {
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].NumPVC < items[j].NumPVC
 	})

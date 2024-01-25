@@ -1103,7 +1103,7 @@ func expectVolume(name string) expectedVolume {
 	}
 }
 
-func assertVolumes(t *testing.T, expected []expectedVolume, actual []types.Volume) {
+func assertVolumes(t *testing.T, expected []expectedVolume, actual []types.MaprVolume) {
 	t.Helper()
 
 	assert := assert.New(t)

@@ -67,7 +67,7 @@ var (
 	}
 )
 
-func Print(cmd *cobra.Command, volumeClaims []types.VolumeClaim) error {
+func Print(cmd *cobra.Command, volumeClaims []types.MaprVolumeClaim) error {
 	format := cmd.Flag("output").Value.String()
 	allNamespaces := cmd.Flag("all-namespaces").Changed && cmd.Flag("all-namespaces").Value.String() == "true"
 
@@ -88,7 +88,7 @@ func Print(cmd *cobra.Command, volumeClaims []types.VolumeClaim) error {
 	return nil
 }
 
-func generableTable(volumeClaims []types.VolumeClaim) *metaV1.Table {
+func generableTable(volumeClaims []types.MaprVolumeClaim) *metaV1.Table {
 	rows := generateRows(volumeClaims)
 
 	return &metaV1.Table{
@@ -97,7 +97,7 @@ func generableTable(volumeClaims []types.VolumeClaim) *metaV1.Table {
 	}
 }
 
-func generateRows(volumeClaims []types.VolumeClaim) []metaV1.TableRow {
+func generateRows(volumeClaims []types.MaprVolumeClaim) []metaV1.TableRow {
 	rows := make([]metaV1.TableRow, 0, len(volumeClaims))
 
 	for _, pv := range volumeClaims {
@@ -107,7 +107,7 @@ func generateRows(volumeClaims []types.VolumeClaim) []metaV1.TableRow {
 	return rows
 }
 
-func generateRow(volumeClaim *types.VolumeClaim) *metaV1.TableRow {
+func generateRow(volumeClaim *types.MaprVolumeClaim) *metaV1.TableRow {
 	row := &metaV1.TableRow{
 		Object: runtime.RawExtension{
 			Object: (*coreV1.PersistentVolumeClaim)(volumeClaim.Claim),

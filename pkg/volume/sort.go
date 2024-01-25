@@ -58,49 +58,49 @@ func ValidateSortOptions(sortOptions []string) error {
 	return nil
 }
 
-func sortByName(volumes []types.Volume) {
+func sortByName(volumes []types.MaprVolume) {
 	sort.Slice(volumes, func(i, j int) bool {
 		return volumes[i].Volume.GetName() < volumes[j].Volume.GetName()
 	})
 }
 
-func sortBySecretNamespace(volumes []types.Volume) {
+func sortBySecretNamespace(volumes []types.MaprVolume) {
 	sort.Slice(volumes, func(i, j int) bool {
 		return volumes[i].Volume.GetSecretNamespace() < volumes[j].Volume.GetSecretNamespace()
 	})
 }
 
-func sortBySecretName(volumes []types.Volume) {
+func sortBySecretName(volumes []types.MaprVolume) {
 	sort.Slice(volumes, func(i, j int) bool {
 		return volumes[i].Volume.GetSecretName() < volumes[j].Volume.GetSecretName()
 	})
 }
 
-func sortByClaimNamespace(volumes []types.Volume) {
+func sortByClaimNamespace(volumes []types.MaprVolume) {
 	sort.Slice(volumes, func(i, j int) bool {
 		return volumes[i].Volume.GetClaimNamespace() < volumes[j].Volume.GetClaimNamespace()
 	})
 }
 
-func sortByClaimName(volumes []types.Volume) {
+func sortByClaimName(volumes []types.MaprVolume) {
 	sort.Slice(volumes, func(i, j int) bool {
 		return volumes[i].Volume.GetClaimName() < volumes[j].Volume.GetClaimName()
 	})
 }
 
-func sortByVolumePath(volumes []types.Volume) {
+func sortByVolumePath(volumes []types.MaprVolume) {
 	sort.Slice(volumes, func(i, j int) bool {
 		return volumes[i].Volume.GetVolumePath() < volumes[j].Volume.GetVolumePath()
 	})
 }
 
-func sortByVolumeHandle(volumes []types.Volume) {
+func sortByVolumeHandle(volumes []types.MaprVolume) {
 	sort.Slice(volumes, func(i, j int) bool {
 		return volumes[i].Volume.GetVolumeHandle() < volumes[j].Volume.GetVolumeHandle()
 	})
 }
 
-func sortByExpiration(volumes []types.Volume) {
+func sortByExpiration(volumes []types.MaprVolume) {
 	sort.Slice(volumes, func(i, j int) bool {
 		if volumes[i].Ticket == nil {
 			return true
@@ -112,7 +112,7 @@ func sortByExpiration(volumes []types.Volume) {
 	})
 }
 
-func sortByAge(volumes []types.Volume) {
+func sortByAge(volumes []types.MaprVolume) {
 	sort.Slice(volumes, func(i, j int) bool {
 		return volumes[i].Volume.CreationTimestamp.Before(&volumes[j].Volume.CreationTimestamp)
 	})
