@@ -13,6 +13,8 @@ import (
 )
 
 func TestPersistentVolume_GetName(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		v    *PersistentVolume
@@ -40,16 +42,21 @@ func TestPersistentVolume_GetName(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.v.GetName()
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Equal(t, tt.want, got)
+			got := test.v.GetName()
+
+			assert.Equal(t, test.want, got)
 		})
 	}
 }
 
 func TestPersistentVolume_GetClaimName(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		v    *PersistentVolume
@@ -78,16 +85,21 @@ func TestPersistentVolume_GetClaimName(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.v.GetClaimName()
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Equal(t, tt.want, got)
+			got := test.v.GetClaimName()
+
+			assert.Equal(t, test.want, got)
 		})
 	}
 }
 
 func TestPersistentVolume_GetClaimNamespace(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		v    *PersistentVolume
@@ -116,16 +128,21 @@ func TestPersistentVolume_GetClaimNamespace(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.v.GetClaimNamespace()
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Equal(t, tt.want, got)
+			got := test.v.GetClaimNamespace()
+
+			assert.Equal(t, test.want, got)
 		})
 	}
 }
 
 func TestPersistentVolume_GetVolumePath(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		v    *PersistentVolume
@@ -194,16 +211,21 @@ func TestPersistentVolume_GetVolumePath(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.v.GetVolumePath()
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Equal(t, tt.want, got)
+			got := test.v.GetVolumePath()
+
+			assert.Equal(t, test.want, got)
 		})
 	}
 }
 
 func TestPersistentVolume_GetVolumeHandle(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		v    *PersistentVolume
@@ -257,16 +279,21 @@ func TestPersistentVolume_GetVolumeHandle(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.v.GetVolumeHandle()
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Equal(t, tt.want, got)
+			got := test.v.GetVolumeHandle()
+
+			assert.Equal(t, test.want, got)
 		})
 	}
 }
 
 func TestPersistentVolume_GetSecretName(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		v    *PersistentVolume
@@ -322,16 +349,21 @@ func TestPersistentVolume_GetSecretName(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.v.GetSecretName()
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Equal(t, tt.want, got)
+			got := test.v.GetSecretName()
+
+			assert.Equal(t, test.want, got)
 		})
 	}
 }
 
 func TestPersistentVolume_GetSecretNamespace(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		v    *PersistentVolume
@@ -387,16 +419,21 @@ func TestPersistentVolume_GetSecretNamespace(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.v.GetSecretNamespace()
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Equal(t, tt.want, got)
+			got := test.v.GetSecretNamespace()
+
+			assert.Equal(t, test.want, got)
 		})
 	}
 }
 
 func TestPersistentVolume_IsMaprCSIBased(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		v    *PersistentVolume
@@ -465,11 +502,14 @@ func TestPersistentVolume_IsMaprCSIBased(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.v.IsMaprCSIBased()
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Equal(t, tt.want, got)
+			got := test.v.IsMaprCSIBased()
+
+			assert.Equal(t, test.want, got)
 		})
 	}
 }
@@ -479,6 +519,8 @@ func TestPersistentVolume_UsesSecret(t *testing.T) {
 		namespace string
 		name      string
 	}
+
+	t.Parallel()
 
 	tests := []struct {
 		name string
@@ -661,11 +703,14 @@ func TestPersistentVolume_UsesSecret(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.v.UsesSecret(tt.args.namespace, tt.args.name)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Equal(t, tt.want, got)
+			got := test.v.UsesSecret(test.args.namespace, test.args.name)
+
+			assert.Equal(t, test.want, got)
 		})
 	}
 }

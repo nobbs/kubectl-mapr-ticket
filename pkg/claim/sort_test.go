@@ -9,7 +9,7 @@ import (
 )
 
 func TestValidateSortOptions(t *testing.T) {
-	assert := assert.New(t)
+	t.Parallel()
 
 	tests := []struct {
 		name        string
@@ -39,10 +39,13 @@ func TestValidateSortOptions(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			err := ValidateSortOptions(test.sortOptions)
 
-			assert.Equal(test.wantErr, err != nil)
+			assert.Equal(t, test.wantErr, err != nil)
 		})
 	}
 }

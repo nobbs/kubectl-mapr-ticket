@@ -22,6 +22,8 @@ const (
 )
 
 func TestLister_Default(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		fields   listerFields
@@ -82,7 +84,10 @@ func TestLister_Default(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			l := NewLister(test.fields.client, test.fields.namespace, test.fields.opts...)
 
 			actual, err := l.List()
@@ -94,6 +99,8 @@ func TestLister_Default(t *testing.T) {
 }
 
 func TestLister_WithAllNamespaces(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		fields   listerFields
@@ -132,7 +139,10 @@ func TestLister_WithAllNamespaces(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			l := NewLister(test.fields.client, test.fields.namespace, test.fields.opts...)
 
 			actual, err := l.List()
@@ -164,13 +174,11 @@ func expectClaim(name, namespace string) expecetedClaim {
 func assertClaims(t *testing.T, expected []expecetedClaim, actual []types.MaprVolumeClaim) {
 	t.Helper()
 
-	assert := assert.New(t)
-
-	assert.Len(actual, len(expected))
+	assert.Len(t, actual, len(expected))
 
 	for i, claim := range actual {
-		assert.Equal(expected[i].name, claim.Claim.Name)
-		assert.Equal(expected[i].namespace, claim.Claim.Namespace)
+		assert.Equal(t, expected[i].name, claim.Claim.Name)
+		assert.Equal(t, expected[i].namespace, claim.Claim.Namespace)
 	}
 }
 

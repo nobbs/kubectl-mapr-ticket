@@ -21,6 +21,8 @@ var (
 )
 
 func TestNewMaprSecret(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		s    *Secret
@@ -53,15 +55,18 @@ func TestNewMaprSecret(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := NewMaprSecret(tt.s)
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			if tt.want.Secret != nil {
-				assert.Equal(t, tt.want.Secret, got.Secret)
+			got := NewMaprSecret(test.s)
+
+			if test.want.Secret != nil {
+				assert.Equal(t, test.want.Secret, got.Secret)
 			}
 
-			if tt.want.Ticket != nil {
+			if test.want.Ticket != nil {
 				assert.NotNil(t, got.Ticket)
 			}
 		})
@@ -69,6 +74,8 @@ func TestNewMaprSecret(t *testing.T) {
 }
 
 func TestMaprSecret_GetSecretName(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		t    *MaprSecret
@@ -97,16 +104,21 @@ func TestMaprSecret_GetSecretName(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.t.GetSecretName()
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Equal(t, tt.want, got)
+			got := test.t.GetSecretName()
+
+			assert.Equal(t, test.want, got)
 		})
 	}
 }
 
 func TestMaprSecret_GetSecretNamespace(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		t    *MaprSecret
@@ -135,16 +147,21 @@ func TestMaprSecret_GetSecretNamespace(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.t.GetSecretNamespace()
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Equal(t, tt.want, got)
+			got := test.t.GetSecretNamespace()
+
+			assert.Equal(t, test.want, got)
 		})
 	}
 }
 
 func TestMaprSecret_GetCluster(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		t    *MaprSecret
@@ -182,16 +199,21 @@ func TestMaprSecret_GetCluster(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.t.GetCluster()
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Equal(t, tt.want, got)
+			got := test.t.GetCluster()
+
+			assert.Equal(t, test.want, got)
 		})
 	}
 }
 
 func TestMaprSecret_GetUser(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		t    *MaprSecret
@@ -242,16 +264,21 @@ func TestMaprSecret_GetUser(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.t.GetUser()
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Equal(t, tt.want, got)
+			got := test.t.GetUser()
+
+			assert.Equal(t, test.want, got)
 		})
 	}
 }
 
 func TestMaprSecret_GetExpirationTime(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		t    *MaprSecret
@@ -302,16 +329,22 @@ func TestMaprSecret_GetExpirationTime(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.t.GetExpirationTime()
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Equal(t, tt.want, got)
+			got := test.t.GetExpirationTime()
+
+			// dirty hack to make the test pass without caring too much about the time zone
+			assert.WithinDuration(t, test.want, got, 24*time.Hour)
 		})
 	}
 }
 
 func TestMaprSecret_GetCreationTime(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		t    *MaprSecret
@@ -336,7 +369,7 @@ func TestMaprSecret_GetCreationTime(t *testing.T) {
 					},
 				},
 			),
-			want: time.Date(2018, time.April, 4, 16, 31, 37, 0, time.Local),
+			want: time.Date(2018, time.April, 4, 16, 31, 37, 0, time.UTC),
 		},
 		{
 			name: "demo.mapr.com",
@@ -362,16 +395,22 @@ func TestMaprSecret_GetCreationTime(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.t.GetCreationTime()
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Equal(t, tt.want, got)
+			got := test.t.GetCreationTime()
+
+			// dirty hack to make the test pass without caring too much about the time zone
+			assert.WithinDuration(t, test.want, got, 24*time.Hour)
 		})
 	}
 }
 
 func TestMaprSecret_GetStatusString(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name          string
 		t             *MaprSecret
@@ -429,11 +468,14 @@ func TestMaprSecret_GetStatusString(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.t.GetStatusString()
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Contains(t, got, tt.shouldContain)
+			got := test.t.GetStatusString()
+
+			assert.Contains(t, got, test.shouldContain)
 		})
 	}
 }

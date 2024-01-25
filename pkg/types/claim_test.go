@@ -12,6 +12,8 @@ import (
 )
 
 func TestPersistentVolumeClaim_GetNamespace(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		c    *PersistentVolumeClaim
@@ -38,16 +40,21 @@ func TestPersistentVolumeClaim_GetNamespace(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.c.GetNamespace()
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Equal(t, tt.want, got)
+			got := test.c.GetNamespace()
+
+			assert.Equal(t, test.want, got)
 		})
 	}
 }
 
 func TestPersistentVolumeClaim_GetName(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		c    *PersistentVolumeClaim
@@ -74,16 +81,21 @@ func TestPersistentVolumeClaim_GetName(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.c.GetName()
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Equal(t, tt.want, got)
+			got := test.c.GetName()
+
+			assert.Equal(t, test.want, got)
 		})
 	}
 }
 
 func TestPersistentVolumeClaim_IsBound(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		c    *PersistentVolumeClaim
@@ -119,11 +131,14 @@ func TestPersistentVolumeClaim_IsBound(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.c.IsBound()
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 
-			assert.Equal(t, tt.want, got)
+			got := test.c.IsBound()
+
+			assert.Equal(t, test.want, got)
 		})
 	}
 }
