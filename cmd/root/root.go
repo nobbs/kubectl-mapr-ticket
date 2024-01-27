@@ -3,6 +3,7 @@
 //
 // SPX-License-Identifier: MIT
 
+// Package root provides the root command for the application.
 package root
 
 import (

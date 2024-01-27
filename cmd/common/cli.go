@@ -17,12 +17,9 @@ const (
 )
 
 var (
+	// CliBinName is the name of the CLI binary as invoked by the user, e.g. "kubectl-mapr-ticket"
 	CliBinName = filepath.Base(os.Args[0])
 )
-
-type stringNormalizer struct {
-	string
-}
 
 // StringSliceToFlagOptions returns a normalized string representation of a string slice
 // separated by commas and spaces, suitable for use in CLI flag usage strings, e.g.
@@ -55,6 +52,12 @@ func CliExample(example string, args ...any) string {
 	return stringNormalizer{example}.trim().indent().string
 }
 
+// stringNormalizer is a helper struct to normalize strings for use in CLI help and usage text
+type stringNormalizer struct {
+	string
+}
+
+// trim returns a stringNormalizer with the string trimmed of leading and trailing whitespace
 func (s stringNormalizer) trim() stringNormalizer {
 	s.string = strings.TrimSpace(s.string)
 
@@ -68,6 +71,7 @@ func (s stringNormalizer) trim() stringNormalizer {
 	return s
 }
 
+// indent returns a stringNormalizer with each line of the string indented by two spaces
 func (s stringNormalizer) indent() stringNormalizer {
 	lines := strings.Split(s.string, "\n")
 

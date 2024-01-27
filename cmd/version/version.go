@@ -3,6 +3,7 @@
 //
 // SPX-License-Identifier: MIT
 
+// Package version provides the version command for the application.
 package version
 
 import (

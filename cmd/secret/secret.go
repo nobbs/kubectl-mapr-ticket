@@ -3,6 +3,7 @@
 //
 // SPX-License-Identifier: MIT
 
+// Package secret provides the secret command for the application.
 package secret
 
 import (
@@ -18,6 +19,7 @@ import (
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// command string constants for use in help and usage text
 const (
 	secretUse   = `secret`
 	secretShort = "List all secrets containing MapR tickets in the current namespace"
@@ -47,6 +49,7 @@ const (
 )
 
 var (
+	// valid output formats for the command
 	secretValidOutputFormats = []string{"table", "wide"}
 )
 
@@ -105,6 +108,7 @@ func newOptions(opts *common.Options) *options {
 	}
 }
 
+// NewCmd creates a new secret command for the application.
 func NewCmd(opts *common.Options) *cobra.Command {
 	o := newOptions(opts)
 
@@ -163,6 +167,7 @@ func NewCmd(opts *common.Options) *cobra.Command {
 	return cmd
 }
 
+// Complete sets any default values for the command flags not handled automatically
 func (o *options) Complete(cmd *cobra.Command, args []string) error {
 	// set namespace based on flags
 	ns := util.GetNamespace(o.KubernetesConfigFlags, o.AllNamespaces)
@@ -171,6 +176,7 @@ func (o *options) Complete(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// Validate ensures that all required arguments and flag values are provided
 func (o *options) Validate() error {
 	// validate output format
 	if o.OutputFormat != "table" && o.OutputFormat != "wide" {
@@ -185,7 +191,7 @@ func (o *options) Validate() error {
 	return nil
 }
 
-//gocyclo:ignore
+// Run executes the command
 func (o *options) Run(cmd *cobra.Command, args []string) error {
 	client, err := util.ClientFromFlags(o.KubernetesConfigFlags)
 	if err != nil {
@@ -266,6 +272,7 @@ func (o *options) Run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// registerCompletions registers completions for the command flags
 func (o *options) registerCompletions(cmd *cobra.Command) error {
 	err := cmd.RegisterFlagCompletionFunc("output", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return common.CompleteStringValues(secretValidOutputFormats, toComplete)

@@ -3,6 +3,7 @@
 //
 // SPX-License-Identifier: MIT
 
+// Package claim provides the claim command for the application.
 package claim
 
 import (
@@ -17,6 +18,7 @@ import (
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/util"
 )
 
+// command string constants for use in help and usage text
 const (
 	claimUse   = `claim`
 	claimShort = "List all persistent volumes claims that use a MapR ticket in the current namespace"
@@ -38,6 +40,7 @@ const (
 )
 
 var (
+	// valid output formats for the command
 	claimValidOutputFormats = []string{"table", "wide"}
 )
 
@@ -60,6 +63,7 @@ func newOptions(opts *common.Options) *options {
 	}
 }
 
+// NewCmd creates a new claim command for the application.
 func NewCmd(opts *common.Options) *cobra.Command {
 	o := newOptions(opts)
 
@@ -107,6 +111,7 @@ func NewCmd(opts *common.Options) *cobra.Command {
 	return cmd
 }
 
+// Complete sets any default values for the command flags not handled automatically
 func (o *options) Complete(cmd *cobra.Command, args []string) error {
 	// set namespace based on flags
 	ns := util.GetNamespace(o.KubernetesConfigFlags, o.AllNamespaces)
@@ -115,6 +120,7 @@ func (o *options) Complete(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// Validate ensures that all required arguments and flag values are provided
 func (o *options) Validate() error {
 	// validate output format
 	if !slices.Contains(claimValidOutputFormats, o.OutputFormat) {
@@ -129,6 +135,7 @@ func (o *options) Validate() error {
 	return nil
 }
 
+// Run executes the command logic
 func (o *options) Run(cmd *cobra.Command, args []string) error {
 	client, err := util.ClientFromFlags(o.KubernetesConfigFlags)
 	if err != nil {
@@ -177,6 +184,7 @@ func (o *options) Run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// registerCompletions registers completions for the command flags
 func (o *options) registerCompletions(cmd *cobra.Command) error {
 	err := cmd.RegisterFlagCompletionFunc("output", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return common.CompleteStringValues(claimValidOutputFormats, toComplete)

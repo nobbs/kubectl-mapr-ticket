@@ -3,6 +3,7 @@
 //
 // SPX-License-Identifier: MIT
 
+// Package inspect provides the inspect command for the application.
 package inspect
 
 import (
@@ -20,6 +21,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+// command string constants for use in help and usage text
 const (
 	inspectUse   = `inspect`
 	inspectShort = "Inspect a MapR ticket either from a secret or locally"
@@ -37,12 +39,16 @@ const (
 		# Inspect a MapR ticket from a file and output in JSON format (default)
 		%[1]s inspect -f ./mapr-ticket
 
+		# Inspect a MapR ticket from a file and output in JSON format with human readable timestamps
+		%[1]s inspect -f ./mapr-ticket --human-readable
+
 		# Inspect a MapR ticket from a secret and output in YAML format
 		%[1]s inspect mapr-ticket-secret --namespace kube-system -o yaml
 		`
 )
 
 var (
+	// valid output formats for the command
 	inspectValidOutputFormats = []string{"json", "yaml"}
 )
 
@@ -58,6 +64,10 @@ type options struct {
 	// OutputFormat is the format to use for output
 	OutputFormat string
 
+	// HumanReadable indicates whether to print human readable output, ie. time in human readable
+	// RFC3339 format instead of Unix timestamps
+	HumanReadable bool
+
 	// File is the path to the MapR ticket file
 	File string
 }
@@ -68,6 +78,7 @@ func newOptions(opts *common.Options) *options {
 	}
 }
 
+// NewCmd creates a new inspect command for the application.
 func NewCmd(opts *common.Options) *cobra.Command {
 	o := newOptions(opts)
 
@@ -121,6 +132,7 @@ func NewCmd(opts *common.Options) *cobra.Command {
 
 	// add flags
 	cmd.Flags().StringVarP(&o.OutputFormat, "output", "o", "json", fmt.Sprintf("Output format. One of (%s)", common.StringSliceToFlagOptions(inspectValidOutputFormats)))
+	cmd.Flags().BoolVarP(&o.HumanReadable, "human-readable", "H", false, "Print human readable output, ie. time in human readable RFC3339 format instead of Unix timestamps")
 	cmd.Flags().StringVarP(&o.File, "file", "f", "", "Path to the MapR ticket file")
 
 	// register completions for flags
@@ -131,6 +143,7 @@ func NewCmd(opts *common.Options) *cobra.Command {
 	return cmd
 }
 
+// Complete sets any default values for the command flags not handled automatically
 func (o *options) Complete(cmd *cobra.Command, args []string) error {
 	// parse the arguments
 	o.args = args
@@ -154,6 +167,7 @@ func (o *options) Complete(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
+// Validate ensures that all required arguments and flag values are provided
 func (o *options) Validate() error {
 	// validate output format
 	if !slices.Contains(inspectValidOutputFormats, o.OutputFormat) {
@@ -163,6 +177,7 @@ func (o *options) Validate() error {
 	return nil
 }
 
+// Run executes the command logic
 func (o *options) Run(cmd *cobra.Command, args []string) error {
 	// if we have a secret name, inspect the secret
 	if o.SecretName != "" {
@@ -197,7 +212,7 @@ func (o *options) inspectSecret() error {
 	}
 
 	// print ticket
-	if err := o.printTicket(ticket); err != nil {
+	if err := o.print(ticket); err != nil {
 		return err
 	}
 
@@ -218,45 +233,14 @@ func (o *options) inspectFile() error {
 	}
 
 	// print ticket
-	if err := o.printTicket(ticket); err != nil {
+	if err := o.print(ticket); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// printTicket prints the ticket in the configured output format
-func (o *options) printTicket(ticket *ticket.Ticket) error {
-	switch o.OutputFormat {
-	case "json":
-		return printJSON(ticket)
-	case "yaml":
-		return printYAML(ticket)
-	default:
-		return fmt.Errorf("invalid output format %q. Must be one of (%s)", o.OutputFormat, common.StringSliceToFlagOptions(inspectValidOutputFormats))
-	}
-}
-
-// printJSON prints the ticket in JSON format
-func printJSON(ticket *ticket.Ticket) error {
-	fmt.Println(ticket.AsMaprTicket().String())
-
-	return nil
-}
-
-// printYAML prints the ticket in YAML format
-func printYAML(ticket *ticket.Ticket) error {
-	jsonString := ticket.AsMaprTicket().String()
-	yamlBytes, err := yaml.JSONToYAML([]byte(jsonString))
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(string(yamlBytes))
-
-	return nil
-}
-
+// registerCompletions registers completions for the command flags
 func (o *options) registerCompletions(cmd *cobra.Command) error {
 	err := cmd.RegisterFlagCompletionFunc("output", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return common.CompleteStringValues(inspectValidOutputFormats, toComplete)
@@ -265,9 +249,55 @@ func (o *options) registerCompletions(cmd *cobra.Command) error {
 		return err
 	}
 
+	// register --file flag completions for yaml, yml and json files
 	if err := cmd.MarkFlagFilename("file", "yaml", "yml", "json"); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+// print prints the ticket in the configured output format, or returns an error
+// if the output format is invalid
+func (o *options) print(ticket *ticket.Ticket) error {
+	switch o.OutputFormat {
+	case "json":
+		return o.printJSON(ticket)
+	case "yaml":
+		return o.printYAML(ticket)
+	default:
+		return fmt.Errorf("invalid output format %q. Must be one of (%s)", o.OutputFormat, common.StringSliceToFlagOptions(inspectValidOutputFormats))
+	}
+}
+
+// printJSON prints the ticket in JSON format
+func (o *options) printJSON(ticket *ticket.Ticket) error {
+	switch o.HumanReadable {
+	case true:
+		fmt.Println(ticket.AsMaprTicket().PrettyString())
+	default:
+		fmt.Println(ticket.AsMaprTicket().String())
+	}
+
+	return nil
+}
+
+// printYAML prints the ticket in YAML format
+func (o *options) printYAML(ticket *ticket.Ticket) error {
+	var jsonString string
+	switch o.HumanReadable {
+	case true:
+		jsonString = ticket.AsMaprTicket().PrettyString()
+	default:
+		jsonString = ticket.AsMaprTicket().String()
+	}
+
+	yamlBytes, err := yaml.JSONToYAML([]byte(jsonString))
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(string(yamlBytes))
 
 	return nil
 }

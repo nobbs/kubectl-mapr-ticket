@@ -3,6 +3,7 @@
 //
 // SPX-License-Identifier: MIT
 
+// Package volume provides the volume command for the application.
 package volume
 
 import (
