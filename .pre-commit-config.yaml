@@ -12,3 +12,15 @@ repos:
     hooks:
       - id: golangci-lint-full
         name: Run golangci-lint
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.4
+    hooks:
+      - id: insert-license
+        files: \.go$
+        exclude: ^internal/ezmeral.hpe.com/.*$
+        args:
+          - --license-filepath
+          - .github/license-head-template.txt
+          - --comment-style
+          - //
+          - --use-current-year
