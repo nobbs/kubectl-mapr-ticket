@@ -1,7 +1,13 @@
+// Copyright (c) 2024 Alexej Disterhoft
+// Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+//
+// SPX-License-Identifier: MIT
+
 package common
 
 import (
 	"context"
+	"slices"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -48,7 +54,7 @@ func CompleteStringSliceValues(values []string, toComplete string) ([]string, co
 	filteredValues := []string{}
 
 	for _, v := range values {
-		if !contains(completeTokens, v) {
+		if !slices.Contains(completeTokens, v) {
 			filteredValues = append(filteredValues, v)
 		}
 	}
@@ -100,7 +106,7 @@ func CompleteTicketNames(client kubernetes.Interface, namespace string, args []s
 		}
 
 		// skip already completed tickets
-		if contains(args, secret.Name) {
+		if slices.Contains(args, secret.Name) {
 			continue
 		}
 
@@ -110,13 +116,4 @@ func CompleteTicketNames(client kubernetes.Interface, namespace string, args []s
 	}
 
 	return suggestions, cobra.ShellCompDirectiveNoFileComp
-}
-
-func contains(slice []string, item string) bool {
-	for _, s := range slice {
-		if s == item {
-			return true
-		}
-	}
-	return false
 }

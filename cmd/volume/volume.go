@@ -1,3 +1,9 @@
+// Copyright (c) 2024 Alexej Disterhoft
+// Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+//
+// SPX-License-Identifier: MIT
+
+// Package volume provides the volume command for the application.
 package volume
 
 import (
@@ -154,7 +160,7 @@ func (o *options) Validate() error {
 	}
 
 	// ensure that the sort options are valid
-	if err := volume.ValidateSortOptions(o.SortBy); err != nil {
+	if err := util.ValidateSortOptions(volume.SortOptionsList, o.SortBy); err != nil {
 		return err
 	}
 

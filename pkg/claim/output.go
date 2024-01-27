@@ -1,3 +1,8 @@
+// Copyright (c) 2024 Alexej Disterhoft
+// Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+//
+// SPX-License-Identifier: MIT
+
 package claim
 
 import (
@@ -67,6 +72,7 @@ var (
 	}
 )
 
+// Print prints the volume claims to the given output stream in a tabular format known by kubectl.
 func Print(cmd *cobra.Command, volumeClaims []types.MaprVolumeClaim) error {
 	format := cmd.Flag("output").Value.String()
 	allNamespaces := cmd.Flag("all-namespaces").Changed && cmd.Flag("all-namespaces").Value.String() == "true"
@@ -88,6 +94,7 @@ func Print(cmd *cobra.Command, volumeClaims []types.MaprVolumeClaim) error {
 	return nil
 }
 
+// generableTable generates a table from the given volume claims.
 func generableTable(volumeClaims []types.MaprVolumeClaim) *metaV1.Table {
 	rows := generateRows(volumeClaims)
 
@@ -97,6 +104,7 @@ func generableTable(volumeClaims []types.MaprVolumeClaim) *metaV1.Table {
 	}
 }
 
+// generateRows generates the rows for the given volume claims.
 func generateRows(volumeClaims []types.MaprVolumeClaim) []metaV1.TableRow {
 	rows := make([]metaV1.TableRow, 0, len(volumeClaims))
 
@@ -107,6 +115,7 @@ func generateRows(volumeClaims []types.MaprVolumeClaim) []metaV1.TableRow {
 	return rows
 }
 
+// generateRow generates a row for the given volume claim.
 func generateRow(volumeClaim *types.MaprVolumeClaim) *metaV1.TableRow {
 	row := &metaV1.TableRow{
 		Object: runtime.RawExtension{

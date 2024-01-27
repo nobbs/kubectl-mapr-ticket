@@ -1,3 +1,8 @@
+// Copyright (c) 2024 Alexej Disterhoft
+// Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+//
+// SPX-License-Identifier: MIT
+
 package types
 
 import (
@@ -7,6 +12,7 @@ import (
 )
 
 const (
+	// default MapR CSI provisioner identifiers
 	MaprCSIProvisionerKDF    = "com.mapr.csi-kdf"
 	MaprCSIProvisionerNFSKDF = "com.mapr.csi-nfskdf"
 )
@@ -57,7 +63,7 @@ func (v *PersistentVolume) GetClaimNamespace() string {
 	return v.Spec.ClaimRef.Namespace
 }
 
-// ClaimUID returns the volume path of the volume
+// GetVolumePath returns the volume path of the volume
 func (v *PersistentVolume) GetVolumePath() string {
 	if v == nil || v.Spec.CSI == nil || v.Spec.CSI.VolumeAttributes == nil {
 		return ""

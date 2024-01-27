@@ -1,3 +1,16 @@
+// Copyright (c) 2024 Alexej Disterhoft
+// Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+//
+// SPX-License-Identifier: MIT
+
+// Package claim implements the persistent volume claim lister. It is responsible for listing all
+// persistent volume claims in the cluster that are refering to MapR-backed persistent volumes.
+//
+// The lister is implemented as a chain of filters and collectors. The filters are used to filter
+// out volume claims, ie. to only keep those that are bound and backed by a MapR CSI provisioner.
+// The collectors are used to collect additional information about the volume claims, ie. to collect
+// the PV for each PVC and the MapR ticket for each PV. This data is then used to print the volume
+// claims in a human-readable tabular format.
 package claim
 
 import (
@@ -14,16 +27,20 @@ type secretLister interface {
 	List() ([]types.MaprSecret, error)
 }
 
+// Lister is the struct that is used to list volume claims refering to MapR-backed persistent
+// volumes in the cluster.
 type Lister struct {
-	client       kubernetes.Interface
-	secretLister secretLister
-
+	client    kubernetes.Interface
 	namespace string
-	sortBy    []SortOption
+
+	secretLister secretLister
+	sortBy       []SortOption
 
 	volumeClaims []types.MaprVolumeClaim
 }
 
+// NewLister creates a new volume claim lister. It requires a Kubernetes client and a namespace
+// to operate on. It also accepts a list of options that can be used to configure the lister.
 func NewLister(client kubernetes.Interface, namespace string, opts ...ListerOption) *Lister {
 	l := &Lister{
 		client:    client,
@@ -139,6 +156,7 @@ func (l *Lister) collectVolumes() *Lister {
 	return l
 }
 
+// collectTickets collects the MapR tickets for each PVC, if available.
 func (l *Lister) collectTickets() *Lister {
 	// return early if there is no secret lister
 	if l.secretLister == nil {

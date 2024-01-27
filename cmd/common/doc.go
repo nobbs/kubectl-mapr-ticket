@@ -3,4 +3,5 @@
 //
 // SPX-License-Identifier: MIT
 
-package claim_test
+// Package common contains common functions used by the cmd packages.
+package common

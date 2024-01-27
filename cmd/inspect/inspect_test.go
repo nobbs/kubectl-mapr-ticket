@@ -3,4 +3,4 @@
 //
 // SPX-License-Identifier: MIT
 
-package claim_test
+package inspect_test

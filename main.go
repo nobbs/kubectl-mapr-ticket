@@ -1,3 +1,15 @@
+// Copyright (c) 2024 Alexej Disterhoft
+// Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+//
+// SPX-License-Identifier: MIT
+
+// Package main implements the main entry point for the kubectl-mapr-ticket CLI. It is responsible for
+// creating the root command and executing it.
+//
+// The root command is responsible for creating the subcommands and executing them. The subcommands
+// are responsible for the actual work.
+//
+// If you are interested in the actual plugin documentation, please refer to the README.md file.
 package main
 
 import (
@@ -13,7 +25,7 @@ import (
 
 const (
 	// Name of the CLI
-	cliName = "kubectl-mapr-ticket"
+	cliName = "kubectl mapr-ticket"
 )
 
 func main() {

@@ -1,10 +1,11 @@
+// Copyright (c) 2024 Alexej Disterhoft
+// Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+//
+// SPX-License-Identifier: MIT
+
 package secret
 
 import (
-	"bytes"
-	"encoding/json"
-	"io"
-
 	"github.com/spf13/cobra"
 
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/ticket"
@@ -15,7 +16,6 @@ import (
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/cli-runtime/pkg/printers"
-	"sigs.k8s.io/yaml"
 )
 
 var (
@@ -93,36 +93,30 @@ var (
 	}
 )
 
+// Print prints the secrets containing MapR tickets in a human-readable format to the given output
+// stream.
 func Print(cmd *cobra.Command, secrets []types.MaprSecret) error {
 	format := cmd.Flag("output").Value.String()
 	allNamespaces := cmd.Flag("all-namespaces").Changed && cmd.Flag("all-namespaces").Value.String() == "true"
 	withInUse := cmd.Flag("show-in-use").Changed && cmd.Flag("show-in-use").Value.String() == "true"
 
-	switch format {
-	case "table", "wide":
-		// generate table for output
-		table := generateTable(secrets)
+	// generate table for output
+	table := generateTable(secrets)
 
-		// enrich table with in use column
-		if withInUse {
-			enrichTableWithInUse(table, secrets)
-		}
+	// enrich table with in use column
+	if withInUse {
+		enrichTableWithInUse(table, secrets)
+	}
 
-		// print table
-		printer := printers.NewTablePrinter(printers.PrintOptions{
-			WithNamespace: allNamespaces,
-			Wide:          format == "wide",
-		})
+	// print table
+	printer := printers.NewTablePrinter(printers.PrintOptions{
+		WithNamespace: allNamespaces,
+		Wide:          format == "wide",
+	})
 
-		err := printer.PrintObj(table, cmd.OutOrStdout())
-		if err != nil {
-			return err
-		}
-	case "json", "yaml":
-		err := printEncoded(secrets, format, cmd.OutOrStdout())
-		if err != nil {
-			return err
-		}
+	err := printer.PrintObj(table, cmd.OutOrStdout())
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -193,72 +187,4 @@ func enrichTableWithInUse(table *metaV1.Table, secrets []types.MaprSecret) {
 			table.Rows[i].Cells[insertPos],
 		)
 	}
-}
-
-func printEncoded(secrets []types.MaprSecret, format string, stream io.Writer) error {
-	bytesBuffer := bytes.NewBuffer([]byte{})
-
-	if len(secrets) == 1 {
-		// encode single item
-		_, err := bytesBuffer.Write(encodeItem(&secrets[0], format))
-		if err != nil {
-			return err
-		}
-	} else {
-		// encode multiple items
-		_, err := bytesBuffer.Write(encodeItems(secrets, format))
-		if err != nil {
-			return err
-		}
-	}
-
-	// print encoded items
-	_, err := bytesBuffer.WriteTo(stream)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func encodeItems(secrets []types.MaprSecret, format string) []byte {
-	switch format {
-	case "json":
-		encoded, err := json.MarshalIndent(secrets, "", "  ")
-		if err != nil {
-			return nil
-		}
-
-		return encoded
-	case "yaml":
-		encoded, err := yaml.Marshal(secrets)
-		if err != nil {
-			return nil
-		}
-
-		return encoded
-	}
-
-	return nil
-}
-
-func encodeItem(secret *types.MaprSecret, format string) []byte {
-	switch format {
-	case "json":
-		encoded, err := json.MarshalIndent(secret, "", "  ")
-		if err != nil {
-			return nil
-		}
-
-		return encoded
-	case "yaml":
-		encoded, err := yaml.Marshal(secret)
-		if err != nil {
-			return nil
-		}
-
-		return encoded
-	}
-
-	return nil
 }

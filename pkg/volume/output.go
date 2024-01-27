@@ -1,3 +1,8 @@
+// Copyright (c) 2024 Alexej Disterhoft
+// Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+//
+// SPX-License-Identifier: MIT
+
 package volume
 
 import (
@@ -73,6 +78,7 @@ var (
 	}
 )
 
+// Print prints the volumes to the default output stream in a human readable table format.
 func Print(cmd *cobra.Command, volumes []types.MaprVolume) error {
 	format := cmd.Flag("output").Value.String()
 
@@ -92,6 +98,7 @@ func Print(cmd *cobra.Command, volumes []types.MaprVolume) error {
 	return nil
 }
 
+// generableTable generates a table from the specified volumes.
 func generableTable(volumes []types.MaprVolume) *metaV1.Table {
 	rows := generateRows(volumes)
 
@@ -101,6 +108,7 @@ func generableTable(volumes []types.MaprVolume) *metaV1.Table {
 	}
 }
 
+// generateRows generates the rows for the table from the specified volumes.
 func generateRows(volumes []types.MaprVolume) []metaV1.TableRow {
 	rows := make([]metaV1.TableRow, 0, len(volumes))
 
@@ -111,6 +119,7 @@ func generateRows(volumes []types.MaprVolume) []metaV1.TableRow {
 	return rows
 }
 
+// generateRow generates a row for the table from the specified volume.
 func generateRow(volume *types.MaprVolume) *metaV1.TableRow {
 	row := &metaV1.TableRow{
 		Object: runtime.RawExtension{

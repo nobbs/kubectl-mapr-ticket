@@ -4,6 +4,12 @@ env:
   CGO_ENABLED: 0
 
 tasks:
+  default:
+    desc: Run tests and linter
+    cmds:
+      - task: test
+      - task: lint
+
   build:
     desc: Build the binary
     cmds:
@@ -16,7 +22,7 @@ tasks:
   test:
     desc: Run tests
     cmds:
-      - go test -covermode=atomic ./... {{.CLI_ARGS}}
+      - gotestsum --  -coverprofile=coverage.txt -covermode=atomic ./...
 
   lint:
     desc: Run linter
@@ -32,3 +38,8 @@ tasks:
     desc: Run pre-commit checks
     cmds:
       - pre-commit run --all-files
+
+  install:gotestsum:
+    desc: Install gotestsum
+    cmds:
+      - go install gotest.tools/gotestsum@latest

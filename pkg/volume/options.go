@@ -1,5 +1,11 @@
+// Copyright (c) 2024 Alexej Disterhoft
+// Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+//
+// SPX-License-Identifier: MIT
+
 package volume
 
+// ListerOption is a function that can be used to configure the volume lister.
 type ListerOption func(*Lister)
 
 // WithSortBy sets the sort order used by the Lister for output

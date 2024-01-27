@@ -1,3 +1,15 @@
+// Copyright (c) 2024 Alexej Disterhoft
+// Use of this source code is governed by a MIT license that can be found in the LICENSE file.
+//
+// SPX-License-Identifier: MIT
+
+// Package secret implements the secret lister. It is responsible for retrieving the list of secrets
+// containing MapR tickets and enriching them with additional information.
+//
+// The lister is implemented as a chain of filters and collectors. The filters are used to filter
+// out secrets, ie. to only keep those that contain a MapR ticket. The collectors are used to collect
+// additional information about the secrets, ie. to collect the number of persistent volumes using
+// each secret. This data is then used to print the secrets in a human-readable tabular format.
 package secret
 
 import (
@@ -16,11 +28,12 @@ type volumeLister interface {
 	List() ([]types.MaprVolume, error)
 }
 
+// Lister is the struct that is used to list secrets containing MapR tickets in the cluster.
 type Lister struct {
-	client       kubernetes.Interface
-	volumeLister volumeLister
+	client    kubernetes.Interface
+	namespace string
 
-	namespace           string
+	volumeLister        volumeLister
 	filterOnlyExpired   bool
 	filterOnlyUnexpired bool
 	filterByMaprCluster *string
@@ -35,7 +48,8 @@ type Lister struct {
 	tickets []types.MaprSecret
 }
 
-// NewLister creates a new Lister
+// NewLister creates a new secret lister. It requires a Kubernetes client and a namespace
+// to operate on. It also accepts a list of options that can be used to configure the lister.
 func NewLister(client kubernetes.Interface, namespace string, opts ...ListerOption) *Lister {
 	const (
 		defaultFilterOnlyExpired   = false
@@ -57,6 +71,8 @@ func NewLister(client kubernetes.Interface, namespace string, opts ...ListerOpti
 	return l
 }
 
+// List returns a list of secrets containing MapR tickets in the cluster, enriched with additional
+// information and filtered according to the specified options.
 func (l *Lister) List() ([]types.MaprSecret, error) {
 	if err := l.getSecretsWithTickets(); err != nil {
 		return nil, err

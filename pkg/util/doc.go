@@ -3,4 +3,5 @@
 //
 // SPX-License-Identifier: MIT
 
-package claim_test
+// Package util provides utility functions for the application.
+package util
