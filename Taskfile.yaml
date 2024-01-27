@@ -1,9 +1,5 @@
 version: "3"
 
-vars:
-  GOPATH:
-    sh: go env GOPATH
-
 env:
   CGO_ENABLED: 0
 
@@ -26,9 +22,7 @@ tasks:
   test:
     desc: Run tests
     cmds:
-      - |
-        export PATH=$PATH:$(go env GOPATH)/bin
-        gotestsum --  -coverprofile=coverage.txt -covermode=atomic ./...
+      - gotestsum --  -coverprofile=coverage.txt -covermode=atomic ./...
 
   lint:
     desc: Run linter
