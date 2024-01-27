@@ -1,7 +1,7 @@
 // Copyright (c) 2024 Alexej Disterhoft
 // Use of this source code is governed by a MIT license that can be found in the LICENSE file.
 //
-// SPX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 
 // Package volume implements a volume lister that lists volumes that are provisioned by one of the
 // MapR CSI provisioners. It implements functionality to filter volumes by the secret they use and

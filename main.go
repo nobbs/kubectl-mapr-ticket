@@ -1,7 +1,7 @@
 // Copyright (c) 2024 Alexej Disterhoft
 // Use of this source code is governed by a MIT license that can be found in the LICENSE file.
 //
-// SPX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 
 // Package main implements the main entry point for the kubectl-mapr-ticket CLI. It is responsible for
 // creating the root command and executing it.

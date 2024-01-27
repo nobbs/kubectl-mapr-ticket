@@ -1,7 +1,7 @@
 // Copyright (c) 2024 Alexej Disterhoft
 // Use of this source code is governed by a MIT license that can be found in the LICENSE file.
 //
-// SPX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 
 // Package claim implements the persistent volume claim lister. It is responsible for listing all
 // persistent volume claims in the cluster that are refering to MapR-backed persistent volumes.

@@ -1,7 +1,7 @@
 // Copyright (c) 2024 Alexej Disterhoft
 // Use of this source code is governed by a MIT license that can be found in the LICENSE file.
 //
-// SPX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 
 // Package ticket provides functionality to work with MapR tickets, including parsing tickets either
 // from their raw string representation or from Kubernetes secrets.
