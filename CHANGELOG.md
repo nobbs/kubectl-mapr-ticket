@@ -1,5 +1,41 @@
 # Changelog
 
+## [0.4.0](https://github.com/nobbs/kubectl-mapr-ticket/compare/v0.3.0...v0.4.0) (2024-01-27)
+
+
+### Features
+
+* add `inspect` command ([#52](https://github.com/nobbs/kubectl-mapr-ticket/issues/52)) ([f4bd4bc](https://github.com/nobbs/kubectl-mapr-ticket/commit/f4bd4bcbc1d03f5464afac3f578a0262bba0f234))
+
+
+### Bug Fixes
+
+* ci not properly updating version ([c066e8a](https://github.com/nobbs/kubectl-mapr-ticket/commit/c066e8a950890bc285080c8cbd590421c590df0b))
+* complete multiple values for sort-by flags ([8f4bf49](https://github.com/nobbs/kubectl-mapr-ticket/commit/8f4bf496b24515bc8f7d02c47a6dd457a8b06683))
+* **deps:** update module github.com/nobbs/mapr-ticket-parser to v0.1.3 ([f4bd4bc](https://github.com/nobbs/kubectl-mapr-ticket/commit/f4bd4bcbc1d03f5464afac3f578a0262bba0f234))
+
+
+### Continuous Integration
+
+* use gotestsum for tests ([f4bd4bc](https://github.com/nobbs/kubectl-mapr-ticket/commit/f4bd4bcbc1d03f5464afac3f578a0262bba0f234))
+
+
+### Documentation
+
+* add godoc comments to cmd packages ([f4bd4bc](https://github.com/nobbs/kubectl-mapr-ticket/commit/f4bd4bcbc1d03f5464afac3f578a0262bba0f234))
+* add inspect subcommand to README ([f4bd4bc](https://github.com/nobbs/kubectl-mapr-ticket/commit/f4bd4bcbc1d03f5464afac3f578a0262bba0f234))
+* add some more go doc strings ([f4bd4bc](https://github.com/nobbs/kubectl-mapr-ticket/commit/f4bd4bcbc1d03f5464afac3f578a0262bba0f234))
+
+
+### Miscellaneous Chores
+
+* add license header to all files ([f4bd4bc](https://github.com/nobbs/kubectl-mapr-ticket/commit/f4bd4bcbc1d03f5464afac3f578a0262bba0f234))
+* **deps:** upgrade all dependencies ([b376b29](https://github.com/nobbs/kubectl-mapr-ticket/commit/b376b291e45fd0247ff3addce5c27fbcdbf118c6))
+* switch to direnv for managing local dev env ([f4bd4bc](https://github.com/nobbs/kubectl-mapr-ticket/commit/f4bd4bcbc1d03f5464afac3f578a0262bba0f234))
+* switch to prerelease version of mapr-ticket-parser ([f4bd4bc](https://github.com/nobbs/kubectl-mapr-ticket/commit/f4bd4bcbc1d03f5464afac3f578a0262bba0f234))
+* typo in SPDX license header ([9120486](https://github.com/nobbs/kubectl-mapr-ticket/commit/912048669a42b2196a59a87bc9f380d87074ac78))
+* update pre-commit config ([03df59a](https://github.com/nobbs/kubectl-mapr-ticket/commit/03df59aaf0bcccfe6af2338ba9bef621e2c1ebb8))
+
 ## [0.3.0](https://github.com/nobbs/kubectl-mapr-ticket/compare/v0.2.1...v0.3.0) (2024-01-25)
 
 
