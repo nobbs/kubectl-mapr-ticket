@@ -51,9 +51,42 @@ $ kubectl mapr-ticket --help
 
 The plugin can be invoked using the `kubectl mapr-ticket` command. The plugin supports the following subcommands:
 
+- `inspect`, alias `i` - Inspect the contents of a MapR ticket secret in the current namespace or a local file.
 - `secret`, alias `s` - List all secrets containing MapR tickets in the current namespace and print some information about them.
 - `volume`, alias `pv` - List all persistent volumes that use the specified MapR ticket secret and print some information about them.
 - `claim`, alias `pvc` - List all persistent volume claims that use a MapR ticket in the current namespace.
+
+### Inspect
+
+The `inspect` subcommand will print the contents of a MapR ticket secret in the current namespace or a MapR ticket from a local file. The output by default is a minimal JSON representation of the ticket. An optional `--output` flag can be used to instead print the ticket in YAML format. The optional `--human-readable` (`-H`) flag can be used to print the ticket in a human-readable format, pretty-printing the JSON output and converting UNIX timestamps to human-readable dates.
+
+```consol
+$ cat mapr_ticket
+demo.mapr.com +Cze+qwYCbAXGbz56OO7UF+lGqL3WPXrNkO1SLawEEDmSbgNl019xBeBY3kvh+R13iz/mCnwpzsLQw4Y5jEnv5GtuIWbeoC95ha8VKwX8MKcE6Kn9nZ2AF0QminkHwNVBx6TDriGZffyJCfZzivBwBSdKoQEWhBOPFCIMAi7w2zV/SX5Ut7u4qIKvEpr0JHV7sLMWYLhYncM6CKMd7iECGvECsBvEZRVj+dpbEY0BaRN/W54/7wNWaSVELUF6JWHQ8dmsqty4cZlI0/MV10HZzIbl9sMLFQ=
+
+$ kubectl mapr-ticket inspect --human-readable --file mapr_ticket
+{
+  "cluster": "demo.mapr.com",
+  "ticket": {
+    "expiryTime": "29229672-06-17T19:31:17+02:00",
+    "creationTimeSec": "2018-04-04T16:31:37+02:00",
+    "maxRenewalDurationSec": "0s",
+    "encryptedTicket": "AggBendQDHJBpB80ZZpmpde/2DYxfbgEPOBjBZTgLNno844p0I5Y5OZ7PvUdbcS1HwvGQjOWnsX3oIS3F6ZrGLeNWxKwQW9VtQG7EcOZFFtHCFMjcnWU3RSGo6dRn8EndfObMZBbXAQYJks5Qw==",
+    "userKey": {
+      "key": "t4l3cSFODvinISYUr6C394nN9w3gbg+YspV4fIu+vkQ="
+    },
+    "userCreds": {
+      "uid": 5000,
+      "gids": [
+        5000,
+        0,
+        5001
+      ],
+      "userName": "mapr"
+    }
+  }
+}
+```
 
 ### Secrets
 
