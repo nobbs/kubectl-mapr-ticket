@@ -159,7 +159,7 @@ func (o *options) Validate() error {
 	}
 
 	// ensure that the sort options are valid
-	if err := volume.ValidateSortOptions(o.SortBy); err != nil {
+	if err := util.ValidateSortOptions(volume.SortOptionsList, o.SortBy); err != nil {
 		return err
 	}
 

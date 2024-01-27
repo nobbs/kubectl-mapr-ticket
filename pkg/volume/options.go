@@ -5,6 +5,7 @@
 
 package volume
 
+// ListerOption is a function that can be used to configure the volume lister.
 type ListerOption func(*Lister)
 
 // WithSortBy sets the sort order used by the Lister for output

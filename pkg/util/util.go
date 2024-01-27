@@ -5,11 +5,26 @@
 
 package util
 
-import "strings"
+import (
+	"fmt"
+	"slices"
+	"strings"
+)
 
 // StringSliceToCommaSeparatedString returns a normalized string representation of a string slice
 // separated by commas and spaces, suitable for use in CLI flag usage strings, e.g.
 // "one, two, three".
 func StringSliceToCommaSeparatedString(slice []string) string {
 	return strings.Join(slice, ", ")
+}
+
+// ValidateSortOptions validates the specified sort options to ensure that they are valid.
+func ValidateSortOptions(validSortOptions, sortOptions []string) error {
+	for _, sortOption := range sortOptions {
+		if !slices.Contains(validSortOptions, sortOption) {
+			return fmt.Errorf("invalid sort option: %s. Must be one of: (%s)", sortOption, StringSliceToCommaSeparatedString(validSortOptions))
+		}
+	}
+
+	return nil
 }

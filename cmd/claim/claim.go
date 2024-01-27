@@ -122,7 +122,7 @@ func (o *options) Validate() error {
 	}
 
 	// ensure that the sort options are valid
-	if err := claim.ValidateSortOptions(o.SortBy); err != nil {
+	if err := util.ValidateSortOptions(claim.SortOptionsList, o.SortBy); err != nil {
 		return err
 	}
 

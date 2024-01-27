@@ -3,6 +3,9 @@
 //
 // SPX-License-Identifier: MIT
 
+// Package volume implements a volume lister that lists volumes that are provisioned by one of the
+// MapR CSI provisioners. It implements functionality to filter volumes by the secret they use and
+// to sort the volumes.
 package volume
 
 import (
@@ -14,17 +17,20 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+// secretLister is the interface that a secret lister must implement.
 type secretLister interface {
 	List() ([]types.MaprSecret, error)
 }
 
+// Lister is a volume lister that lists volumes that are provisioned by one of the MapR CSI
+// provisioners and that use the specified secret.
 type Lister struct {
-	client       kubernetes.Interface
-	secretLister secretLister
-
+	client     kubernetes.Interface
 	namespace  string
 	secretName string
-	sortBy     []SortOption
+
+	secretLister secretLister
+	sortBy       []SortOption
 
 	volumes []types.MaprVolume
 }

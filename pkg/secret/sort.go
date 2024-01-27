@@ -6,16 +6,16 @@
 package secret
 
 import (
-	"fmt"
-	"slices"
 	"sort"
 
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/types"
-	"github.com/nobbs/kubectl-mapr-ticket/pkg/util"
 )
 
+// SortOption is the type of a sort option, basically a wrapper around a string to provide
+// type safety.
 type SortOption string
 
+// All valid sort options are defined here
 const (
 	SortByName        SortOption = "name"
 	SortByNamespace   SortOption = "namespace"
@@ -45,19 +45,9 @@ var (
 	}
 )
 
+// String returns the string representation of the sort option.
 func (s SortOption) String() string {
 	return string(s)
-}
-
-// ValidateSortOptions validates the specified sort options
-func ValidateSortOptions(sortOptions []string) error {
-	for _, sortOption := range sortOptions {
-		if !slices.Contains(SortOptionsList, sortOption) {
-			return fmt.Errorf("invalid sort option: %s. Must be one of: (%s)", sortOption, util.StringSliceToCommaSeparatedString(SortOptionsList))
-		}
-	}
-
-	return nil
 }
 
 // sortByName sorts the items by secret name

@@ -3,6 +3,12 @@
 //
 // SPX-License-Identifier: MIT
 
+// Package ticket provides functionality to work with MapR tickets, including parsing tickets either
+// from their raw string representation or from Kubernetes secrets.
+//
+// The package relies on https://pkg.go.dev/github.com/nobbs/mapr-ticket-parser for the actual
+// ticket parsing. Most of the functionality in this package is just a wrapper around the parser to
+// add some convenience methods.
 package ticket
 
 import (
@@ -22,8 +28,7 @@ const (
 	// SecretMaprTicketKey is the key used for MapR tickets in secrets
 	SecretMaprTicketKey = "CONTAINER_TICKET"
 
-	// DefaultTimeFormat is the default time format used for human readable time
-	// strings
+	// DefaultTimeFormat is the default time format used for human readable time strings
 	DefaultTimeFormat = time.RFC3339
 )
 

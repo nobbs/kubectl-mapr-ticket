@@ -47,7 +47,7 @@ const (
 )
 
 var (
-	secretValidOutputFormats = []string{"table", "wide", "json", "yaml"}
+	secretValidOutputFormats = []string{"table", "wide"}
 )
 
 type options struct {
@@ -173,12 +173,12 @@ func (o *options) Complete(cmd *cobra.Command, args []string) error {
 
 func (o *options) Validate() error {
 	// validate output format
-	if o.OutputFormat != "table" && o.OutputFormat != "wide" && o.OutputFormat != "json" && o.OutputFormat != "yaml" {
-		return fmt.Errorf("invalid output format: %s. Must be one of: table|wide|json|yaml", o.OutputFormat)
+	if o.OutputFormat != "table" && o.OutputFormat != "wide" {
+		return fmt.Errorf("invalid output format: %s. Must be one of: table|wide", o.OutputFormat)
 	}
 
 	// validate sort options
-	if err := secret.ValidateSortOptions(o.SortBy); err != nil {
+	if err := util.ValidateSortOptions(secret.SortOptionsList, o.SortBy); err != nil {
 		return err
 	}
 
