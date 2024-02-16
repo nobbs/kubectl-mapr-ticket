@@ -46,7 +46,7 @@ func NewCmd(rootOpts *common.Options) *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			o.PrintVersionInfo(cmd)
+			PrintVersionInfo(cmd)
 		},
 	}
 
@@ -58,7 +58,7 @@ func NewCmd(rootOpts *common.Options) *cobra.Command {
 	return cmd
 }
 
-func (o *options) PrintVersionInfo(cmd *cobra.Command) {
+func PrintVersionInfo(cmd *cobra.Command) {
 	versionInfo := version.NewVersion()
 	cmd.Println(versionInfo)
 }
