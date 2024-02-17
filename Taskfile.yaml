@@ -39,6 +39,12 @@ tasks:
     cmds:
       - pre-commit run --all-files
 
+  pre-commit:fix:
+    desc: Run pre-commit checks and git add fixed files
+    cmds:
+      - task: pre-commit
+      - git add --update .
+
   install:gotestsum:
     desc: Install gotestsum
     cmds:
