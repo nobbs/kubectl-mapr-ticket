@@ -73,12 +73,13 @@ func NewCmd(opts *common.Options) *cobra.Command {
 	o := newOptions(opts)
 
 	cmd := &cobra.Command{
-		Aliases: []string{"pv"},
-		Use:     volumeUse,
-		Short:   volumeShort,
-		Long:    common.CliLongDesc(volumeLong),
-		Example: common.CliExample(volumeExample, common.CliBinName),
-		Args:    cobra.MaximumNArgs(1),
+		Aliases:      []string{"pv"},
+		Use:          volumeUse,
+		Short:        volumeShort,
+		Long:         common.CliLongDesc(volumeLong),
+		Example:      common.CliExample(volumeExample, common.CliBinName),
+		SilenceUsage: true,
+		Args:         cobra.MaximumNArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			// we only want one argument, so don't complete once we have one
 			if len(args) > 0 {

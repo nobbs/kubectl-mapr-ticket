@@ -68,11 +68,12 @@ func NewCmd(opts *common.Options) *cobra.Command {
 	o := newOptions(opts)
 
 	cmd := &cobra.Command{
-		Aliases: []string{"pvc"},
-		Use:     claimUse,
-		Short:   claimShort,
-		Long:    common.CliLongDesc(claimLong),
-		Example: common.CliExample(claimExample, common.CliBinName),
+		Aliases:      []string{"pvc"},
+		Use:          claimUse,
+		Short:        claimShort,
+		Long:         common.CliLongDesc(claimLong),
+		Example:      common.CliExample(claimExample, common.CliBinName),
+		SilenceUsage: true,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},

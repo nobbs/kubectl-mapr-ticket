@@ -113,12 +113,13 @@ func NewCmd(opts *common.Options) *cobra.Command {
 	o := newOptions(opts)
 
 	cmd := &cobra.Command{
-		Aliases: []string{"s"},
-		Use:     secretUse,
-		Short:   secretShort,
-		Long:    common.CliLongDesc(secretLong),
-		Example: common.CliExample(secretExample, common.CliBinName),
-		Args:    cobra.NoArgs,
+		Aliases:      []string{"s"},
+		Use:          secretUse,
+		Short:        secretShort,
+		Long:         common.CliLongDesc(secretLong),
+		Example:      common.CliExample(secretExample, common.CliBinName),
+		SilenceUsage: true,
+		Args:         cobra.NoArgs,
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},

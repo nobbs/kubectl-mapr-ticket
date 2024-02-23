@@ -40,9 +40,10 @@ func NewCmd(flags *genericclioptions.ConfigFlags, streams genericiooptions.IOStr
 	)
 
 	rootCmd := &cobra.Command{
-		Use:   fmt.Sprintf(rootUse, common.CliBinName),
-		Short: rootShort,
-		Long:  common.CliLongDesc(rootLong),
+		Use:          fmt.Sprintf(rootUse, common.CliBinName),
+		Short:        rootShort,
+		Long:         common.CliLongDesc(rootLong),
+		SilenceUsage: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return util.SetupLogging(o.IOStreams.ErrOut, o.Debug)
 		},
