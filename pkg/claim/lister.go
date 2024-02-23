@@ -15,6 +15,7 @@ package claim
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/types"
 
@@ -58,7 +59,7 @@ func NewLister(client kubernetes.Interface, namespace string, opts ...ListerOpti
 // List returns a list of volume claims that are provisioned by one of the MapR CSI provisioners.
 func (l *Lister) List() ([]types.MaprVolumeClaim, error) {
 	if err := l.getClaims(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to list volume claims: %w", err)
 	}
 
 	l.filterClaimsBoundOnly().

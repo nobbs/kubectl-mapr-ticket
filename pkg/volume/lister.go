@@ -10,6 +10,7 @@ package volume
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/types"
 
@@ -55,7 +56,7 @@ func NewLister(client kubernetes.Interface, secretName string, namespace string,
 // List returns a list of volumes using the MapR CSI provisioners and the specified secret.
 func (l *Lister) List() ([]types.MaprVolume, error) {
 	if err := l.getVolumes(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to list volumes: %w", err)
 	}
 
 	l.filterVolumesToMaprCSI().

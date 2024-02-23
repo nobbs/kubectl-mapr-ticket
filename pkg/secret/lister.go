@@ -14,6 +14,7 @@ package secret
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/nobbs/kubectl-mapr-ticket/pkg/ticket"
@@ -75,7 +76,7 @@ func NewLister(client kubernetes.Interface, namespace string, opts ...ListerOpti
 // information and filtered according to the specified options.
 func (l *Lister) List() ([]types.MaprSecret, error) {
 	if err := l.getSecretsWithTickets(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to list secrets: %w", err)
 	}
 
 	// run all filters and sorts
