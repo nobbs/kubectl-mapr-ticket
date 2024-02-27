@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.4.1](https://github.com/nobbs/kubectl-mapr-ticket/compare/v0.4.0...v0.4.1) (2024-02-27)
+
+
+### Bug Fixes
+
+* **deps:** update golang.org/x/exp digest to 2c58cdc ([#58](https://github.com/nobbs/kubectl-mapr-ticket/issues/58)) ([2fcef6d](https://github.com/nobbs/kubectl-mapr-ticket/commit/2fcef6d0fe90146dd0d8f31a8b7503fd90608137))
+* **deps:** update golang.org/x/exp digest to 814bf88 ([#63](https://github.com/nobbs/kubectl-mapr-ticket/issues/63)) ([1aaf728](https://github.com/nobbs/kubectl-mapr-ticket/commit/1aaf728f56ef8c9bbe5797b8d24768ba4e3e8737))
+* **deps:** update golang.org/x/exp digest to ec58324 ([#60](https://github.com/nobbs/kubectl-mapr-ticket/issues/60)) ([702c0d0](https://github.com/nobbs/kubectl-mapr-ticket/commit/702c0d06ee36af965b04904afd938012fbaf613f))
+* **deps:** update kubernetes packages to v0.29.2 ([#61](https://github.com/nobbs/kubectl-mapr-ticket/issues/61)) ([6023551](https://github.com/nobbs/kubectl-mapr-ticket/commit/60235512ccd920d393b4b29a46ddb86bd49f0198))
+
+
+### Tests
+
+* add more tests for various code paths ([#55](https://github.com/nobbs/kubectl-mapr-ticket/issues/55)) ([4931b3d](https://github.com/nobbs/kubectl-mapr-ticket/commit/4931b3db67d17fcd318fc88ddbf86cd556cf5899))
+
+
+### Miscellaneous Chores
+
+* **deps:** update codecov/codecov-action action to v4 ([#56](https://github.com/nobbs/kubectl-mapr-ticket/issues/56)) ([d05da5e](https://github.com/nobbs/kubectl-mapr-ticket/commit/d05da5ef238dc225d4961aa23ea1cd697679ccc8))
+* **deps:** update dependency golang to v1.22.0 ([#62](https://github.com/nobbs/kubectl-mapr-ticket/issues/62)) ([629f544](https://github.com/nobbs/kubectl-mapr-ticket/commit/629f544f16fed058c2d853d5c76ce235bbf8be00))
+* **deps:** update golangci/golangci-lint-action action to v4 ([#59](https://github.com/nobbs/kubectl-mapr-ticket/issues/59)) ([da53337](https://github.com/nobbs/kubectl-mapr-ticket/commit/da533373138702e25d4486460787d62119ca406d))
+
 ## [0.4.0](https://github.com/nobbs/kubectl-mapr-ticket/compare/v0.3.0...v0.4.0) (2024-01-27)
 
 
