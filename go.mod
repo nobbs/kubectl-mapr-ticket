@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/charmbracelet/log v0.3.1
-	github.com/nobbs/mapr-ticket-parser v0.1.3
+	github.com/nobbs/mapr-ticket-parser v0.1.4
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.9.0
@@ -70,7 +70,7 @@ require (
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/protobuf v1.32.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/evanphx/json-patch.v5 v5.8.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
