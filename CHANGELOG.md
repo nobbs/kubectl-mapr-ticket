@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.4.2](https://github.com/nobbs/kubectl-mapr-ticket/compare/v0.4.1...v0.4.2) (2024-03-23)
+
+
+### Bug Fixes
+
+* **deps:** update golang.org/x/exp digest to a85f2c6 ([#71](https://github.com/nobbs/kubectl-mapr-ticket/issues/71)) ([26087b5](https://github.com/nobbs/kubectl-mapr-ticket/commit/26087b514154e0893f880223e545819083155885))
+* **deps:** update golang.org/x/exp digest to c7f7c64 ([#69](https://github.com/nobbs/kubectl-mapr-ticket/issues/69)) ([d2db01c](https://github.com/nobbs/kubectl-mapr-ticket/commit/d2db01cb2292d4fc8a1a5976454389e3a729d79c))
+* **deps:** update k8s.io/utils digest to 4693a02 ([#68](https://github.com/nobbs/kubectl-mapr-ticket/issues/68)) ([026cf9e](https://github.com/nobbs/kubectl-mapr-ticket/commit/026cf9e4d22565e5b89c6d8366ef786850c313d8))
+* **deps:** update kubernetes packages to v0.29.3 ([#70](https://github.com/nobbs/kubectl-mapr-ticket/issues/70)) ([b870df0](https://github.com/nobbs/kubectl-mapr-ticket/commit/b870df02b26c5b2682334877c66380201866a6ff))
+* **deps:** update module github.com/charmbracelet/log to v0.4.0 ([#72](https://github.com/nobbs/kubectl-mapr-ticket/issues/72)) ([e5db852](https://github.com/nobbs/kubectl-mapr-ticket/commit/e5db85202b7e80df30b438fbfc449c877b723d82))
+* **deps:** update module github.com/nobbs/mapr-ticket-parser to v0.1.4 ([#67](https://github.com/nobbs/kubectl-mapr-ticket/issues/67)) ([a2de740](https://github.com/nobbs/kubectl-mapr-ticket/commit/a2de74015485329975943a49676596633ceed5d5))
+* **deps:** update module github.com/stretchr/testify to v1.9.0 ([#64](https://github.com/nobbs/kubectl-mapr-ticket/issues/64)) ([f4480cd](https://github.com/nobbs/kubectl-mapr-ticket/commit/f4480cdd36601595d47f9555356328479e0ad84a))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency golang to v1.22.1 ([#65](https://github.com/nobbs/kubectl-mapr-ticket/issues/65)) ([517a274](https://github.com/nobbs/kubectl-mapr-ticket/commit/517a2742220b637d1a67a9a8f68544d010c8e4fa))
+
 ## [0.4.1](https://github.com/nobbs/kubectl-mapr-ticket/compare/v0.4.0...v0.4.1) (2024-02-27)
 
 
