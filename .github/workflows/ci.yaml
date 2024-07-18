@@ -13,9 +13,6 @@ on:
 permissions:
   contents: read
 
-env:
-  GOTOOLCHAIN: local
-
 jobs:
   golangci-lint:
     runs-on: ubuntu-latest
