@@ -12,10 +12,10 @@ require (
 	github.com/stretchr/testify v1.9.0
 	github.com/xhit/go-str2duration/v2 v2.1.0
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f
-	k8s.io/api v0.29.4
-	k8s.io/apimachinery v0.30.2
-	k8s.io/cli-runtime v0.29.4
-	k8s.io/client-go v0.29.4
+	k8s.io/api v0.30.3
+	k8s.io/apimachinery v0.30.3
+	k8s.io/cli-runtime v0.30.3
+	k8s.io/client-go v0.30.3
 	k8s.io/utils v0.0.0-20240502163921-fe8a2dddb1d0
 	sigs.k8s.io/yaml v1.4.0
 )
