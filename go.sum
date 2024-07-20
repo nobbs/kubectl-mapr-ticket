@@ -100,8 +100,8 @@ github.com/muesli/termenv v0.15.2 h1:GohcuySI0QmI3wN8Ok9PtKGkgkFIk7y6Vpb5PvrY+Wo
 github.com/muesli/termenv v0.15.2/go.mod h1:Epx+iuz8sNs7mNKhxzH4fWXGNpZwUaJKRS1noLXviQ8=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
-github.com/nobbs/mapr-ticket-parser v0.1.6 h1:vKQsskLRTybdnbJR18kzf/DgJ6JqBh8WPX9tMUQxyzc=
-github.com/nobbs/mapr-ticket-parser v0.1.6/go.mod h1:eWBwu1Z9ccOXsNsz9q9QNSM/nJVd+3GxbNaHtE7gbAE=
+github.com/nobbs/mapr-ticket-parser v0.1.7 h1:aFNAlaa9yvmxwIPWR72lSrDiIxMU099XIZZSaHa3C64=
+github.com/nobbs/mapr-ticket-parser v0.1.7/go.mod h1:KOeQbti7LaZgFD8IW+RWQWHQEZj0wIsS2/jfG7utP9w=
 github.com/onsi/ginkgo/v2 v2.15.0 h1:79HwNRBAZHOEwrczrgSOPy+eFTTlIGELKy5as+ClttY=
 github.com/onsi/ginkgo/v2 v2.15.0/go.mod h1:HlxMHtYF57y6Dpf+mc5529KKmSq9h2FpCF+/ZkwUxKM=
 github.com/onsi/gomega v1.31.0 h1:54UJxxj6cPInHS3a35wm6BK/F9nHYueZ1NVujHDrnXE=
