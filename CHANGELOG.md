@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.4.2](https://github.com/nobbs/kubectl-mapr-ticket/compare/v0.4.1...v0.4.2) (2024-07-20)
+
+
+### Bug Fixes
+
+* **deps:** update golang.org/x/exp digest to 8a7402a ([#88](https://github.com/nobbs/kubectl-mapr-ticket/issues/88)) ([25ec5ca](https://github.com/nobbs/kubectl-mapr-ticket/commit/25ec5ca5cc889776bb6a10adbab2431b1e3c0401))
+* **deps:** update golang.org/x/exp digest to a85f2c6 ([#71](https://github.com/nobbs/kubectl-mapr-ticket/issues/71)) ([26087b5](https://github.com/nobbs/kubectl-mapr-ticket/commit/26087b514154e0893f880223e545819083155885))
+* **deps:** update golang.org/x/exp digest to c7f7c64 ([#69](https://github.com/nobbs/kubectl-mapr-ticket/issues/69)) ([d2db01c](https://github.com/nobbs/kubectl-mapr-ticket/commit/d2db01cb2292d4fc8a1a5976454389e3a729d79c))
+* **deps:** update golang.org/x/exp digest to e3f2596 ([#84](https://github.com/nobbs/kubectl-mapr-ticket/issues/84)) ([b433b9e](https://github.com/nobbs/kubectl-mapr-ticket/commit/b433b9e7d544958a8bddc193deb7b81f9e8c763f))
+* **deps:** update golang.org/x/exp digest to fe59bbe ([#73](https://github.com/nobbs/kubectl-mapr-ticket/issues/73)) ([ef832a5](https://github.com/nobbs/kubectl-mapr-ticket/commit/ef832a5f5688da6f124921c322a66fbabc7cccde))
+* **deps:** update k8s.io/utils digest to 18e509b ([#85](https://github.com/nobbs/kubectl-mapr-ticket/issues/85)) ([144b9f8](https://github.com/nobbs/kubectl-mapr-ticket/commit/144b9f81f177d09db7ee85d7c3092fb68f371d89))
+* **deps:** update k8s.io/utils digest to 4693a02 ([#68](https://github.com/nobbs/kubectl-mapr-ticket/issues/68)) ([026cf9e](https://github.com/nobbs/kubectl-mapr-ticket/commit/026cf9e4d22565e5b89c6d8366ef786850c313d8))
+* **deps:** update kubernetes packages to v0.29.3 ([#70](https://github.com/nobbs/kubectl-mapr-ticket/issues/70)) ([b870df0](https://github.com/nobbs/kubectl-mapr-ticket/commit/b870df02b26c5b2682334877c66380201866a6ff))
+* **deps:** update kubernetes packages to v0.29.4 ([#75](https://github.com/nobbs/kubectl-mapr-ticket/issues/75)) ([6e97b54](https://github.com/nobbs/kubectl-mapr-ticket/commit/6e97b547002e98cef279416a1b914b417353a05f))
+* **deps:** update kubernetes packages to v0.30.3 ([#77](https://github.com/nobbs/kubectl-mapr-ticket/issues/77)) ([bf0649c](https://github.com/nobbs/kubectl-mapr-ticket/commit/bf0649cb435dc76c8cc20577131a58915d4b4c97))
+* **deps:** update module github.com/charmbracelet/log to v0.4.0 ([#72](https://github.com/nobbs/kubectl-mapr-ticket/issues/72)) ([e5db852](https://github.com/nobbs/kubectl-mapr-ticket/commit/e5db85202b7e80df30b438fbfc449c877b723d82))
+* **deps:** update module github.com/nobbs/mapr-ticket-parser to v0.1.4 ([#67](https://github.com/nobbs/kubectl-mapr-ticket/issues/67)) ([a2de740](https://github.com/nobbs/kubectl-mapr-ticket/commit/a2de74015485329975943a49676596633ceed5d5))
+* **deps:** update module github.com/nobbs/mapr-ticket-parser to v0.1.6 ([#76](https://github.com/nobbs/kubectl-mapr-ticket/issues/76)) ([017ccd8](https://github.com/nobbs/kubectl-mapr-ticket/commit/017ccd857da782de0b6a14a1cd5c59a5172aa515))
+* **deps:** update module github.com/nobbs/mapr-ticket-parser to v0.1.7 ([#89](https://github.com/nobbs/kubectl-mapr-ticket/issues/89)) ([ec33866](https://github.com/nobbs/kubectl-mapr-ticket/commit/ec33866582d6987f6c90a4b8d2a3311d9c96b23e))
+* **deps:** update module github.com/spf13/cobra to v1.8.1 ([#86](https://github.com/nobbs/kubectl-mapr-ticket/issues/86)) ([8f62563](https://github.com/nobbs/kubectl-mapr-ticket/commit/8f625630cf6d409dd86459e7d3bf4903a3ec8717))
+* **deps:** update module github.com/stretchr/testify to v1.9.0 ([#64](https://github.com/nobbs/kubectl-mapr-ticket/issues/64)) ([f4480cd](https://github.com/nobbs/kubectl-mapr-ticket/commit/f4480cdd36601595d47f9555356328479e0ad84a))
+
+
+### Continuous Integration
+
+* add trivy workflow ([#87](https://github.com/nobbs/kubectl-mapr-ticket/issues/87)) ([f639d29](https://github.com/nobbs/kubectl-mapr-ticket/commit/f639d29f65dadeed4e8ae82f25b1c283ec06d35f))
+
+
+### Miscellaneous Chores
+
+* **deps:** update dependency golang to v1.22.1 ([#65](https://github.com/nobbs/kubectl-mapr-ticket/issues/65)) ([517a274](https://github.com/nobbs/kubectl-mapr-ticket/commit/517a2742220b637d1a67a9a8f68544d010c8e4fa))
+* **deps:** update dependency golang to v1.22.2 ([#74](https://github.com/nobbs/kubectl-mapr-ticket/issues/74)) ([434e401](https://github.com/nobbs/kubectl-mapr-ticket/commit/434e40104596b697b6b878648954fc9fc4122e9b))
+* **deps:** update dependency golang to v1.22.5 ([#83](https://github.com/nobbs/kubectl-mapr-ticket/issues/83)) ([6d9594b](https://github.com/nobbs/kubectl-mapr-ticket/commit/6d9594b0aa00ffcf703abe32390b7600843d369f))
+* **deps:** update golangci/golangci-lint-action action to v6 ([#82](https://github.com/nobbs/kubectl-mapr-ticket/issues/82)) ([03a6283](https://github.com/nobbs/kubectl-mapr-ticket/commit/03a6283f333302432b48111f0710a5d0b3121d62))
+
 ## [0.4.1](https://github.com/nobbs/kubectl-mapr-ticket/compare/v0.4.0...v0.4.1) (2024-02-27)
 
 
