@@ -2,7 +2,7 @@ module github.com/nobbs/kubectl-mapr-ticket
 
 go 1.22.0
 
-toolchain go1.22.5
+toolchain go1.23.2
 
 require (
 	github.com/charmbracelet/log v0.4.0
