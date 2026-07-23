@@ -1,8 +1,6 @@
 module github.com/nobbs/kubectl-mapr-ticket
 
-go 1.22.0
-
-toolchain go1.22.5
+go 1.25
 
 require (
 	github.com/charmbracelet/log v0.4.0
@@ -16,7 +14,7 @@ require (
 	k8s.io/apimachinery v0.30.3
 	k8s.io/cli-runtime v0.30.3
 	k8s.io/client-go v0.30.3
-	k8s.io/utils v0.0.0-20240711033017-18e509b52bc8
+	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
 	sigs.k8s.io/yaml v1.4.0
 )
 
