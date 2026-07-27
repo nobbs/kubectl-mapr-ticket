@@ -1,8 +1,6 @@
 module github.com/nobbs/kubectl-mapr-ticket
 
-go 1.22.0
-
-toolchain go1.22.5
+go 1.25.0
 
 require (
 	github.com/charmbracelet/log v0.4.0
@@ -11,7 +9,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.9.0
 	github.com/xhit/go-str2duration/v2 v2.1.0
-	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
+	golang.org/x/exp v0.0.0-20260727155853-b88d891fe743
 	k8s.io/api v0.30.3
 	k8s.io/apimachinery v0.30.3
 	k8s.io/cli-runtime v0.30.3
@@ -66,7 +64,7 @@ require (
 	go.starlark.net v0.0.0-20240123142251-f86470692795 // indirect
 	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/oauth2 v0.16.0 // indirect
-	golang.org/x/sync v0.7.0 // indirect
+	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/term v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
